@@ -1,4 +1,6 @@
-import React, { useState } from 'react'
+"use client";
+
+import { Fragment, useState } from 'react'
 import { trains, getCarriagesByTrain } from '../data/mockData'
 import { CarriageDetailsModal } from '../components/CarriageDetailsModal'
 
@@ -8,6 +10,9 @@ const statusConfig = {
   warning: { dot: 'bg-amber-400', text: 'text-amber-600', progress: 'bg-amber-500', label: 'Warning', bg: 'status-warning' },
   critical: { dot: 'bg-red-400', text: 'text-red-600', progress: 'bg-red-500', label: 'Critical', bg: 'status-critical' },
 }
+
+const RAIL_TIE_BACKGROUND =
+  'repeating-linear-gradient(90deg, #475569 0px, #475569 10px, transparent 10px, transparent 22px)'
 
 // --- COMPONENT BÁNH XE (Đã bo tròn & làm nhạt màu) ---
 const TrainBogie = ({ className }) => (
@@ -82,9 +87,7 @@ export function FleetDashboard() {
                       <div className="w-full h-[4px] bg-slate-400 border-b border-slate-500 shadow-sm" />
                       <div 
                         className="w-full h-[6px] mt-[1px]"
-                        style={{
-                          backgroundImage: 'repeating-linear-gradient(90deg, #475569 0px, #475569 10px, transparent 10px, transparent 22px)'
-                        }}
+                        style={{ backgroundImage: RAIL_TIE_BACKGROUND }}
                       />
                       <div className="w-full h-[4px] bg-slate-200/80 rounded-full mt-[1px]" />
                     </div>
@@ -137,7 +140,7 @@ export function FleetDashboard() {
                       const shapeClasses = isLast ? "rounded-r-[3rem] rounded-l-lg" : "rounded-lg"
 
                       return (
-                        <React.Fragment key={carriage.id}>
+                        <Fragment key={carriage.id}>
                           {/* Khớp nối */}
                           <div className="w-4 h-3 bg-slate-600 mb-6 flex-shrink-0 border-y border-slate-500 shadow-sm z-0" />
 
@@ -181,7 +184,7 @@ export function FleetDashboard() {
                             <TrainBogie className="left-[15%]" />
                             <TrainBogie className="right-[15%]" />
                           </div>
-                        </React.Fragment>
+                        </Fragment>
                       )
                     })}
                   </div>

@@ -223,7 +223,7 @@ export function TodoList({ todos, onUpdate, isAgentRunning }: TodoListProps) {
 ## Tech Stack
 
 - **Frontend**: Next.js 16, React 19, TailwindCSS 4
-- **Agent**: LangGraph (Python), OpenAI GPT-5.2
+- **Agent**: LangGraph (Python), Google Gemini
 - **CopilotKit**: React hooks for agent integration (v2)
 - **Monorepo**: Turborepo with pnpm workspaces
 - **Other**: MCP (Model Context Protocol) integration, Recharts for generative UI examples
@@ -254,8 +254,8 @@ pnpm lint
 ### Environment Setup
 
 ```bash
-# Set OpenAI API key for the agent
-echo 'OPENAI_API_KEY=your-key-here' > apps/agent/.env
+# Set Gemini API key for the agent
+echo 'GEMINI_API_KEY=your-key-here' > apps/agent/.env
 ```
 
 ## Design Principles

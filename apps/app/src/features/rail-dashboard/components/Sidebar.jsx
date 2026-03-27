@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from 'react'
 import { ChevronLeft, ChevronRight, LayoutDashboard } from 'lucide-react'
 import Link from 'next/link'
@@ -10,12 +12,11 @@ const iconMap = {
 export function Sidebar({ links }) {
   const [collapsed, setCollapsed] = useState(false)
   const pathname = usePathname()
+  const sidebarWidth = collapsed ? 'w-20' : 'w-64'
 
   return (
     <aside
-      className={`sticky top-0 h-screen border-r border-slate-200 bg-white shadow-sm transition-all duration-300 ${
-        collapsed ? 'w-20' : 'w-64'
-      }`}
+      className={`sticky top-0 h-screen border-r border-slate-200 bg-white shadow-sm transition-all duration-300 ${sidebarWidth}`}
     >
       <div className="flex h-full flex-col px-3 py-5">
         <div className="mb-6 flex items-center justify-between">
@@ -33,7 +34,7 @@ export function Sidebar({ links }) {
 
         <nav className="space-y-2">
           {links.map((link) => {
-            const Icon = iconMap[link.label]
+            const Icon = iconMap[link.label] ?? LayoutDashboard
             const isActive = pathname === link.to
 
             return (

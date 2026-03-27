@@ -1,5 +1,6 @@
 import { navLinks } from '../data/mockData'
 import { Sidebar } from '../components/Sidebar'
+import { ChatPanel } from '../components/ChatPanel'
 
 export function AppLayout({ children }) {
   return (
@@ -14,6 +15,8 @@ export function AppLayout({ children }) {
           </main>
         </div>
       </div>
+
+      <ChatPanel />
     </div>
   )
 }
