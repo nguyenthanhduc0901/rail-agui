@@ -8,7 +8,7 @@ import {
 } from "@copilotkit/react-core/v2";
 import { ToolReasoning } from "@/components/tool-rendering";
 
-export const useGenerativeUIExamples = () => {
+export const useRailToolRendering = () => {
   const { theme, setTheme } = useTheme();
 
   const ignoredTools = ["generate_form", "log_a2ui_event"];

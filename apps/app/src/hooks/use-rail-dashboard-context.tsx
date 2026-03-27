@@ -6,7 +6,7 @@ import {
   carriagesByTrain,
   issues,
   trains,
-} from "@/features/rail-dashboard/data/railDataAdapter";
+} from "@/features/rail-dashboard/data/railDataSource";
 
 export const useRailDashboardContext = () => {
   useCopilotReadable({
@@ -30,7 +30,7 @@ export const useRailDashboardContext = () => {
       trainId: issue.trainId,
       carriageId: issue.carriageId,
       system: issue.system,
-      title: issue.title,
+      title: issue.description,
       priority: issue.priority,
       status: issue.status,
       date: issue.date,

@@ -2,22 +2,22 @@
 
 import { CopilotChat } from "@copilotkit/react-core/v2";
 
-import { ExampleLayout } from "@/components/example-layout";
+import { DashboardShell } from "@/components/dashboard-shell";
 import { AppLayout } from "./layout/AppLayout";
 import { FleetDashboard } from "./screens/FleetDashboard";
 import {
-  useExampleSuggestions,
-  useGenerativeUIExamples,
+  useRailChatSuggestions,
+  useRailToolRendering,
   useRailDashboardContext,
 } from "@/hooks";
 
 export function RailDashboardApp() {
-  useGenerativeUIExamples();
-  useExampleSuggestions();
+  useRailToolRendering();
+  useRailChatSuggestions();
   useRailDashboardContext();
 
   return (
-    <ExampleLayout
+    <DashboardShell
       chatContent={
         <CopilotChat input={{ disclaimer: () => null, className: "pb-6" }} />
       }

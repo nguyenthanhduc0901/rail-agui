@@ -5,12 +5,14 @@ import { useFrontendTool } from "@copilotkit/react-core";
 
 import { ModeToggle } from "./mode-toggle";
 
-interface ExampleLayoutProps {
+interface DashboardShellProps {
   chatContent: ReactNode;
   appContent: ReactNode;
 }
 
-export function ExampleLayout({ chatContent, appContent }: ExampleLayoutProps) {
+const CHATBOT_WIDTH_APP_MODE = "430px";
+
+export function DashboardShell({ chatContent, appContent }: DashboardShellProps) {
   const [mode, setMode] = useState<"chat" | "app">("chat");
 
   useFrontendTool({
@@ -30,23 +32,26 @@ export function ExampleLayout({ chatContent, appContent }: ExampleLayoutProps) {
   });
 
   return (
-    <div className="h-full flex flex-row">
+    <div className="h-screen flex flex-row overflow-hidden">
       <ModeToggle mode={mode} onModeChange={setMode} />
 
       <div
-        className={`h-full overflow-hidden ${
+        className={`h-full overflow-y-auto rail-scrollbar ${
           mode === "app"
-            ? "w-2/3 max-lg:w-full border-r border-zinc-200 dark:border-zinc-700 max-lg:border-r-0"
+            ? "flex-1 border-r border-zinc-200 dark:border-zinc-700 max-lg:border-r-0"
             : "w-0 border-r-0"
         }`}
       >
-        <div className="w-full lg:w-[66.666vw] h-full">{appContent}</div>
+        <div className="w-full min-h-full">{appContent}</div>
       </div>
 
       <div
-        className={`max-h-full overflow-y-auto ${
-          mode === "app" ? "w-1/3 px-6 max-lg:hidden" : "flex-1 max-lg:px-4"
+        className={`h-full overflow-y-auto chatbot-scrollbar ${
+          mode === "app"
+            ? "min-w-[320px] max-w-[420px] px-4 xl:px-6 max-lg:hidden"
+            : "flex-1 max-w-[48rem] ml-auto px-4 lg:px-6"
         }`}
+        style={mode === "app" ? { width: CHATBOT_WIDTH_APP_MODE } : undefined}
       >
         {chatContent}
       </div>

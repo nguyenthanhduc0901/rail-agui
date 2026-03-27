@@ -2,7 +2,7 @@
 
 import { useConfigureSuggestions } from "@copilotkit/react-core/v2";
 
-export const useExampleSuggestions = () => {
+export const useRailChatSuggestions = () => {
   useConfigureSuggestions({
     suggestions: [
       {

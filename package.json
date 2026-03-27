@@ -1,5 +1,5 @@
 {
-  "name": "copilotkit-langgraph-template",
+  "name": "ag-ui-chatbot",
   "private": true,
   "scripts": {
     "dev": "turbo run dev",

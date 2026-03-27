@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { trains, getCarriagesByTrain } from '../data/railDataAdapter'
+import { trains, getCarriagesByTrain } from '../data/railDataSource'
 import { CarriageDetailsModal } from '../components/CarriageDetailsModal'
 
 // --- CẤU HÌNH ---
