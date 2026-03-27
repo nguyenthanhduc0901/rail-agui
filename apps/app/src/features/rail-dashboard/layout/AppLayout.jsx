@@ -4,8 +4,8 @@ import { ChatPanel } from '../components/ChatPanel'
 
 export function AppLayout({ children }) {
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 [font-family:var(--font-sans)]">
-      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top_left,rgba(148,163,184,0.14),transparent_32%),radial-gradient(circle_at_bottom_right,rgba(14,165,233,0.1),transparent_28%)]" />
+    <div className="min-h-screen bg-slate-50 text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100 [font-family:var(--font-sans)]">
+      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top_left,rgba(148,163,184,0.14),transparent_32%),radial-gradient(circle_at_bottom_right,rgba(14,165,233,0.1),transparent_28%)] dark:bg-[radial-gradient(circle_at_top_left,rgba(14,165,233,0.16),transparent_35%),radial-gradient(circle_at_bottom_right,rgba(15,23,42,0.55),transparent_30%)]" />
       <div className="relative flex min-h-screen">
         <Sidebar links={navLinks} />
 
@@ -14,9 +14,9 @@ export function AppLayout({ children }) {
             {children}
           </main>
         </div>
-      </div>
 
-      <ChatPanel />
+        <ChatPanel />
+      </div>
     </div>
   )
 }

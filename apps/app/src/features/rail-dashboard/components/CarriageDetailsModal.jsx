@@ -409,9 +409,14 @@ export function CarriageDetailsModal({ isOpen, onClose, train, carriage }) {
                       <span className="text-xs font-medium text-slate-400">{issue.date}</span>
                     </div>
 
-                    <h4 className="font-semibold text-slate-800 mb-4 text-[15px] leading-snug group-hover:text-blue-600 transition-colors">
-                      {issue.description}
-                    </h4>
+                    <div className="mb-4">
+                      <h4 className="font-semibold text-slate-800 text-[15px] leading-snug group-hover:text-blue-600 transition-colors">
+                        {issue.title}
+                      </h4>
+                      <p className="mt-1 text-[13px] leading-relaxed text-slate-600">
+                        {issue.description}
+                      </p>
+                    </div>
 
                     <div className="flex items-center gap-3 text-xs font-medium">
                       <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 text-slate-600 px-2.5 py-1.5 rounded-lg">

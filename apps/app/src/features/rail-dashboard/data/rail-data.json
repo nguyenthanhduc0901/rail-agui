@@ -1,0 +1,4507 @@
+{
+  "meta": {
+    "generatedAt": "2026-03-27T06:26:12.341Z",
+    "generator": "apps/app/scripts/generate-rail-data.mjs",
+    "version": 1
+  },
+  "trains": [
+    {
+      "id": "T01",
+      "name": "Northline Express",
+      "status": "critical",
+      "openIssues": 11,
+      "efficiency": 70,
+      "healthyCarriages": 2
+    },
+    {
+      "id": "T02",
+      "name": "Delta Commuter",
+      "status": "critical",
+      "openIssues": 17,
+      "efficiency": 70,
+      "healthyCarriages": 0
+    },
+    {
+      "id": "T03",
+      "name": "Harbor Intercity",
+      "status": "warning",
+      "openIssues": 2,
+      "efficiency": 91,
+      "healthyCarriages": 3
+    },
+    {
+      "id": "T04",
+      "name": "Metro Link",
+      "status": "critical",
+      "openIssues": 13,
+      "efficiency": 70,
+      "healthyCarriages": 0
+    },
+    {
+      "id": "T05",
+      "name": "East Freight",
+      "status": "critical",
+      "openIssues": 10,
+      "efficiency": 70,
+      "healthyCarriages": 3
+    },
+    {
+      "id": "T06",
+      "name": "Sunset Regional",
+      "status": "critical",
+      "openIssues": 8,
+      "efficiency": 75,
+      "healthyCarriages": 1
+    },
+    {
+      "id": "T07",
+      "name": "Alpine Express",
+      "status": "warning",
+      "openIssues": 6,
+      "efficiency": 81,
+      "healthyCarriages": 1
+    },
+    {
+      "id": "T08",
+      "name": "Coastal Rapid",
+      "status": "critical",
+      "openIssues": 7,
+      "efficiency": 73,
+      "healthyCarriages": 2
+    },
+    {
+      "id": "T09",
+      "name": "Urban Transit",
+      "status": "critical",
+      "openIssues": 14,
+      "efficiency": 70,
+      "healthyCarriages": 1
+    },
+    {
+      "id": "T10",
+      "name": "Industrial Freight",
+      "status": "critical",
+      "openIssues": 15,
+      "efficiency": 70,
+      "healthyCarriages": 2
+    },
+    {
+      "id": "T11",
+      "name": "Highland Connector",
+      "status": "critical",
+      "openIssues": 9,
+      "efficiency": 74,
+      "healthyCarriages": 2
+    },
+    {
+      "id": "T12",
+      "name": "Riverline Shuttle",
+      "status": "critical",
+      "openIssues": 11,
+      "efficiency": 70,
+      "healthyCarriages": 0
+    },
+    {
+      "id": "T13",
+      "name": "Pacific Cargo",
+      "status": "critical",
+      "openIssues": 13,
+      "efficiency": 70,
+      "healthyCarriages": 0
+    },
+    {
+      "id": "T14",
+      "name": "Golden Arrow",
+      "status": "critical",
+      "openIssues": 11,
+      "efficiency": 70,
+      "healthyCarriages": 0
+    },
+    {
+      "id": "T15",
+      "name": "Summit Rail",
+      "status": "warning",
+      "openIssues": 6,
+      "efficiency": 80,
+      "healthyCarriages": 2
+    },
+    {
+      "id": "T16",
+      "name": "Valley Intermodal",
+      "status": "critical",
+      "openIssues": 9,
+      "efficiency": 71,
+      "healthyCarriages": 2
+    },
+    {
+      "id": "T17",
+      "name": "Central Commuter",
+      "status": "critical",
+      "openIssues": 11,
+      "efficiency": 70,
+      "healthyCarriages": 0
+    },
+    {
+      "id": "T18",
+      "name": "Blue Horizon",
+      "status": "warning",
+      "openIssues": 5,
+      "efficiency": 85,
+      "healthyCarriages": 3
+    },
+    {
+      "id": "T19",
+      "name": "Pioneer Freight",
+      "status": "critical",
+      "openIssues": 10,
+      "efficiency": 73,
+      "healthyCarriages": 3
+    },
+    {
+      "id": "T20",
+      "name": "Aurora Line",
+      "status": "critical",
+      "openIssues": 13,
+      "efficiency": 70,
+      "healthyCarriages": 1
+    }
+  ],
+  "carriagesByTrain": {
+    "T01": [
+      {
+        "id": "C01",
+        "type": "Head",
+        "status": "healthy",
+        "issues": 0
+      },
+      {
+        "id": "C02",
+        "type": "Cargo",
+        "status": "critical",
+        "issues": 4
+      },
+      {
+        "id": "C03",
+        "type": "Cargo",
+        "status": "warning",
+        "issues": 2
+      },
+      {
+        "id": "C04",
+        "type": "Cargo",
+        "status": "critical",
+        "issues": 3
+      },
+      {
+        "id": "C05",
+        "type": "Passenger",
+        "status": "healthy",
+        "issues": 0
+      },
+      {
+        "id": "C06",
+        "type": "Service",
+        "status": "warning",
+        "issues": 1
+      },
+      {
+        "id": "C07",
+        "type": "Power",
+        "status": "warning",
+        "issues": 1
+      }
+    ],
+    "T02": [
+      {
+        "id": "C01",
+        "type": "Head",
+        "status": "critical",
+        "issues": 3
+      },
+      {
+        "id": "C02",
+        "type": "Passenger",
+        "status": "critical",
+        "issues": 4
+      },
+      {
+        "id": "C03",
+        "type": "Cargo",
+        "status": "critical",
+        "issues": 4
+      },
+      {
+        "id": "C04",
+        "type": "Service",
+        "status": "critical",
+        "issues": 3
+      },
+      {
+        "id": "C05",
+        "type": "Power",
+        "status": "critical",
+        "issues": 3
+      }
+    ],
+    "T03": [
+      {
+        "id": "C01",
+        "type": "Head",
+        "status": "healthy",
+        "issues": 0
+      },
+      {
+        "id": "C02",
+        "type": "Cargo",
+        "status": "healthy",
+        "issues": 0
+      },
+      {
+        "id": "C03",
+        "type": "Cargo",
+        "status": "healthy",
+        "issues": 0
+      },
+      {
+        "id": "C04",
+        "type": "Passenger",
+        "status": "warning",
+        "issues": 1
+      },
+      {
+        "id": "C05",
+        "type": "Power",
+        "status": "warning",
+        "issues": 1
+      }
+    ],
+    "T04": [
+      {
+        "id": "C01",
+        "type": "Head",
+        "status": "critical",
+        "issues": 3
+      },
+      {
+        "id": "C02",
+        "type": "Passenger",
+        "status": "critical",
+        "issues": 3
+      },
+      {
+        "id": "C03",
+        "type": "Cargo",
+        "status": "warning",
+        "issues": 1
+      },
+      {
+        "id": "C04",
+        "type": "Passenger",
+        "status": "critical",
+        "issues": 3
+      },
+      {
+        "id": "C05",
+        "type": "Passenger",
+        "status": "warning",
+        "issues": 1
+      },
+      {
+        "id": "C06",
+        "type": "Power",
+        "status": "warning",
+        "issues": 2
+      }
+    ],
+    "T05": [
+      {
+        "id": "C01",
+        "type": "Head",
+        "status": "critical",
+        "issues": 3
+      },
+      {
+        "id": "C02",
+        "type": "Passenger",
+        "status": "healthy",
+        "issues": 0
+      },
+      {
+        "id": "C03",
+        "type": "Service",
+        "status": "healthy",
+        "issues": 0
+      },
+      {
+        "id": "C04",
+        "type": "Passenger",
+        "status": "critical",
+        "issues": 4
+      },
+      {
+        "id": "C05",
+        "type": "Passenger",
+        "status": "critical",
+        "issues": 3
+      },
+      {
+        "id": "C06",
+        "type": "Power",
+        "status": "healthy",
+        "issues": 0
+      }
+    ],
+    "T06": [
+      {
+        "id": "C01",
+        "type": "Head",
+        "status": "critical",
+        "issues": 4
+      },
+      {
+        "id": "C02",
+        "type": "Cargo",
+        "status": "warning",
+        "issues": 2
+      },
+      {
+        "id": "C03",
+        "type": "Service",
+        "status": "warning",
+        "issues": 1
+      },
+      {
+        "id": "C04",
+        "type": "Passenger",
+        "status": "healthy",
+        "issues": 0
+      },
+      {
+        "id": "C05",
+        "type": "Power",
+        "status": "warning",
+        "issues": 1
+      }
+    ],
+    "T07": [
+      {
+        "id": "C01",
+        "type": "Head",
+        "status": "warning",
+        "issues": 2
+      },
+      {
+        "id": "C02",
+        "type": "Passenger",
+        "status": "healthy",
+        "issues": 0
+      },
+      {
+        "id": "C03",
+        "type": "Passenger",
+        "status": "warning",
+        "issues": 1
+      },
+      {
+        "id": "C04",
+        "type": "Passenger",
+        "status": "warning",
+        "issues": 1
+      },
+      {
+        "id": "C05",
+        "type": "Power",
+        "status": "warning",
+        "issues": 2
+      }
+    ],
+    "T08": [
+      {
+        "id": "C01",
+        "type": "Head",
+        "status": "warning",
+        "issues": 1
+      },
+      {
+        "id": "C02",
+        "type": "Cargo",
+        "status": "warning",
+        "issues": 1
+      },
+      {
+        "id": "C03",
+        "type": "Passenger",
+        "status": "critical",
+        "issues": 3
+      },
+      {
+        "id": "C04",
+        "type": "Service",
+        "status": "warning",
+        "issues": 1
+      },
+      {
+        "id": "C05",
+        "type": "Cargo",
+        "status": "warning",
+        "issues": 1
+      },
+      {
+        "id": "C06",
+        "type": "Service",
+        "status": "healthy",
+        "issues": 0
+      },
+      {
+        "id": "C07",
+        "type": "Power",
+        "status": "healthy",
+        "issues": 0
+      }
+    ],
+    "T09": [
+      {
+        "id": "C01",
+        "type": "Head",
+        "status": "critical",
+        "issues": 3
+      },
+      {
+        "id": "C02",
+        "type": "Service",
+        "status": "warning",
+        "issues": 2
+      },
+      {
+        "id": "C03",
+        "type": "Service",
+        "status": "critical",
+        "issues": 3
+      },
+      {
+        "id": "C04",
+        "type": "Service",
+        "status": "warning",
+        "issues": 2
+      },
+      {
+        "id": "C05",
+        "type": "Passenger",
+        "status": "healthy",
+        "issues": 0
+      },
+      {
+        "id": "C06",
+        "type": "Power",
+        "status": "critical",
+        "issues": 4
+      }
+    ],
+    "T10": [
+      {
+        "id": "C01",
+        "type": "Head",
+        "status": "critical",
+        "issues": 4
+      },
+      {
+        "id": "C02",
+        "type": "Passenger",
+        "status": "healthy",
+        "issues": 0
+      },
+      {
+        "id": "C03",
+        "type": "Passenger",
+        "status": "critical",
+        "issues": 3
+      },
+      {
+        "id": "C04",
+        "type": "Passenger",
+        "status": "warning",
+        "issues": 1
+      },
+      {
+        "id": "C05",
+        "type": "Passenger",
+        "status": "critical",
+        "issues": 3
+      },
+      {
+        "id": "C06",
+        "type": "Service",
+        "status": "healthy",
+        "issues": 0
+      },
+      {
+        "id": "C07",
+        "type": "Power",
+        "status": "critical",
+        "issues": 4
+      }
+    ],
+    "T11": [
+      {
+        "id": "C01",
+        "type": "Head",
+        "status": "healthy",
+        "issues": 0
+      },
+      {
+        "id": "C02",
+        "type": "Cargo",
+        "status": "critical",
+        "issues": 3
+      },
+      {
+        "id": "C03",
+        "type": "Passenger",
+        "status": "warning",
+        "issues": 2
+      },
+      {
+        "id": "C04",
+        "type": "Cargo",
+        "status": "healthy",
+        "issues": 0
+      },
+      {
+        "id": "C05",
+        "type": "Cargo",
+        "status": "warning",
+        "issues": 2
+      },
+      {
+        "id": "C06",
+        "type": "Power",
+        "status": "warning",
+        "issues": 2
+      }
+    ],
+    "T12": [
+      {
+        "id": "C01",
+        "type": "Head",
+        "status": "warning",
+        "issues": 2
+      },
+      {
+        "id": "C02",
+        "type": "Passenger",
+        "status": "critical",
+        "issues": 3
+      },
+      {
+        "id": "C03",
+        "type": "Passenger",
+        "status": "critical",
+        "issues": 3
+      },
+      {
+        "id": "C04",
+        "type": "Passenger",
+        "status": "warning",
+        "issues": 1
+      },
+      {
+        "id": "C05",
+        "type": "Power",
+        "status": "warning",
+        "issues": 2
+      }
+    ],
+    "T13": [
+      {
+        "id": "C01",
+        "type": "Head",
+        "status": "warning",
+        "issues": 1
+      },
+      {
+        "id": "C02",
+        "type": "Passenger",
+        "status": "critical",
+        "issues": 4
+      },
+      {
+        "id": "C03",
+        "type": "Cargo",
+        "status": "warning",
+        "issues": 1
+      },
+      {
+        "id": "C04",
+        "type": "Service",
+        "status": "critical",
+        "issues": 4
+      },
+      {
+        "id": "C05",
+        "type": "Power",
+        "status": "critical",
+        "issues": 3
+      }
+    ],
+    "T14": [
+      {
+        "id": "C01",
+        "type": "Head",
+        "status": "critical",
+        "issues": 4
+      },
+      {
+        "id": "C02",
+        "type": "Passenger",
+        "status": "warning",
+        "issues": 1
+      },
+      {
+        "id": "C03",
+        "type": "Passenger",
+        "status": "warning",
+        "issues": 1
+      },
+      {
+        "id": "C04",
+        "type": "Cargo",
+        "status": "warning",
+        "issues": 1
+      },
+      {
+        "id": "C05",
+        "type": "Passenger",
+        "status": "warning",
+        "issues": 1
+      },
+      {
+        "id": "C06",
+        "type": "Power",
+        "status": "critical",
+        "issues": 3
+      }
+    ],
+    "T15": [
+      {
+        "id": "C01",
+        "type": "Head",
+        "status": "critical",
+        "issues": 3
+      },
+      {
+        "id": "C02",
+        "type": "Service",
+        "status": "healthy",
+        "issues": 0
+      },
+      {
+        "id": "C03",
+        "type": "Cargo",
+        "status": "warning",
+        "issues": 1
+      },
+      {
+        "id": "C04",
+        "type": "Service",
+        "status": "healthy",
+        "issues": 0
+      },
+      {
+        "id": "C05",
+        "type": "Power",
+        "status": "warning",
+        "issues": 2
+      }
+    ],
+    "T16": [
+      {
+        "id": "C01",
+        "type": "Head",
+        "status": "healthy",
+        "issues": 0
+      },
+      {
+        "id": "C02",
+        "type": "Service",
+        "status": "warning",
+        "issues": 2
+      },
+      {
+        "id": "C03",
+        "type": "Cargo",
+        "status": "warning",
+        "issues": 1
+      },
+      {
+        "id": "C04",
+        "type": "Service",
+        "status": "critical",
+        "issues": 3
+      },
+      {
+        "id": "C05",
+        "type": "Cargo",
+        "status": "warning",
+        "issues": 1
+      },
+      {
+        "id": "C06",
+        "type": "Service",
+        "status": "healthy",
+        "issues": 0
+      },
+      {
+        "id": "C07",
+        "type": "Power",
+        "status": "warning",
+        "issues": 2
+      }
+    ],
+    "T17": [
+      {
+        "id": "C01",
+        "type": "Head",
+        "status": "critical",
+        "issues": 3
+      },
+      {
+        "id": "C02",
+        "type": "Service",
+        "status": "critical",
+        "issues": 3
+      },
+      {
+        "id": "C03",
+        "type": "Passenger",
+        "status": "critical",
+        "issues": 3
+      },
+      {
+        "id": "C04",
+        "type": "Cargo",
+        "status": "warning",
+        "issues": 1
+      },
+      {
+        "id": "C05",
+        "type": "Power",
+        "status": "warning",
+        "issues": 1
+      }
+    ],
+    "T18": [
+      {
+        "id": "C01",
+        "type": "Head",
+        "status": "warning",
+        "issues": 2
+      },
+      {
+        "id": "C02",
+        "type": "Service",
+        "status": "healthy",
+        "issues": 0
+      },
+      {
+        "id": "C03",
+        "type": "Cargo",
+        "status": "healthy",
+        "issues": 0
+      },
+      {
+        "id": "C04",
+        "type": "Passenger",
+        "status": "warning",
+        "issues": 1
+      },
+      {
+        "id": "C05",
+        "type": "Cargo",
+        "status": "healthy",
+        "issues": 0
+      },
+      {
+        "id": "C06",
+        "type": "Power",
+        "status": "warning",
+        "issues": 2
+      }
+    ],
+    "T19": [
+      {
+        "id": "C01",
+        "type": "Head",
+        "status": "healthy",
+        "issues": 0
+      },
+      {
+        "id": "C02",
+        "type": "Service",
+        "status": "healthy",
+        "issues": 0
+      },
+      {
+        "id": "C03",
+        "type": "Cargo",
+        "status": "critical",
+        "issues": 4
+      },
+      {
+        "id": "C04",
+        "type": "Cargo",
+        "status": "warning",
+        "issues": 2
+      },
+      {
+        "id": "C05",
+        "type": "Service",
+        "status": "warning",
+        "issues": 2
+      },
+      {
+        "id": "C06",
+        "type": "Cargo",
+        "status": "healthy",
+        "issues": 0
+      },
+      {
+        "id": "C07",
+        "type": "Power",
+        "status": "warning",
+        "issues": 2
+      }
+    ],
+    "T20": [
+      {
+        "id": "C01",
+        "type": "Head",
+        "status": "warning",
+        "issues": 1
+      },
+      {
+        "id": "C02",
+        "type": "Cargo",
+        "status": "healthy",
+        "issues": 0
+      },
+      {
+        "id": "C03",
+        "type": "Cargo",
+        "status": "warning",
+        "issues": 2
+      },
+      {
+        "id": "C04",
+        "type": "Service",
+        "status": "warning",
+        "issues": 2
+      },
+      {
+        "id": "C05",
+        "type": "Cargo",
+        "status": "critical",
+        "issues": 3
+      },
+      {
+        "id": "C06",
+        "type": "Cargo",
+        "status": "critical",
+        "issues": 3
+      },
+      {
+        "id": "C07",
+        "type": "Power",
+        "status": "warning",
+        "issues": 2
+      }
+    ]
+  },
+  "issues": [
+    {
+      "id": "ISS-1001",
+      "trainId": "T01",
+      "carriageId": "C02",
+      "system": "HVAC",
+      "title": "Cabin Temperature Oscillation",
+      "description": "Cabin Temperature Oscillation observed on T01/C02 (HVAC). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": null,
+      "date": "2026-02-05"
+    },
+    {
+      "id": "ISS-1002",
+      "trainId": "T01",
+      "carriageId": "C02",
+      "system": "Network",
+      "title": "Onboard Gateway Timeout",
+      "description": "Onboard Gateway Timeout observed on T01/C02 (Network). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "low",
+      "status": "open",
+      "assignee": null,
+      "date": "2026-03-05"
+    },
+    {
+      "id": "ISS-1003",
+      "trainId": "T01",
+      "carriageId": "C02",
+      "system": "HVAC",
+      "title": "Airflow Distribution Imbalance",
+      "description": "Airflow Distribution Imbalance observed on T01/C02 (HVAC). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "high",
+      "status": "open",
+      "assignee": {
+        "name": "Raj Kumar",
+        "initials": "RK",
+        "color": "bg-amber-500/80"
+      },
+      "date": "2026-03-01"
+    },
+    {
+      "id": "ISS-1004",
+      "trainId": "T01",
+      "carriageId": "C02",
+      "system": "Brakes",
+      "title": "Regenerative Brake Mismatch",
+      "description": "Regenerative Brake Mismatch observed on T01/C02 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "high",
+      "status": "open",
+      "assignee": {
+        "name": "Phuc Do",
+        "initials": "PD",
+        "color": "bg-indigo-500/80"
+      },
+      "date": "2026-02-23"
+    },
+    {
+      "id": "ISS-1005",
+      "trainId": "T01",
+      "carriageId": "C03",
+      "system": "Brakes",
+      "title": "Regenerative Brake Mismatch",
+      "description": "Regenerative Brake Mismatch observed on T01/C03 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "medium",
+      "status": "in-progress",
+      "assignee": null,
+      "date": "2026-02-10"
+    },
+    {
+      "id": "ISS-1006",
+      "trainId": "T01",
+      "carriageId": "C03",
+      "system": "Brakes",
+      "title": "Regenerative Brake Mismatch",
+      "description": "Regenerative Brake Mismatch observed on T01/C03 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": null,
+      "date": "2026-02-11"
+    },
+    {
+      "id": "ISS-1007",
+      "trainId": "T01",
+      "carriageId": "C03",
+      "system": "HVAC",
+      "title": "Compressor Cycle Instability",
+      "description": "Compressor Cycle Instability observed on T01/C03 (HVAC). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Resolution note: issue was mitigated and post-fix telemetry returned to nominal range.",
+      "priority": "medium",
+      "status": "closed",
+      "assignee": {
+        "name": "Bao Vu",
+        "initials": "BV",
+        "color": "bg-orange-500/80"
+      },
+      "date": "2026-02-20"
+    },
+    {
+      "id": "ISS-1008",
+      "trainId": "T01",
+      "carriageId": "C04",
+      "system": "Brakes",
+      "title": "Disc Wear Threshold Exceeded",
+      "description": "Disc Wear Threshold Exceeded observed on T01/C04 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Resolution note: issue was mitigated and post-fix telemetry returned to nominal range.",
+      "priority": "medium",
+      "status": "closed",
+      "assignee": {
+        "name": "Sofia Martinez",
+        "initials": "SM",
+        "color": "bg-rose-500/80"
+      },
+      "date": "2026-03-20"
+    },
+    {
+      "id": "ISS-1009",
+      "trainId": "T01",
+      "carriageId": "C04",
+      "system": "Doors",
+      "title": "Emergency Release Calibration Error",
+      "description": "Emergency Release Calibration Error observed on T01/C04 (Doors). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "low",
+      "status": "in-progress",
+      "assignee": null,
+      "date": "2026-03-06"
+    },
+    {
+      "id": "ISS-1010",
+      "trainId": "T01",
+      "carriageId": "C04",
+      "system": "Doors",
+      "title": "Door Lock Sensor Mismatch",
+      "description": "Door Lock Sensor Mismatch observed on T01/C04 (Doors). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "low",
+      "status": "open",
+      "assignee": {
+        "name": "Phuc Do",
+        "initials": "PD",
+        "color": "bg-indigo-500/80"
+      },
+      "date": "2026-03-23"
+    },
+    {
+      "id": "ISS-1011",
+      "trainId": "T01",
+      "carriageId": "C04",
+      "system": "Power",
+      "title": "Inverter Thermal Drift",
+      "description": "Inverter Thermal Drift observed on T01/C04 (Power). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "low",
+      "status": "open",
+      "assignee": {
+        "name": "Minh Le",
+        "initials": "ML",
+        "color": "bg-fuchsia-500/80"
+      },
+      "date": "2026-03-12"
+    },
+    {
+      "id": "ISS-1012",
+      "trainId": "T01",
+      "carriageId": "C06",
+      "system": "Power",
+      "title": "Inverter Thermal Drift",
+      "description": "Inverter Thermal Drift observed on T01/C06 (Power). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": {
+        "name": "Bao Vu",
+        "initials": "BV",
+        "color": "bg-orange-500/80"
+      },
+      "date": "2026-02-20"
+    },
+    {
+      "id": "ISS-1013",
+      "trainId": "T01",
+      "carriageId": "C07",
+      "system": "Network",
+      "title": "Onboard Gateway Timeout",
+      "description": "Onboard Gateway Timeout observed on T01/C07 (Network). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "low",
+      "status": "in-progress",
+      "assignee": null,
+      "date": "2026-03-14"
+    },
+    {
+      "id": "ISS-1014",
+      "trainId": "T02",
+      "carriageId": "C01",
+      "system": "Power",
+      "title": "Inverter Thermal Drift",
+      "description": "Inverter Thermal Drift observed on T02/C01 (Power). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": {
+        "name": "Minh Le",
+        "initials": "ML",
+        "color": "bg-fuchsia-500/80"
+      },
+      "date": "2026-03-07"
+    },
+    {
+      "id": "ISS-1015",
+      "trainId": "T02",
+      "carriageId": "C01",
+      "system": "Network",
+      "title": "Telemetry Packet Loss Spike",
+      "description": "Telemetry Packet Loss Spike observed on T02/C01 (Network). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": {
+        "name": "Nhi Dang",
+        "initials": "ND",
+        "color": "bg-teal-500/80"
+      },
+      "date": "2026-02-21"
+    },
+    {
+      "id": "ISS-1016",
+      "trainId": "T02",
+      "carriageId": "C01",
+      "system": "Power",
+      "title": "Battery Module Degradation",
+      "description": "Battery Module Degradation observed on T02/C01 (Power). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Resolution note: issue was mitigated and post-fix telemetry returned to nominal range.",
+      "priority": "low",
+      "status": "closed",
+      "assignee": {
+        "name": "Minh Le",
+        "initials": "ML",
+        "color": "bg-fuchsia-500/80"
+      },
+      "date": "2026-02-10"
+    },
+    {
+      "id": "ISS-1017",
+      "trainId": "T02",
+      "carriageId": "C01",
+      "system": "HVAC",
+      "title": "Airflow Distribution Imbalance",
+      "description": "Airflow Distribution Imbalance observed on T02/C01 (HVAC). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "medium",
+      "status": "in-progress",
+      "assignee": {
+        "name": "Raj Kumar",
+        "initials": "RK",
+        "color": "bg-amber-500/80"
+      },
+      "date": "2026-02-04"
+    },
+    {
+      "id": "ISS-1018",
+      "trainId": "T02",
+      "carriageId": "C02",
+      "system": "HVAC",
+      "title": "Compressor Cycle Instability",
+      "description": "Compressor Cycle Instability observed on T02/C02 (HVAC). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "high",
+      "status": "open",
+      "assignee": {
+        "name": "Raj Kumar",
+        "initials": "RK",
+        "color": "bg-amber-500/80"
+      },
+      "date": "2026-02-14"
+    },
+    {
+      "id": "ISS-1019",
+      "trainId": "T02",
+      "carriageId": "C02",
+      "system": "Brakes",
+      "title": "Regenerative Brake Mismatch",
+      "description": "Regenerative Brake Mismatch observed on T02/C02 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "low",
+      "status": "in-progress",
+      "assignee": {
+        "name": "Alex Chen",
+        "initials": "AC",
+        "color": "bg-lime-500/80"
+      },
+      "date": "2026-03-05"
+    },
+    {
+      "id": "ISS-1020",
+      "trainId": "T02",
+      "carriageId": "C02",
+      "system": "HVAC",
+      "title": "Cabin Temperature Oscillation",
+      "description": "Cabin Temperature Oscillation observed on T02/C02 (HVAC). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "low",
+      "status": "in-progress",
+      "assignee": null,
+      "date": "2026-03-10"
+    },
+    {
+      "id": "ISS-1021",
+      "trainId": "T02",
+      "carriageId": "C02",
+      "system": "HVAC",
+      "title": "Cabin Temperature Oscillation",
+      "description": "Cabin Temperature Oscillation observed on T02/C02 (HVAC). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "high",
+      "status": "in-progress",
+      "assignee": {
+        "name": "Minh Le",
+        "initials": "ML",
+        "color": "bg-fuchsia-500/80"
+      },
+      "date": "2026-03-16"
+    },
+    {
+      "id": "ISS-1022",
+      "trainId": "T02",
+      "carriageId": "C03",
+      "system": "HVAC",
+      "title": "Cabin Temperature Oscillation",
+      "description": "Cabin Temperature Oscillation observed on T02/C03 (HVAC). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "low",
+      "status": "open",
+      "assignee": {
+        "name": "Raj Kumar",
+        "initials": "RK",
+        "color": "bg-amber-500/80"
+      },
+      "date": "2026-02-27"
+    },
+    {
+      "id": "ISS-1023",
+      "trainId": "T02",
+      "carriageId": "C03",
+      "system": "Power",
+      "title": "Battery Module Degradation",
+      "description": "Battery Module Degradation observed on T02/C03 (Power). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": {
+        "name": "Phuc Do",
+        "initials": "PD",
+        "color": "bg-indigo-500/80"
+      },
+      "date": "2026-02-02"
+    },
+    {
+      "id": "ISS-1024",
+      "trainId": "T02",
+      "carriageId": "C03",
+      "system": "Power",
+      "title": "Battery Module Degradation",
+      "description": "Battery Module Degradation observed on T02/C03 (Power). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": {
+        "name": "Emma Wilson",
+        "initials": "EW",
+        "color": "bg-purple-500/80"
+      },
+      "date": "2026-03-28"
+    },
+    {
+      "id": "ISS-1025",
+      "trainId": "T02",
+      "carriageId": "C03",
+      "system": "HVAC",
+      "title": "Cabin Temperature Oscillation",
+      "description": "Cabin Temperature Oscillation observed on T02/C03 (HVAC). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "high",
+      "status": "open",
+      "assignee": {
+        "name": "Raj Kumar",
+        "initials": "RK",
+        "color": "bg-amber-500/80"
+      },
+      "date": "2026-03-26"
+    },
+    {
+      "id": "ISS-1026",
+      "trainId": "T02",
+      "carriageId": "C04",
+      "system": "Brakes",
+      "title": "Disc Wear Threshold Exceeded",
+      "description": "Disc Wear Threshold Exceeded observed on T02/C04 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Resolution note: issue was mitigated and post-fix telemetry returned to nominal range.",
+      "priority": "high",
+      "status": "closed",
+      "assignee": null,
+      "date": "2026-03-15"
+    },
+    {
+      "id": "ISS-1027",
+      "trainId": "T02",
+      "carriageId": "C04",
+      "system": "Doors",
+      "title": "Emergency Release Calibration Error",
+      "description": "Emergency Release Calibration Error observed on T02/C04 (Doors). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": {
+        "name": "Minh Le",
+        "initials": "ML",
+        "color": "bg-fuchsia-500/80"
+      },
+      "date": "2026-03-11"
+    },
+    {
+      "id": "ISS-1028",
+      "trainId": "T02",
+      "carriageId": "C04",
+      "system": "Network",
+      "title": "Onboard Gateway Timeout",
+      "description": "Onboard Gateway Timeout observed on T02/C04 (Network). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": {
+        "name": "Phuc Do",
+        "initials": "PD",
+        "color": "bg-indigo-500/80"
+      },
+      "date": "2026-03-18"
+    },
+    {
+      "id": "ISS-1029",
+      "trainId": "T02",
+      "carriageId": "C04",
+      "system": "Doors",
+      "title": "Emergency Release Calibration Error",
+      "description": "Emergency Release Calibration Error observed on T02/C04 (Doors). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "low",
+      "status": "in-progress",
+      "assignee": null,
+      "date": "2026-02-18"
+    },
+    {
+      "id": "ISS-1030",
+      "trainId": "T02",
+      "carriageId": "C05",
+      "system": "Brakes",
+      "title": "Regenerative Brake Mismatch",
+      "description": "Regenerative Brake Mismatch observed on T02/C05 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "low",
+      "status": "open",
+      "assignee": {
+        "name": "Raj Kumar",
+        "initials": "RK",
+        "color": "bg-amber-500/80"
+      },
+      "date": "2026-03-01"
+    },
+    {
+      "id": "ISS-1031",
+      "trainId": "T02",
+      "carriageId": "C05",
+      "system": "Power",
+      "title": "Battery Module Degradation",
+      "description": "Battery Module Degradation observed on T02/C05 (Power). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "high",
+      "status": "open",
+      "assignee": {
+        "name": "Raj Kumar",
+        "initials": "RK",
+        "color": "bg-amber-500/80"
+      },
+      "date": "2026-03-15"
+    },
+    {
+      "id": "ISS-1032",
+      "trainId": "T02",
+      "carriageId": "C05",
+      "system": "Brakes",
+      "title": "Disc Wear Threshold Exceeded",
+      "description": "Disc Wear Threshold Exceeded observed on T02/C05 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "low",
+      "status": "open",
+      "assignee": {
+        "name": "Phuc Do",
+        "initials": "PD",
+        "color": "bg-indigo-500/80"
+      },
+      "date": "2026-02-05"
+    },
+    {
+      "id": "ISS-1033",
+      "trainId": "T03",
+      "carriageId": "C04",
+      "system": "Brakes",
+      "title": "Regenerative Brake Mismatch",
+      "description": "Regenerative Brake Mismatch observed on T03/C04 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "high",
+      "status": "open",
+      "assignee": {
+        "name": "Gia Nguyen",
+        "initials": "GN",
+        "color": "bg-emerald-500/80"
+      },
+      "date": "2026-03-07"
+    },
+    {
+      "id": "ISS-1034",
+      "trainId": "T03",
+      "carriageId": "C05",
+      "system": "Power",
+      "title": "Auxiliary Power Voltage Sag",
+      "description": "Auxiliary Power Voltage Sag observed on T03/C05 (Power). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "low",
+      "status": "open",
+      "assignee": {
+        "name": "Sofia Martinez",
+        "initials": "SM",
+        "color": "bg-rose-500/80"
+      },
+      "date": "2026-02-08"
+    },
+    {
+      "id": "ISS-1035",
+      "trainId": "T04",
+      "carriageId": "C01",
+      "system": "Network",
+      "title": "Onboard Gateway Timeout",
+      "description": "Onboard Gateway Timeout observed on T04/C01 (Network). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Resolution note: issue was mitigated and post-fix telemetry returned to nominal range.",
+      "priority": "high",
+      "status": "closed",
+      "assignee": {
+        "name": "Minh Le",
+        "initials": "ML",
+        "color": "bg-fuchsia-500/80"
+      },
+      "date": "2026-03-10"
+    },
+    {
+      "id": "ISS-1036",
+      "trainId": "T04",
+      "carriageId": "C01",
+      "system": "Power",
+      "title": "Inverter Thermal Drift",
+      "description": "Inverter Thermal Drift observed on T04/C01 (Power). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "high",
+      "status": "open",
+      "assignee": null,
+      "date": "2026-02-23"
+    },
+    {
+      "id": "ISS-1037",
+      "trainId": "T04",
+      "carriageId": "C01",
+      "system": "Power",
+      "title": "Inverter Thermal Drift",
+      "description": "Inverter Thermal Drift observed on T04/C01 (Power). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "medium",
+      "status": "in-progress",
+      "assignee": {
+        "name": "Phuc Do",
+        "initials": "PD",
+        "color": "bg-indigo-500/80"
+      },
+      "date": "2026-02-05"
+    },
+    {
+      "id": "ISS-1038",
+      "trainId": "T04",
+      "carriageId": "C01",
+      "system": "HVAC",
+      "title": "Cabin Temperature Oscillation",
+      "description": "Cabin Temperature Oscillation observed on T04/C01 (HVAC). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "low",
+      "status": "open",
+      "assignee": {
+        "name": "Linh Tran",
+        "initials": "LT",
+        "color": "bg-cyan-500/80"
+      },
+      "date": "2026-02-16"
+    },
+    {
+      "id": "ISS-1039",
+      "trainId": "T04",
+      "carriageId": "C02",
+      "system": "Brakes",
+      "title": "Brake Pressure Drift Detected",
+      "description": "Brake Pressure Drift Detected observed on T04/C02 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "low",
+      "status": "open",
+      "assignee": {
+        "name": "Minh Le",
+        "initials": "ML",
+        "color": "bg-fuchsia-500/80"
+      },
+      "date": "2026-03-14"
+    },
+    {
+      "id": "ISS-1040",
+      "trainId": "T04",
+      "carriageId": "C02",
+      "system": "Power",
+      "title": "Inverter Thermal Drift",
+      "description": "Inverter Thermal Drift observed on T04/C02 (Power). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "high",
+      "status": "in-progress",
+      "assignee": {
+        "name": "Minh Le",
+        "initials": "ML",
+        "color": "bg-fuchsia-500/80"
+      },
+      "date": "2026-03-17"
+    },
+    {
+      "id": "ISS-1041",
+      "trainId": "T04",
+      "carriageId": "C02",
+      "system": "HVAC",
+      "title": "Cabin Temperature Oscillation",
+      "description": "Cabin Temperature Oscillation observed on T04/C02 (HVAC). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "high",
+      "status": "in-progress",
+      "assignee": {
+        "name": "Minh Le",
+        "initials": "ML",
+        "color": "bg-fuchsia-500/80"
+      },
+      "date": "2026-02-06"
+    },
+    {
+      "id": "ISS-1042",
+      "trainId": "T04",
+      "carriageId": "C03",
+      "system": "Power",
+      "title": "Inverter Thermal Drift",
+      "description": "Inverter Thermal Drift observed on T04/C03 (Power). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": {
+        "name": "Bao Vu",
+        "initials": "BV",
+        "color": "bg-orange-500/80"
+      },
+      "date": "2026-03-10"
+    },
+    {
+      "id": "ISS-1043",
+      "trainId": "T04",
+      "carriageId": "C04",
+      "system": "Brakes",
+      "title": "Regenerative Brake Mismatch",
+      "description": "Regenerative Brake Mismatch observed on T04/C04 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Resolution note: issue was mitigated and post-fix telemetry returned to nominal range.",
+      "priority": "low",
+      "status": "closed",
+      "assignee": {
+        "name": "Linh Tran",
+        "initials": "LT",
+        "color": "bg-cyan-500/80"
+      },
+      "date": "2026-03-25"
+    },
+    {
+      "id": "ISS-1044",
+      "trainId": "T04",
+      "carriageId": "C04",
+      "system": "Network",
+      "title": "Onboard Gateway Timeout",
+      "description": "Onboard Gateway Timeout observed on T04/C04 (Network). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": {
+        "name": "Sofia Martinez",
+        "initials": "SM",
+        "color": "bg-rose-500/80"
+      },
+      "date": "2026-03-14"
+    },
+    {
+      "id": "ISS-1045",
+      "trainId": "T04",
+      "carriageId": "C04",
+      "system": "Brakes",
+      "title": "Regenerative Brake Mismatch",
+      "description": "Regenerative Brake Mismatch observed on T04/C04 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "medium",
+      "status": "in-progress",
+      "assignee": {
+        "name": "Gia Nguyen",
+        "initials": "GN",
+        "color": "bg-emerald-500/80"
+      },
+      "date": "2026-03-11"
+    },
+    {
+      "id": "ISS-1046",
+      "trainId": "T04",
+      "carriageId": "C04",
+      "system": "Doors",
+      "title": "Door Lock Sensor Mismatch",
+      "description": "Door Lock Sensor Mismatch observed on T04/C04 (Doors). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "medium",
+      "status": "in-progress",
+      "assignee": {
+        "name": "Sofia Martinez",
+        "initials": "SM",
+        "color": "bg-rose-500/80"
+      },
+      "date": "2026-02-15"
+    },
+    {
+      "id": "ISS-1047",
+      "trainId": "T04",
+      "carriageId": "C05",
+      "system": "Network",
+      "title": "Telemetry Packet Loss Spike",
+      "description": "Telemetry Packet Loss Spike observed on T04/C05 (Network). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": null,
+      "date": "2026-02-28"
+    },
+    {
+      "id": "ISS-1048",
+      "trainId": "T04",
+      "carriageId": "C06",
+      "system": "Doors",
+      "title": "Door Actuator Response Delay",
+      "description": "Door Actuator Response Delay observed on T04/C06 (Doors). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "high",
+      "status": "in-progress",
+      "assignee": {
+        "name": "Sofia Martinez",
+        "initials": "SM",
+        "color": "bg-rose-500/80"
+      },
+      "date": "2026-02-13"
+    },
+    {
+      "id": "ISS-1049",
+      "trainId": "T04",
+      "carriageId": "C06",
+      "system": "Power",
+      "title": "Auxiliary Power Voltage Sag",
+      "description": "Auxiliary Power Voltage Sag observed on T04/C06 (Power). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "high",
+      "status": "open",
+      "assignee": null,
+      "date": "2026-02-10"
+    },
+    {
+      "id": "ISS-1050",
+      "trainId": "T05",
+      "carriageId": "C01",
+      "system": "Doors",
+      "title": "Door Actuator Response Delay",
+      "description": "Door Actuator Response Delay observed on T05/C01 (Doors). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "high",
+      "status": "in-progress",
+      "assignee": null,
+      "date": "2026-02-04"
+    },
+    {
+      "id": "ISS-1051",
+      "trainId": "T05",
+      "carriageId": "C01",
+      "system": "HVAC",
+      "title": "Cabin Temperature Oscillation",
+      "description": "Cabin Temperature Oscillation observed on T05/C01 (HVAC). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": {
+        "name": "Emma Wilson",
+        "initials": "EW",
+        "color": "bg-purple-500/80"
+      },
+      "date": "2026-02-11"
+    },
+    {
+      "id": "ISS-1052",
+      "trainId": "T05",
+      "carriageId": "C01",
+      "system": "Power",
+      "title": "Battery Module Degradation",
+      "description": "Battery Module Degradation observed on T05/C01 (Power). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "low",
+      "status": "open",
+      "assignee": {
+        "name": "Nhi Dang",
+        "initials": "ND",
+        "color": "bg-teal-500/80"
+      },
+      "date": "2026-02-09"
+    },
+    {
+      "id": "ISS-1053",
+      "trainId": "T05",
+      "carriageId": "C03",
+      "system": "Brakes",
+      "title": "Regenerative Brake Mismatch",
+      "description": "Regenerative Brake Mismatch observed on T05/C03 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Resolution note: issue was mitigated and post-fix telemetry returned to nominal range.",
+      "priority": "medium",
+      "status": "closed",
+      "assignee": {
+        "name": "Gia Nguyen",
+        "initials": "GN",
+        "color": "bg-emerald-500/80"
+      },
+      "date": "2026-03-08"
+    },
+    {
+      "id": "ISS-1054",
+      "trainId": "T05",
+      "carriageId": "C04",
+      "system": "Network",
+      "title": "Onboard Gateway Timeout",
+      "description": "Onboard Gateway Timeout observed on T05/C04 (Network). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "high",
+      "status": "open",
+      "assignee": null,
+      "date": "2026-03-13"
+    },
+    {
+      "id": "ISS-1055",
+      "trainId": "T05",
+      "carriageId": "C04",
+      "system": "Network",
+      "title": "Telemetry Packet Loss Spike",
+      "description": "Telemetry Packet Loss Spike observed on T05/C04 (Network). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": {
+        "name": "Alex Chen",
+        "initials": "AC",
+        "color": "bg-lime-500/80"
+      },
+      "date": "2026-02-10"
+    },
+    {
+      "id": "ISS-1056",
+      "trainId": "T05",
+      "carriageId": "C04",
+      "system": "Network",
+      "title": "Telemetry Packet Loss Spike",
+      "description": "Telemetry Packet Loss Spike observed on T05/C04 (Network). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "low",
+      "status": "open",
+      "assignee": {
+        "name": "Emma Wilson",
+        "initials": "EW",
+        "color": "bg-purple-500/80"
+      },
+      "date": "2026-03-10"
+    },
+    {
+      "id": "ISS-1057",
+      "trainId": "T05",
+      "carriageId": "C04",
+      "system": "HVAC",
+      "title": "Compressor Cycle Instability",
+      "description": "Compressor Cycle Instability observed on T05/C04 (HVAC). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "low",
+      "status": "open",
+      "assignee": {
+        "name": "Minh Le",
+        "initials": "ML",
+        "color": "bg-fuchsia-500/80"
+      },
+      "date": "2026-02-11"
+    },
+    {
+      "id": "ISS-1058",
+      "trainId": "T05",
+      "carriageId": "C05",
+      "system": "HVAC",
+      "title": "Compressor Cycle Instability",
+      "description": "Compressor Cycle Instability observed on T05/C05 (HVAC). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "low",
+      "status": "in-progress",
+      "assignee": {
+        "name": "Gia Nguyen",
+        "initials": "GN",
+        "color": "bg-emerald-500/80"
+      },
+      "date": "2026-03-15"
+    },
+    {
+      "id": "ISS-1059",
+      "trainId": "T05",
+      "carriageId": "C05",
+      "system": "Brakes",
+      "title": "Disc Wear Threshold Exceeded",
+      "description": "Disc Wear Threshold Exceeded observed on T05/C05 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "high",
+      "status": "open",
+      "assignee": null,
+      "date": "2026-03-06"
+    },
+    {
+      "id": "ISS-1060",
+      "trainId": "T05",
+      "carriageId": "C05",
+      "system": "Network",
+      "title": "Onboard Gateway Timeout",
+      "description": "Onboard Gateway Timeout observed on T05/C05 (Network). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": {
+        "name": "Raj Kumar",
+        "initials": "RK",
+        "color": "bg-amber-500/80"
+      },
+      "date": "2026-02-25"
+    },
+    {
+      "id": "ISS-1061",
+      "trainId": "T06",
+      "carriageId": "C01",
+      "system": "HVAC",
+      "title": "Compressor Cycle Instability",
+      "description": "Compressor Cycle Instability observed on T06/C01 (HVAC). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "low",
+      "status": "open",
+      "assignee": null,
+      "date": "2026-03-16"
+    },
+    {
+      "id": "ISS-1062",
+      "trainId": "T06",
+      "carriageId": "C01",
+      "system": "Brakes",
+      "title": "Disc Wear Threshold Exceeded",
+      "description": "Disc Wear Threshold Exceeded observed on T06/C01 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": {
+        "name": "Phuc Do",
+        "initials": "PD",
+        "color": "bg-indigo-500/80"
+      },
+      "date": "2026-03-22"
+    },
+    {
+      "id": "ISS-1063",
+      "trainId": "T06",
+      "carriageId": "C01",
+      "system": "Doors",
+      "title": "Emergency Release Calibration Error",
+      "description": "Emergency Release Calibration Error observed on T06/C01 (Doors). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "high",
+      "status": "open",
+      "assignee": {
+        "name": "Bao Vu",
+        "initials": "BV",
+        "color": "bg-orange-500/80"
+      },
+      "date": "2026-03-23"
+    },
+    {
+      "id": "ISS-1064",
+      "trainId": "T06",
+      "carriageId": "C01",
+      "system": "Brakes",
+      "title": "Regenerative Brake Mismatch",
+      "description": "Regenerative Brake Mismatch observed on T06/C01 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "high",
+      "status": "open",
+      "assignee": {
+        "name": "Phuc Do",
+        "initials": "PD",
+        "color": "bg-indigo-500/80"
+      },
+      "date": "2026-03-23"
+    },
+    {
+      "id": "ISS-1065",
+      "trainId": "T06",
+      "carriageId": "C02",
+      "system": "HVAC",
+      "title": "Cabin Temperature Oscillation",
+      "description": "Cabin Temperature Oscillation observed on T06/C02 (HVAC). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "high",
+      "status": "in-progress",
+      "assignee": {
+        "name": "Raj Kumar",
+        "initials": "RK",
+        "color": "bg-amber-500/80"
+      },
+      "date": "2026-03-05"
+    },
+    {
+      "id": "ISS-1066",
+      "trainId": "T06",
+      "carriageId": "C02",
+      "system": "Brakes",
+      "title": "Disc Wear Threshold Exceeded",
+      "description": "Disc Wear Threshold Exceeded observed on T06/C02 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "medium",
+      "status": "in-progress",
+      "assignee": {
+        "name": "Minh Le",
+        "initials": "ML",
+        "color": "bg-fuchsia-500/80"
+      },
+      "date": "2026-03-11"
+    },
+    {
+      "id": "ISS-1067",
+      "trainId": "T06",
+      "carriageId": "C03",
+      "system": "Network",
+      "title": "Telemetry Packet Loss Spike",
+      "description": "Telemetry Packet Loss Spike observed on T06/C03 (Network). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Resolution note: issue was mitigated and post-fix telemetry returned to nominal range.",
+      "priority": "high",
+      "status": "closed",
+      "assignee": {
+        "name": "Bao Vu",
+        "initials": "BV",
+        "color": "bg-orange-500/80"
+      },
+      "date": "2026-03-09"
+    },
+    {
+      "id": "ISS-1068",
+      "trainId": "T06",
+      "carriageId": "C03",
+      "system": "Brakes",
+      "title": "Disc Wear Threshold Exceeded",
+      "description": "Disc Wear Threshold Exceeded observed on T06/C03 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "low",
+      "status": "open",
+      "assignee": {
+        "name": "Sofia Martinez",
+        "initials": "SM",
+        "color": "bg-rose-500/80"
+      },
+      "date": "2026-02-24"
+    },
+    {
+      "id": "ISS-1069",
+      "trainId": "T06",
+      "carriageId": "C04",
+      "system": "Brakes",
+      "title": "Regenerative Brake Mismatch",
+      "description": "Regenerative Brake Mismatch observed on T06/C04 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Resolution note: issue was mitigated and post-fix telemetry returned to nominal range.",
+      "priority": "high",
+      "status": "closed",
+      "assignee": null,
+      "date": "2026-02-18"
+    },
+    {
+      "id": "ISS-1070",
+      "trainId": "T06",
+      "carriageId": "C05",
+      "system": "Power",
+      "title": "Battery Module Degradation",
+      "description": "Battery Module Degradation observed on T06/C05 (Power). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Resolution note: issue was mitigated and post-fix telemetry returned to nominal range.",
+      "priority": "high",
+      "status": "closed",
+      "assignee": {
+        "name": "Nhi Dang",
+        "initials": "ND",
+        "color": "bg-teal-500/80"
+      },
+      "date": "2026-03-09"
+    },
+    {
+      "id": "ISS-1071",
+      "trainId": "T06",
+      "carriageId": "C05",
+      "system": "HVAC",
+      "title": "Airflow Distribution Imbalance",
+      "description": "Airflow Distribution Imbalance observed on T06/C05 (HVAC). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "medium",
+      "status": "in-progress",
+      "assignee": {
+        "name": "Sofia Martinez",
+        "initials": "SM",
+        "color": "bg-rose-500/80"
+      },
+      "date": "2026-03-21"
+    },
+    {
+      "id": "ISS-1072",
+      "trainId": "T07",
+      "carriageId": "C01",
+      "system": "Doors",
+      "title": "Emergency Release Calibration Error",
+      "description": "Emergency Release Calibration Error observed on T07/C01 (Doors). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Resolution note: issue was mitigated and post-fix telemetry returned to nominal range.",
+      "priority": "low",
+      "status": "closed",
+      "assignee": {
+        "name": "Alex Chen",
+        "initials": "AC",
+        "color": "bg-lime-500/80"
+      },
+      "date": "2026-02-03"
+    },
+    {
+      "id": "ISS-1073",
+      "trainId": "T07",
+      "carriageId": "C01",
+      "system": "Power",
+      "title": "Battery Module Degradation",
+      "description": "Battery Module Degradation observed on T07/C01 (Power). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "low",
+      "status": "open",
+      "assignee": null,
+      "date": "2026-02-23"
+    },
+    {
+      "id": "ISS-1074",
+      "trainId": "T07",
+      "carriageId": "C01",
+      "system": "Power",
+      "title": "Auxiliary Power Voltage Sag",
+      "description": "Auxiliary Power Voltage Sag observed on T07/C01 (Power). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "low",
+      "status": "in-progress",
+      "assignee": {
+        "name": "Phuc Do",
+        "initials": "PD",
+        "color": "bg-indigo-500/80"
+      },
+      "date": "2026-02-17"
+    },
+    {
+      "id": "ISS-1075",
+      "trainId": "T07",
+      "carriageId": "C01",
+      "system": "Network",
+      "title": "Train Control Link Interruption",
+      "description": "Train Control Link Interruption observed on T07/C01 (Network). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Resolution note: issue was mitigated and post-fix telemetry returned to nominal range.",
+      "priority": "low",
+      "status": "closed",
+      "assignee": {
+        "name": "Gia Nguyen",
+        "initials": "GN",
+        "color": "bg-emerald-500/80"
+      },
+      "date": "2026-03-23"
+    },
+    {
+      "id": "ISS-1076",
+      "trainId": "T07",
+      "carriageId": "C02",
+      "system": "Doors",
+      "title": "Door Actuator Response Delay",
+      "description": "Door Actuator Response Delay observed on T07/C02 (Doors). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Resolution note: issue was mitigated and post-fix telemetry returned to nominal range.",
+      "priority": "high",
+      "status": "closed",
+      "assignee": null,
+      "date": "2026-02-14"
+    },
+    {
+      "id": "ISS-1077",
+      "trainId": "T07",
+      "carriageId": "C03",
+      "system": "HVAC",
+      "title": "Cabin Temperature Oscillation",
+      "description": "Cabin Temperature Oscillation observed on T07/C03 (HVAC). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "high",
+      "status": "open",
+      "assignee": {
+        "name": "Linh Tran",
+        "initials": "LT",
+        "color": "bg-cyan-500/80"
+      },
+      "date": "2026-03-25"
+    },
+    {
+      "id": "ISS-1078",
+      "trainId": "T07",
+      "carriageId": "C04",
+      "system": "Power",
+      "title": "Inverter Thermal Drift",
+      "description": "Inverter Thermal Drift observed on T07/C04 (Power). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "medium",
+      "status": "in-progress",
+      "assignee": {
+        "name": "Alex Chen",
+        "initials": "AC",
+        "color": "bg-lime-500/80"
+      },
+      "date": "2026-02-22"
+    },
+    {
+      "id": "ISS-1079",
+      "trainId": "T07",
+      "carriageId": "C05",
+      "system": "Power",
+      "title": "Inverter Thermal Drift",
+      "description": "Inverter Thermal Drift observed on T07/C05 (Power). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": null,
+      "date": "2026-02-01"
+    },
+    {
+      "id": "ISS-1080",
+      "trainId": "T07",
+      "carriageId": "C05",
+      "system": "HVAC",
+      "title": "Compressor Cycle Instability",
+      "description": "Compressor Cycle Instability observed on T07/C05 (HVAC). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "low",
+      "status": "in-progress",
+      "assignee": {
+        "name": "Bao Vu",
+        "initials": "BV",
+        "color": "bg-orange-500/80"
+      },
+      "date": "2026-02-14"
+    },
+    {
+      "id": "ISS-1081",
+      "trainId": "T08",
+      "carriageId": "C01",
+      "system": "HVAC",
+      "title": "Compressor Cycle Instability",
+      "description": "Compressor Cycle Instability observed on T08/C01 (HVAC). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "high",
+      "status": "open",
+      "assignee": {
+        "name": "Linh Tran",
+        "initials": "LT",
+        "color": "bg-cyan-500/80"
+      },
+      "date": "2026-03-18"
+    },
+    {
+      "id": "ISS-1082",
+      "trainId": "T08",
+      "carriageId": "C02",
+      "system": "Doors",
+      "title": "Emergency Release Calibration Error",
+      "description": "Emergency Release Calibration Error observed on T08/C02 (Doors). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "medium",
+      "status": "in-progress",
+      "assignee": {
+        "name": "Sofia Martinez",
+        "initials": "SM",
+        "color": "bg-rose-500/80"
+      },
+      "date": "2026-03-05"
+    },
+    {
+      "id": "ISS-1083",
+      "trainId": "T08",
+      "carriageId": "C03",
+      "system": "Brakes",
+      "title": "Regenerative Brake Mismatch",
+      "description": "Regenerative Brake Mismatch observed on T08/C03 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "low",
+      "status": "open",
+      "assignee": null,
+      "date": "2026-03-13"
+    },
+    {
+      "id": "ISS-1084",
+      "trainId": "T08",
+      "carriageId": "C03",
+      "system": "Network",
+      "title": "Telemetry Packet Loss Spike",
+      "description": "Telemetry Packet Loss Spike observed on T08/C03 (Network). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "low",
+      "status": "open",
+      "assignee": {
+        "name": "Gia Nguyen",
+        "initials": "GN",
+        "color": "bg-emerald-500/80"
+      },
+      "date": "2026-03-09"
+    },
+    {
+      "id": "ISS-1085",
+      "trainId": "T08",
+      "carriageId": "C03",
+      "system": "Brakes",
+      "title": "Disc Wear Threshold Exceeded",
+      "description": "Disc Wear Threshold Exceeded observed on T08/C03 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "low",
+      "status": "open",
+      "assignee": {
+        "name": "Minh Le",
+        "initials": "ML",
+        "color": "bg-fuchsia-500/80"
+      },
+      "date": "2026-03-27"
+    },
+    {
+      "id": "ISS-1086",
+      "trainId": "T08",
+      "carriageId": "C03",
+      "system": "Doors",
+      "title": "Door Actuator Response Delay",
+      "description": "Door Actuator Response Delay observed on T08/C03 (Doors). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Resolution note: issue was mitigated and post-fix telemetry returned to nominal range.",
+      "priority": "medium",
+      "status": "closed",
+      "assignee": {
+        "name": "Nhi Dang",
+        "initials": "ND",
+        "color": "bg-teal-500/80"
+      },
+      "date": "2026-03-17"
+    },
+    {
+      "id": "ISS-1087",
+      "trainId": "T08",
+      "carriageId": "C04",
+      "system": "Network",
+      "title": "Onboard Gateway Timeout",
+      "description": "Onboard Gateway Timeout observed on T08/C04 (Network). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Resolution note: issue was mitigated and post-fix telemetry returned to nominal range.",
+      "priority": "medium",
+      "status": "closed",
+      "assignee": {
+        "name": "Linh Tran",
+        "initials": "LT",
+        "color": "bg-cyan-500/80"
+      },
+      "date": "2026-02-15"
+    },
+    {
+      "id": "ISS-1088",
+      "trainId": "T08",
+      "carriageId": "C04",
+      "system": "Network",
+      "title": "Train Control Link Interruption",
+      "description": "Train Control Link Interruption observed on T08/C04 (Network). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "high",
+      "status": "open",
+      "assignee": {
+        "name": "Bao Vu",
+        "initials": "BV",
+        "color": "bg-orange-500/80"
+      },
+      "date": "2026-03-15"
+    },
+    {
+      "id": "ISS-1089",
+      "trainId": "T08",
+      "carriageId": "C05",
+      "system": "Brakes",
+      "title": "Regenerative Brake Mismatch",
+      "description": "Regenerative Brake Mismatch observed on T08/C05 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "medium",
+      "status": "in-progress",
+      "assignee": {
+        "name": "Minh Le",
+        "initials": "ML",
+        "color": "bg-fuchsia-500/80"
+      },
+      "date": "2026-02-16"
+    },
+    {
+      "id": "ISS-1090",
+      "trainId": "T09",
+      "carriageId": "C01",
+      "system": "Power",
+      "title": "Battery Module Degradation",
+      "description": "Battery Module Degradation observed on T09/C01 (Power). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "high",
+      "status": "in-progress",
+      "assignee": {
+        "name": "Raj Kumar",
+        "initials": "RK",
+        "color": "bg-amber-500/80"
+      },
+      "date": "2026-03-02"
+    },
+    {
+      "id": "ISS-1091",
+      "trainId": "T09",
+      "carriageId": "C01",
+      "system": "Network",
+      "title": "Onboard Gateway Timeout",
+      "description": "Onboard Gateway Timeout observed on T09/C01 (Network). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "low",
+      "status": "open",
+      "assignee": {
+        "name": "Nhi Dang",
+        "initials": "ND",
+        "color": "bg-teal-500/80"
+      },
+      "date": "2026-02-16"
+    },
+    {
+      "id": "ISS-1092",
+      "trainId": "T09",
+      "carriageId": "C01",
+      "system": "Power",
+      "title": "Battery Module Degradation",
+      "description": "Battery Module Degradation observed on T09/C01 (Power). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "high",
+      "status": "open",
+      "assignee": {
+        "name": "Alex Chen",
+        "initials": "AC",
+        "color": "bg-lime-500/80"
+      },
+      "date": "2026-02-09"
+    },
+    {
+      "id": "ISS-1093",
+      "trainId": "T09",
+      "carriageId": "C02",
+      "system": "Network",
+      "title": "Train Control Link Interruption",
+      "description": "Train Control Link Interruption observed on T09/C02 (Network). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": null,
+      "date": "2026-03-06"
+    },
+    {
+      "id": "ISS-1094",
+      "trainId": "T09",
+      "carriageId": "C02",
+      "system": "Brakes",
+      "title": "Disc Wear Threshold Exceeded",
+      "description": "Disc Wear Threshold Exceeded observed on T09/C02 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "low",
+      "status": "open",
+      "assignee": {
+        "name": "Raj Kumar",
+        "initials": "RK",
+        "color": "bg-amber-500/80"
+      },
+      "date": "2026-03-20"
+    },
+    {
+      "id": "ISS-1095",
+      "trainId": "T09",
+      "carriageId": "C03",
+      "system": "Power",
+      "title": "Battery Module Degradation",
+      "description": "Battery Module Degradation observed on T09/C03 (Power). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": {
+        "name": "Alex Chen",
+        "initials": "AC",
+        "color": "bg-lime-500/80"
+      },
+      "date": "2026-03-21"
+    },
+    {
+      "id": "ISS-1096",
+      "trainId": "T09",
+      "carriageId": "C03",
+      "system": "Network",
+      "title": "Train Control Link Interruption",
+      "description": "Train Control Link Interruption observed on T09/C03 (Network). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "low",
+      "status": "open",
+      "assignee": {
+        "name": "Bao Vu",
+        "initials": "BV",
+        "color": "bg-orange-500/80"
+      },
+      "date": "2026-03-22"
+    },
+    {
+      "id": "ISS-1097",
+      "trainId": "T09",
+      "carriageId": "C03",
+      "system": "Power",
+      "title": "Battery Module Degradation",
+      "description": "Battery Module Degradation observed on T09/C03 (Power). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "high",
+      "status": "open",
+      "assignee": {
+        "name": "Linh Tran",
+        "initials": "LT",
+        "color": "bg-cyan-500/80"
+      },
+      "date": "2026-03-01"
+    },
+    {
+      "id": "ISS-1098",
+      "trainId": "T09",
+      "carriageId": "C04",
+      "system": "Network",
+      "title": "Train Control Link Interruption",
+      "description": "Train Control Link Interruption observed on T09/C04 (Network). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": {
+        "name": "Raj Kumar",
+        "initials": "RK",
+        "color": "bg-amber-500/80"
+      },
+      "date": "2026-02-19"
+    },
+    {
+      "id": "ISS-1099",
+      "trainId": "T09",
+      "carriageId": "C04",
+      "system": "Network",
+      "title": "Onboard Gateway Timeout",
+      "description": "Onboard Gateway Timeout observed on T09/C04 (Network). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "low",
+      "status": "open",
+      "assignee": {
+        "name": "Nhi Dang",
+        "initials": "ND",
+        "color": "bg-teal-500/80"
+      },
+      "date": "2026-03-27"
+    },
+    {
+      "id": "ISS-1100",
+      "trainId": "T09",
+      "carriageId": "C06",
+      "system": "HVAC",
+      "title": "Cabin Temperature Oscillation",
+      "description": "Cabin Temperature Oscillation observed on T09/C06 (HVAC). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": {
+        "name": "Alex Chen",
+        "initials": "AC",
+        "color": "bg-lime-500/80"
+      },
+      "date": "2026-02-09"
+    },
+    {
+      "id": "ISS-1101",
+      "trainId": "T09",
+      "carriageId": "C06",
+      "system": "Doors",
+      "title": "Door Actuator Response Delay",
+      "description": "Door Actuator Response Delay observed on T09/C06 (Doors). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "medium",
+      "status": "in-progress",
+      "assignee": {
+        "name": "Minh Le",
+        "initials": "ML",
+        "color": "bg-fuchsia-500/80"
+      },
+      "date": "2026-03-07"
+    },
+    {
+      "id": "ISS-1102",
+      "trainId": "T09",
+      "carriageId": "C06",
+      "system": "Power",
+      "title": "Battery Module Degradation",
+      "description": "Battery Module Degradation observed on T09/C06 (Power). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "high",
+      "status": "open",
+      "assignee": {
+        "name": "Raj Kumar",
+        "initials": "RK",
+        "color": "bg-amber-500/80"
+      },
+      "date": "2026-02-28"
+    },
+    {
+      "id": "ISS-1103",
+      "trainId": "T09",
+      "carriageId": "C06",
+      "system": "Network",
+      "title": "Telemetry Packet Loss Spike",
+      "description": "Telemetry Packet Loss Spike observed on T09/C06 (Network). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": {
+        "name": "Minh Le",
+        "initials": "ML",
+        "color": "bg-fuchsia-500/80"
+      },
+      "date": "2026-02-14"
+    },
+    {
+      "id": "ISS-1104",
+      "trainId": "T10",
+      "carriageId": "C01",
+      "system": "Network",
+      "title": "Onboard Gateway Timeout",
+      "description": "Onboard Gateway Timeout observed on T10/C01 (Network). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "low",
+      "status": "open",
+      "assignee": {
+        "name": "Sofia Martinez",
+        "initials": "SM",
+        "color": "bg-rose-500/80"
+      },
+      "date": "2026-03-02"
+    },
+    {
+      "id": "ISS-1105",
+      "trainId": "T10",
+      "carriageId": "C01",
+      "system": "Network",
+      "title": "Onboard Gateway Timeout",
+      "description": "Onboard Gateway Timeout observed on T10/C01 (Network). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "medium",
+      "status": "in-progress",
+      "assignee": {
+        "name": "Emma Wilson",
+        "initials": "EW",
+        "color": "bg-purple-500/80"
+      },
+      "date": "2026-03-26"
+    },
+    {
+      "id": "ISS-1106",
+      "trainId": "T10",
+      "carriageId": "C01",
+      "system": "HVAC",
+      "title": "Compressor Cycle Instability",
+      "description": "Compressor Cycle Instability observed on T10/C01 (HVAC). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "low",
+      "status": "open",
+      "assignee": {
+        "name": "Sofia Martinez",
+        "initials": "SM",
+        "color": "bg-rose-500/80"
+      },
+      "date": "2026-02-28"
+    },
+    {
+      "id": "ISS-1107",
+      "trainId": "T10",
+      "carriageId": "C01",
+      "system": "Doors",
+      "title": "Door Actuator Response Delay",
+      "description": "Door Actuator Response Delay observed on T10/C01 (Doors). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": {
+        "name": "Emma Wilson",
+        "initials": "EW",
+        "color": "bg-purple-500/80"
+      },
+      "date": "2026-02-11"
+    },
+    {
+      "id": "ISS-1108",
+      "trainId": "T10",
+      "carriageId": "C02",
+      "system": "Network",
+      "title": "Onboard Gateway Timeout",
+      "description": "Onboard Gateway Timeout observed on T10/C02 (Network). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Resolution note: issue was mitigated and post-fix telemetry returned to nominal range.",
+      "priority": "low",
+      "status": "closed",
+      "assignee": null,
+      "date": "2026-02-25"
+    },
+    {
+      "id": "ISS-1109",
+      "trainId": "T10",
+      "carriageId": "C03",
+      "system": "Network",
+      "title": "Telemetry Packet Loss Spike",
+      "description": "Telemetry Packet Loss Spike observed on T10/C03 (Network). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": {
+        "name": "Phuc Do",
+        "initials": "PD",
+        "color": "bg-indigo-500/80"
+      },
+      "date": "2026-02-04"
+    },
+    {
+      "id": "ISS-1110",
+      "trainId": "T10",
+      "carriageId": "C03",
+      "system": "Network",
+      "title": "Telemetry Packet Loss Spike",
+      "description": "Telemetry Packet Loss Spike observed on T10/C03 (Network). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "medium",
+      "status": "in-progress",
+      "assignee": {
+        "name": "Linh Tran",
+        "initials": "LT",
+        "color": "bg-cyan-500/80"
+      },
+      "date": "2026-03-01"
+    },
+    {
+      "id": "ISS-1111",
+      "trainId": "T10",
+      "carriageId": "C03",
+      "system": "Power",
+      "title": "Battery Module Degradation",
+      "description": "Battery Module Degradation observed on T10/C03 (Power). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "high",
+      "status": "open",
+      "assignee": {
+        "name": "Gia Nguyen",
+        "initials": "GN",
+        "color": "bg-emerald-500/80"
+      },
+      "date": "2026-02-09"
+    },
+    {
+      "id": "ISS-1112",
+      "trainId": "T10",
+      "carriageId": "C03",
+      "system": "Power",
+      "title": "Auxiliary Power Voltage Sag",
+      "description": "Auxiliary Power Voltage Sag observed on T10/C03 (Power). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Resolution note: issue was mitigated and post-fix telemetry returned to nominal range.",
+      "priority": "low",
+      "status": "closed",
+      "assignee": {
+        "name": "Phuc Do",
+        "initials": "PD",
+        "color": "bg-indigo-500/80"
+      },
+      "date": "2026-03-19"
+    },
+    {
+      "id": "ISS-1113",
+      "trainId": "T10",
+      "carriageId": "C04",
+      "system": "Doors",
+      "title": "Door Actuator Response Delay",
+      "description": "Door Actuator Response Delay observed on T10/C04 (Doors). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Resolution note: issue was mitigated and post-fix telemetry returned to nominal range.",
+      "priority": "low",
+      "status": "closed",
+      "assignee": null,
+      "date": "2026-02-20"
+    },
+    {
+      "id": "ISS-1114",
+      "trainId": "T10",
+      "carriageId": "C04",
+      "system": "Network",
+      "title": "Onboard Gateway Timeout",
+      "description": "Onboard Gateway Timeout observed on T10/C04 (Network). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "low",
+      "status": "open",
+      "assignee": {
+        "name": "Raj Kumar",
+        "initials": "RK",
+        "color": "bg-amber-500/80"
+      },
+      "date": "2026-03-17"
+    },
+    {
+      "id": "ISS-1115",
+      "trainId": "T10",
+      "carriageId": "C05",
+      "system": "HVAC",
+      "title": "Compressor Cycle Instability",
+      "description": "Compressor Cycle Instability observed on T10/C05 (HVAC). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": null,
+      "date": "2026-03-17"
+    },
+    {
+      "id": "ISS-1116",
+      "trainId": "T10",
+      "carriageId": "C05",
+      "system": "Brakes",
+      "title": "Brake Pressure Drift Detected",
+      "description": "Brake Pressure Drift Detected observed on T10/C05 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "low",
+      "status": "open",
+      "assignee": {
+        "name": "Minh Le",
+        "initials": "ML",
+        "color": "bg-fuchsia-500/80"
+      },
+      "date": "2026-03-29"
+    },
+    {
+      "id": "ISS-1117",
+      "trainId": "T10",
+      "carriageId": "C05",
+      "system": "Brakes",
+      "title": "Disc Wear Threshold Exceeded",
+      "description": "Disc Wear Threshold Exceeded observed on T10/C05 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Resolution note: issue was mitigated and post-fix telemetry returned to nominal range.",
+      "priority": "low",
+      "status": "closed",
+      "assignee": {
+        "name": "Bao Vu",
+        "initials": "BV",
+        "color": "bg-orange-500/80"
+      },
+      "date": "2026-02-23"
+    },
+    {
+      "id": "ISS-1118",
+      "trainId": "T10",
+      "carriageId": "C05",
+      "system": "Network",
+      "title": "Onboard Gateway Timeout",
+      "description": "Onboard Gateway Timeout observed on T10/C05 (Network). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "low",
+      "status": "open",
+      "assignee": {
+        "name": "Raj Kumar",
+        "initials": "RK",
+        "color": "bg-amber-500/80"
+      },
+      "date": "2026-03-22"
+    },
+    {
+      "id": "ISS-1119",
+      "trainId": "T10",
+      "carriageId": "C07",
+      "system": "HVAC",
+      "title": "Airflow Distribution Imbalance",
+      "description": "Airflow Distribution Imbalance observed on T10/C07 (HVAC). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": {
+        "name": "Minh Le",
+        "initials": "ML",
+        "color": "bg-fuchsia-500/80"
+      },
+      "date": "2026-02-12"
+    },
+    {
+      "id": "ISS-1120",
+      "trainId": "T10",
+      "carriageId": "C07",
+      "system": "Network",
+      "title": "Telemetry Packet Loss Spike",
+      "description": "Telemetry Packet Loss Spike observed on T10/C07 (Network). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "low",
+      "status": "open",
+      "assignee": {
+        "name": "Linh Tran",
+        "initials": "LT",
+        "color": "bg-cyan-500/80"
+      },
+      "date": "2026-03-28"
+    },
+    {
+      "id": "ISS-1121",
+      "trainId": "T10",
+      "carriageId": "C07",
+      "system": "Brakes",
+      "title": "Disc Wear Threshold Exceeded",
+      "description": "Disc Wear Threshold Exceeded observed on T10/C07 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": {
+        "name": "Sofia Martinez",
+        "initials": "SM",
+        "color": "bg-rose-500/80"
+      },
+      "date": "2026-03-06"
+    },
+    {
+      "id": "ISS-1122",
+      "trainId": "T10",
+      "carriageId": "C07",
+      "system": "Network",
+      "title": "Onboard Gateway Timeout",
+      "description": "Onboard Gateway Timeout observed on T10/C07 (Network). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "low",
+      "status": "open",
+      "assignee": {
+        "name": "Emma Wilson",
+        "initials": "EW",
+        "color": "bg-purple-500/80"
+      },
+      "date": "2026-02-06"
+    },
+    {
+      "id": "ISS-1123",
+      "trainId": "T11",
+      "carriageId": "C02",
+      "system": "Power",
+      "title": "Auxiliary Power Voltage Sag",
+      "description": "Auxiliary Power Voltage Sag observed on T11/C02 (Power). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "high",
+      "status": "open",
+      "assignee": {
+        "name": "Sofia Martinez",
+        "initials": "SM",
+        "color": "bg-rose-500/80"
+      },
+      "date": "2026-02-28"
+    },
+    {
+      "id": "ISS-1124",
+      "trainId": "T11",
+      "carriageId": "C02",
+      "system": "Power",
+      "title": "Auxiliary Power Voltage Sag",
+      "description": "Auxiliary Power Voltage Sag observed on T11/C02 (Power). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "high",
+      "status": "in-progress",
+      "assignee": {
+        "name": "Nhi Dang",
+        "initials": "ND",
+        "color": "bg-teal-500/80"
+      },
+      "date": "2026-03-19"
+    },
+    {
+      "id": "ISS-1125",
+      "trainId": "T11",
+      "carriageId": "C02",
+      "system": "Brakes",
+      "title": "Regenerative Brake Mismatch",
+      "description": "Regenerative Brake Mismatch observed on T11/C02 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "high",
+      "status": "in-progress",
+      "assignee": {
+        "name": "Sofia Martinez",
+        "initials": "SM",
+        "color": "bg-rose-500/80"
+      },
+      "date": "2026-03-28"
+    },
+    {
+      "id": "ISS-1126",
+      "trainId": "T11",
+      "carriageId": "C03",
+      "system": "HVAC",
+      "title": "Cabin Temperature Oscillation",
+      "description": "Cabin Temperature Oscillation observed on T11/C03 (HVAC). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "low",
+      "status": "in-progress",
+      "assignee": {
+        "name": "Minh Le",
+        "initials": "ML",
+        "color": "bg-fuchsia-500/80"
+      },
+      "date": "2026-03-04"
+    },
+    {
+      "id": "ISS-1127",
+      "trainId": "T11",
+      "carriageId": "C03",
+      "system": "Network",
+      "title": "Train Control Link Interruption",
+      "description": "Train Control Link Interruption observed on T11/C03 (Network). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": {
+        "name": "Nhi Dang",
+        "initials": "ND",
+        "color": "bg-teal-500/80"
+      },
+      "date": "2026-02-15"
+    },
+    {
+      "id": "ISS-1128",
+      "trainId": "T11",
+      "carriageId": "C05",
+      "system": "Doors",
+      "title": "Emergency Release Calibration Error",
+      "description": "Emergency Release Calibration Error observed on T11/C05 (Doors). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Resolution note: issue was mitigated and post-fix telemetry returned to nominal range.",
+      "priority": "medium",
+      "status": "closed",
+      "assignee": null,
+      "date": "2026-03-22"
+    },
+    {
+      "id": "ISS-1129",
+      "trainId": "T11",
+      "carriageId": "C05",
+      "system": "Doors",
+      "title": "Door Lock Sensor Mismatch",
+      "description": "Door Lock Sensor Mismatch observed on T11/C05 (Doors). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": null,
+      "date": "2026-03-01"
+    },
+    {
+      "id": "ISS-1130",
+      "trainId": "T11",
+      "carriageId": "C05",
+      "system": "Network",
+      "title": "Train Control Link Interruption",
+      "description": "Train Control Link Interruption observed on T11/C05 (Network). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "medium",
+      "status": "in-progress",
+      "assignee": null,
+      "date": "2026-03-06"
+    },
+    {
+      "id": "ISS-1131",
+      "trainId": "T11",
+      "carriageId": "C06",
+      "system": "Power",
+      "title": "Battery Module Degradation",
+      "description": "Battery Module Degradation observed on T11/C06 (Power). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "low",
+      "status": "in-progress",
+      "assignee": {
+        "name": "Gia Nguyen",
+        "initials": "GN",
+        "color": "bg-emerald-500/80"
+      },
+      "date": "2026-02-22"
+    },
+    {
+      "id": "ISS-1132",
+      "trainId": "T11",
+      "carriageId": "C06",
+      "system": "Brakes",
+      "title": "Disc Wear Threshold Exceeded",
+      "description": "Disc Wear Threshold Exceeded observed on T11/C06 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": {
+        "name": "Bao Vu",
+        "initials": "BV",
+        "color": "bg-orange-500/80"
+      },
+      "date": "2026-03-13"
+    },
+    {
+      "id": "ISS-1133",
+      "trainId": "T12",
+      "carriageId": "C01",
+      "system": "Doors",
+      "title": "Emergency Release Calibration Error",
+      "description": "Emergency Release Calibration Error observed on T12/C01 (Doors). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "medium",
+      "status": "in-progress",
+      "assignee": {
+        "name": "Nhi Dang",
+        "initials": "ND",
+        "color": "bg-teal-500/80"
+      },
+      "date": "2026-03-06"
+    },
+    {
+      "id": "ISS-1134",
+      "trainId": "T12",
+      "carriageId": "C01",
+      "system": "Doors",
+      "title": "Door Actuator Response Delay",
+      "description": "Door Actuator Response Delay observed on T12/C01 (Doors). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Resolution note: issue was mitigated and post-fix telemetry returned to nominal range.",
+      "priority": "high",
+      "status": "closed",
+      "assignee": {
+        "name": "Minh Le",
+        "initials": "ML",
+        "color": "bg-fuchsia-500/80"
+      },
+      "date": "2026-02-14"
+    },
+    {
+      "id": "ISS-1135",
+      "trainId": "T12",
+      "carriageId": "C01",
+      "system": "HVAC",
+      "title": "Compressor Cycle Instability",
+      "description": "Compressor Cycle Instability observed on T12/C01 (HVAC). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "medium",
+      "status": "in-progress",
+      "assignee": {
+        "name": "Linh Tran",
+        "initials": "LT",
+        "color": "bg-cyan-500/80"
+      },
+      "date": "2026-02-10"
+    },
+    {
+      "id": "ISS-1136",
+      "trainId": "T12",
+      "carriageId": "C02",
+      "system": "Brakes",
+      "title": "Brake Pressure Drift Detected",
+      "description": "Brake Pressure Drift Detected observed on T12/C02 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": {
+        "name": "Linh Tran",
+        "initials": "LT",
+        "color": "bg-cyan-500/80"
+      },
+      "date": "2026-03-13"
+    },
+    {
+      "id": "ISS-1137",
+      "trainId": "T12",
+      "carriageId": "C02",
+      "system": "Power",
+      "title": "Battery Module Degradation",
+      "description": "Battery Module Degradation observed on T12/C02 (Power). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "high",
+      "status": "open",
+      "assignee": null,
+      "date": "2026-02-03"
+    },
+    {
+      "id": "ISS-1138",
+      "trainId": "T12",
+      "carriageId": "C02",
+      "system": "Network",
+      "title": "Train Control Link Interruption",
+      "description": "Train Control Link Interruption observed on T12/C02 (Network). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "high",
+      "status": "open",
+      "assignee": null,
+      "date": "2026-03-18"
+    },
+    {
+      "id": "ISS-1139",
+      "trainId": "T12",
+      "carriageId": "C03",
+      "system": "Network",
+      "title": "Telemetry Packet Loss Spike",
+      "description": "Telemetry Packet Loss Spike observed on T12/C03 (Network). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": {
+        "name": "Emma Wilson",
+        "initials": "EW",
+        "color": "bg-purple-500/80"
+      },
+      "date": "2026-03-15"
+    },
+    {
+      "id": "ISS-1140",
+      "trainId": "T12",
+      "carriageId": "C03",
+      "system": "HVAC",
+      "title": "Compressor Cycle Instability",
+      "description": "Compressor Cycle Instability observed on T12/C03 (HVAC). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Resolution note: issue was mitigated and post-fix telemetry returned to nominal range.",
+      "priority": "medium",
+      "status": "closed",
+      "assignee": {
+        "name": "Gia Nguyen",
+        "initials": "GN",
+        "color": "bg-emerald-500/80"
+      },
+      "date": "2026-03-05"
+    },
+    {
+      "id": "ISS-1141",
+      "trainId": "T12",
+      "carriageId": "C03",
+      "system": "HVAC",
+      "title": "Compressor Cycle Instability",
+      "description": "Compressor Cycle Instability observed on T12/C03 (HVAC). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "low",
+      "status": "open",
+      "assignee": {
+        "name": "Emma Wilson",
+        "initials": "EW",
+        "color": "bg-purple-500/80"
+      },
+      "date": "2026-03-10"
+    },
+    {
+      "id": "ISS-1142",
+      "trainId": "T12",
+      "carriageId": "C03",
+      "system": "Doors",
+      "title": "Door Lock Sensor Mismatch",
+      "description": "Door Lock Sensor Mismatch observed on T12/C03 (Doors). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "medium",
+      "status": "in-progress",
+      "assignee": null,
+      "date": "2026-02-28"
+    },
+    {
+      "id": "ISS-1143",
+      "trainId": "T12",
+      "carriageId": "C04",
+      "system": "HVAC",
+      "title": "Cabin Temperature Oscillation",
+      "description": "Cabin Temperature Oscillation observed on T12/C04 (HVAC). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "low",
+      "status": "open",
+      "assignee": {
+        "name": "Raj Kumar",
+        "initials": "RK",
+        "color": "bg-amber-500/80"
+      },
+      "date": "2026-03-20"
+    },
+    {
+      "id": "ISS-1144",
+      "trainId": "T12",
+      "carriageId": "C05",
+      "system": "Doors",
+      "title": "Emergency Release Calibration Error",
+      "description": "Emergency Release Calibration Error observed on T12/C05 (Doors). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "low",
+      "status": "in-progress",
+      "assignee": {
+        "name": "Linh Tran",
+        "initials": "LT",
+        "color": "bg-cyan-500/80"
+      },
+      "date": "2026-02-25"
+    },
+    {
+      "id": "ISS-1145",
+      "trainId": "T12",
+      "carriageId": "C05",
+      "system": "Brakes",
+      "title": "Regenerative Brake Mismatch",
+      "description": "Regenerative Brake Mismatch observed on T12/C05 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "low",
+      "status": "open",
+      "assignee": null,
+      "date": "2026-03-01"
+    },
+    {
+      "id": "ISS-1146",
+      "trainId": "T12",
+      "carriageId": "C05",
+      "system": "Brakes",
+      "title": "Brake Pressure Drift Detected",
+      "description": "Brake Pressure Drift Detected observed on T12/C05 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Resolution note: issue was mitigated and post-fix telemetry returned to nominal range.",
+      "priority": "medium",
+      "status": "closed",
+      "assignee": {
+        "name": "Gia Nguyen",
+        "initials": "GN",
+        "color": "bg-emerald-500/80"
+      },
+      "date": "2026-03-10"
+    },
+    {
+      "id": "ISS-1147",
+      "trainId": "T13",
+      "carriageId": "C01",
+      "system": "Doors",
+      "title": "Door Lock Sensor Mismatch",
+      "description": "Door Lock Sensor Mismatch observed on T13/C01 (Doors). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": {
+        "name": "Nhi Dang",
+        "initials": "ND",
+        "color": "bg-teal-500/80"
+      },
+      "date": "2026-03-29"
+    },
+    {
+      "id": "ISS-1148",
+      "trainId": "T13",
+      "carriageId": "C02",
+      "system": "Power",
+      "title": "Inverter Thermal Drift",
+      "description": "Inverter Thermal Drift observed on T13/C02 (Power). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": {
+        "name": "Phuc Do",
+        "initials": "PD",
+        "color": "bg-indigo-500/80"
+      },
+      "date": "2026-02-02"
+    },
+    {
+      "id": "ISS-1149",
+      "trainId": "T13",
+      "carriageId": "C02",
+      "system": "Doors",
+      "title": "Door Actuator Response Delay",
+      "description": "Door Actuator Response Delay observed on T13/C02 (Doors). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "medium",
+      "status": "in-progress",
+      "assignee": {
+        "name": "Sofia Martinez",
+        "initials": "SM",
+        "color": "bg-rose-500/80"
+      },
+      "date": "2026-02-06"
+    },
+    {
+      "id": "ISS-1150",
+      "trainId": "T13",
+      "carriageId": "C02",
+      "system": "Brakes",
+      "title": "Disc Wear Threshold Exceeded",
+      "description": "Disc Wear Threshold Exceeded observed on T13/C02 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "low",
+      "status": "open",
+      "assignee": {
+        "name": "Emma Wilson",
+        "initials": "EW",
+        "color": "bg-purple-500/80"
+      },
+      "date": "2026-03-05"
+    },
+    {
+      "id": "ISS-1151",
+      "trainId": "T13",
+      "carriageId": "C02",
+      "system": "Doors",
+      "title": "Door Actuator Response Delay",
+      "description": "Door Actuator Response Delay observed on T13/C02 (Doors). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "low",
+      "status": "open",
+      "assignee": {
+        "name": "Sofia Martinez",
+        "initials": "SM",
+        "color": "bg-rose-500/80"
+      },
+      "date": "2026-03-09"
+    },
+    {
+      "id": "ISS-1152",
+      "trainId": "T13",
+      "carriageId": "C03",
+      "system": "Doors",
+      "title": "Emergency Release Calibration Error",
+      "description": "Emergency Release Calibration Error observed on T13/C03 (Doors). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Resolution note: issue was mitigated and post-fix telemetry returned to nominal range.",
+      "priority": "low",
+      "status": "closed",
+      "assignee": null,
+      "date": "2026-02-07"
+    },
+    {
+      "id": "ISS-1153",
+      "trainId": "T13",
+      "carriageId": "C03",
+      "system": "Brakes",
+      "title": "Brake Pressure Drift Detected",
+      "description": "Brake Pressure Drift Detected observed on T13/C03 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "high",
+      "status": "open",
+      "assignee": {
+        "name": "Nhi Dang",
+        "initials": "ND",
+        "color": "bg-teal-500/80"
+      },
+      "date": "2026-02-27"
+    },
+    {
+      "id": "ISS-1154",
+      "trainId": "T13",
+      "carriageId": "C04",
+      "system": "Brakes",
+      "title": "Brake Pressure Drift Detected",
+      "description": "Brake Pressure Drift Detected observed on T13/C04 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "low",
+      "status": "in-progress",
+      "assignee": {
+        "name": "Nhi Dang",
+        "initials": "ND",
+        "color": "bg-teal-500/80"
+      },
+      "date": "2026-03-12"
+    },
+    {
+      "id": "ISS-1155",
+      "trainId": "T13",
+      "carriageId": "C04",
+      "system": "Power",
+      "title": "Auxiliary Power Voltage Sag",
+      "description": "Auxiliary Power Voltage Sag observed on T13/C04 (Power). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "medium",
+      "status": "in-progress",
+      "assignee": {
+        "name": "Raj Kumar",
+        "initials": "RK",
+        "color": "bg-amber-500/80"
+      },
+      "date": "2026-02-17"
+    },
+    {
+      "id": "ISS-1156",
+      "trainId": "T13",
+      "carriageId": "C04",
+      "system": "Brakes",
+      "title": "Brake Pressure Drift Detected",
+      "description": "Brake Pressure Drift Detected observed on T13/C04 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "medium",
+      "status": "in-progress",
+      "assignee": {
+        "name": "Nhi Dang",
+        "initials": "ND",
+        "color": "bg-teal-500/80"
+      },
+      "date": "2026-03-14"
+    },
+    {
+      "id": "ISS-1157",
+      "trainId": "T13",
+      "carriageId": "C04",
+      "system": "Brakes",
+      "title": "Regenerative Brake Mismatch",
+      "description": "Regenerative Brake Mismatch observed on T13/C04 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": {
+        "name": "Gia Nguyen",
+        "initials": "GN",
+        "color": "bg-emerald-500/80"
+      },
+      "date": "2026-02-27"
+    },
+    {
+      "id": "ISS-1158",
+      "trainId": "T13",
+      "carriageId": "C05",
+      "system": "Network",
+      "title": "Telemetry Packet Loss Spike",
+      "description": "Telemetry Packet Loss Spike observed on T13/C05 (Network). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "medium",
+      "status": "in-progress",
+      "assignee": {
+        "name": "Bao Vu",
+        "initials": "BV",
+        "color": "bg-orange-500/80"
+      },
+      "date": "2026-02-11"
+    },
+    {
+      "id": "ISS-1159",
+      "trainId": "T13",
+      "carriageId": "C05",
+      "system": "Brakes",
+      "title": "Disc Wear Threshold Exceeded",
+      "description": "Disc Wear Threshold Exceeded observed on T13/C05 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Resolution note: issue was mitigated and post-fix telemetry returned to nominal range.",
+      "priority": "medium",
+      "status": "closed",
+      "assignee": {
+        "name": "Linh Tran",
+        "initials": "LT",
+        "color": "bg-cyan-500/80"
+      },
+      "date": "2026-03-08"
+    },
+    {
+      "id": "ISS-1160",
+      "trainId": "T13",
+      "carriageId": "C05",
+      "system": "Brakes",
+      "title": "Regenerative Brake Mismatch",
+      "description": "Regenerative Brake Mismatch observed on T13/C05 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "low",
+      "status": "open",
+      "assignee": {
+        "name": "Bao Vu",
+        "initials": "BV",
+        "color": "bg-orange-500/80"
+      },
+      "date": "2026-03-26"
+    },
+    {
+      "id": "ISS-1161",
+      "trainId": "T13",
+      "carriageId": "C05",
+      "system": "Network",
+      "title": "Telemetry Packet Loss Spike",
+      "description": "Telemetry Packet Loss Spike observed on T13/C05 (Network). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "high",
+      "status": "open",
+      "assignee": {
+        "name": "Phuc Do",
+        "initials": "PD",
+        "color": "bg-indigo-500/80"
+      },
+      "date": "2026-03-25"
+    },
+    {
+      "id": "ISS-1162",
+      "trainId": "T14",
+      "carriageId": "C01",
+      "system": "HVAC",
+      "title": "Compressor Cycle Instability",
+      "description": "Compressor Cycle Instability observed on T14/C01 (HVAC). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": {
+        "name": "Gia Nguyen",
+        "initials": "GN",
+        "color": "bg-emerald-500/80"
+      },
+      "date": "2026-03-10"
+    },
+    {
+      "id": "ISS-1163",
+      "trainId": "T14",
+      "carriageId": "C01",
+      "system": "Brakes",
+      "title": "Regenerative Brake Mismatch",
+      "description": "Regenerative Brake Mismatch observed on T14/C01 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "low",
+      "status": "in-progress",
+      "assignee": null,
+      "date": "2026-03-29"
+    },
+    {
+      "id": "ISS-1164",
+      "trainId": "T14",
+      "carriageId": "C01",
+      "system": "Network",
+      "title": "Telemetry Packet Loss Spike",
+      "description": "Telemetry Packet Loss Spike observed on T14/C01 (Network). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "low",
+      "status": "in-progress",
+      "assignee": {
+        "name": "Alex Chen",
+        "initials": "AC",
+        "color": "bg-lime-500/80"
+      },
+      "date": "2026-03-27"
+    },
+    {
+      "id": "ISS-1165",
+      "trainId": "T14",
+      "carriageId": "C01",
+      "system": "Doors",
+      "title": "Door Actuator Response Delay",
+      "description": "Door Actuator Response Delay observed on T14/C01 (Doors). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "medium",
+      "status": "in-progress",
+      "assignee": {
+        "name": "Raj Kumar",
+        "initials": "RK",
+        "color": "bg-amber-500/80"
+      },
+      "date": "2026-02-16"
+    },
+    {
+      "id": "ISS-1166",
+      "trainId": "T14",
+      "carriageId": "C02",
+      "system": "Network",
+      "title": "Train Control Link Interruption",
+      "description": "Train Control Link Interruption observed on T14/C02 (Network). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": {
+        "name": "Nhi Dang",
+        "initials": "ND",
+        "color": "bg-teal-500/80"
+      },
+      "date": "2026-03-25"
+    },
+    {
+      "id": "ISS-1167",
+      "trainId": "T14",
+      "carriageId": "C03",
+      "system": "HVAC",
+      "title": "Cabin Temperature Oscillation",
+      "description": "Cabin Temperature Oscillation observed on T14/C03 (HVAC). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "low",
+      "status": "in-progress",
+      "assignee": null,
+      "date": "2026-02-10"
+    },
+    {
+      "id": "ISS-1168",
+      "trainId": "T14",
+      "carriageId": "C04",
+      "system": "Network",
+      "title": "Telemetry Packet Loss Spike",
+      "description": "Telemetry Packet Loss Spike observed on T14/C04 (Network). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": {
+        "name": "Alex Chen",
+        "initials": "AC",
+        "color": "bg-lime-500/80"
+      },
+      "date": "2026-02-02"
+    },
+    {
+      "id": "ISS-1169",
+      "trainId": "T14",
+      "carriageId": "C05",
+      "system": "Brakes",
+      "title": "Regenerative Brake Mismatch",
+      "description": "Regenerative Brake Mismatch observed on T14/C05 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": null,
+      "date": "2026-03-02"
+    },
+    {
+      "id": "ISS-1170",
+      "trainId": "T14",
+      "carriageId": "C05",
+      "system": "Doors",
+      "title": "Emergency Release Calibration Error",
+      "description": "Emergency Release Calibration Error observed on T14/C05 (Doors). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Resolution note: issue was mitigated and post-fix telemetry returned to nominal range.",
+      "priority": "medium",
+      "status": "closed",
+      "assignee": null,
+      "date": "2026-02-21"
+    },
+    {
+      "id": "ISS-1171",
+      "trainId": "T14",
+      "carriageId": "C06",
+      "system": "Power",
+      "title": "Battery Module Degradation",
+      "description": "Battery Module Degradation observed on T14/C06 (Power). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "high",
+      "status": "open",
+      "assignee": {
+        "name": "Linh Tran",
+        "initials": "LT",
+        "color": "bg-cyan-500/80"
+      },
+      "date": "2026-03-09"
+    },
+    {
+      "id": "ISS-1172",
+      "trainId": "T14",
+      "carriageId": "C06",
+      "system": "Brakes",
+      "title": "Disc Wear Threshold Exceeded",
+      "description": "Disc Wear Threshold Exceeded observed on T14/C06 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": {
+        "name": "Sofia Martinez",
+        "initials": "SM",
+        "color": "bg-rose-500/80"
+      },
+      "date": "2026-03-04"
+    },
+    {
+      "id": "ISS-1173",
+      "trainId": "T14",
+      "carriageId": "C06",
+      "system": "HVAC",
+      "title": "Airflow Distribution Imbalance",
+      "description": "Airflow Distribution Imbalance observed on T14/C06 (HVAC). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "high",
+      "status": "open",
+      "assignee": {
+        "name": "Nhi Dang",
+        "initials": "ND",
+        "color": "bg-teal-500/80"
+      },
+      "date": "2026-03-01"
+    },
+    {
+      "id": "ISS-1174",
+      "trainId": "T15",
+      "carriageId": "C01",
+      "system": "Network",
+      "title": "Train Control Link Interruption",
+      "description": "Train Control Link Interruption observed on T15/C01 (Network). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Resolution note: issue was mitigated and post-fix telemetry returned to nominal range.",
+      "priority": "medium",
+      "status": "closed",
+      "assignee": {
+        "name": "Linh Tran",
+        "initials": "LT",
+        "color": "bg-cyan-500/80"
+      },
+      "date": "2026-02-21"
+    },
+    {
+      "id": "ISS-1175",
+      "trainId": "T15",
+      "carriageId": "C01",
+      "system": "Network",
+      "title": "Onboard Gateway Timeout",
+      "description": "Onboard Gateway Timeout observed on T15/C01 (Network). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": null,
+      "date": "2026-03-23"
+    },
+    {
+      "id": "ISS-1176",
+      "trainId": "T15",
+      "carriageId": "C01",
+      "system": "Brakes",
+      "title": "Regenerative Brake Mismatch",
+      "description": "Regenerative Brake Mismatch observed on T15/C01 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": {
+        "name": "Sofia Martinez",
+        "initials": "SM",
+        "color": "bg-rose-500/80"
+      },
+      "date": "2026-03-24"
+    },
+    {
+      "id": "ISS-1177",
+      "trainId": "T15",
+      "carriageId": "C01",
+      "system": "Brakes",
+      "title": "Regenerative Brake Mismatch",
+      "description": "Regenerative Brake Mismatch observed on T15/C01 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "high",
+      "status": "in-progress",
+      "assignee": {
+        "name": "Bao Vu",
+        "initials": "BV",
+        "color": "bg-orange-500/80"
+      },
+      "date": "2026-02-21"
+    },
+    {
+      "id": "ISS-1178",
+      "trainId": "T15",
+      "carriageId": "C03",
+      "system": "Doors",
+      "title": "Door Actuator Response Delay",
+      "description": "Door Actuator Response Delay observed on T15/C03 (Doors). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": {
+        "name": "Bao Vu",
+        "initials": "BV",
+        "color": "bg-orange-500/80"
+      },
+      "date": "2026-03-02"
+    },
+    {
+      "id": "ISS-1179",
+      "trainId": "T15",
+      "carriageId": "C05",
+      "system": "Network",
+      "title": "Telemetry Packet Loss Spike",
+      "description": "Telemetry Packet Loss Spike observed on T15/C05 (Network). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "medium",
+      "status": "in-progress",
+      "assignee": {
+        "name": "Gia Nguyen",
+        "initials": "GN",
+        "color": "bg-emerald-500/80"
+      },
+      "date": "2026-02-01"
+    },
+    {
+      "id": "ISS-1180",
+      "trainId": "T15",
+      "carriageId": "C05",
+      "system": "HVAC",
+      "title": "Cabin Temperature Oscillation",
+      "description": "Cabin Temperature Oscillation observed on T15/C05 (HVAC). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": {
+        "name": "Raj Kumar",
+        "initials": "RK",
+        "color": "bg-amber-500/80"
+      },
+      "date": "2026-02-12"
+    },
+    {
+      "id": "ISS-1181",
+      "trainId": "T16",
+      "carriageId": "C02",
+      "system": "Brakes",
+      "title": "Regenerative Brake Mismatch",
+      "description": "Regenerative Brake Mismatch observed on T16/C02 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "low",
+      "status": "open",
+      "assignee": {
+        "name": "Linh Tran",
+        "initials": "LT",
+        "color": "bg-cyan-500/80"
+      },
+      "date": "2026-03-13"
+    },
+    {
+      "id": "ISS-1182",
+      "trainId": "T16",
+      "carriageId": "C02",
+      "system": "Brakes",
+      "title": "Regenerative Brake Mismatch",
+      "description": "Regenerative Brake Mismatch observed on T16/C02 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "high",
+      "status": "open",
+      "assignee": {
+        "name": "Nhi Dang",
+        "initials": "ND",
+        "color": "bg-teal-500/80"
+      },
+      "date": "2026-03-01"
+    },
+    {
+      "id": "ISS-1183",
+      "trainId": "T16",
+      "carriageId": "C03",
+      "system": "Power",
+      "title": "Inverter Thermal Drift",
+      "description": "Inverter Thermal Drift observed on T16/C03 (Power). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "low",
+      "status": "open",
+      "assignee": {
+        "name": "Minh Le",
+        "initials": "ML",
+        "color": "bg-fuchsia-500/80"
+      },
+      "date": "2026-02-04"
+    },
+    {
+      "id": "ISS-1184",
+      "trainId": "T16",
+      "carriageId": "C04",
+      "system": "HVAC",
+      "title": "Airflow Distribution Imbalance",
+      "description": "Airflow Distribution Imbalance observed on T16/C04 (HVAC). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "high",
+      "status": "in-progress",
+      "assignee": {
+        "name": "Bao Vu",
+        "initials": "BV",
+        "color": "bg-orange-500/80"
+      },
+      "date": "2026-03-16"
+    },
+    {
+      "id": "ISS-1185",
+      "trainId": "T16",
+      "carriageId": "C04",
+      "system": "Network",
+      "title": "Onboard Gateway Timeout",
+      "description": "Onboard Gateway Timeout observed on T16/C04 (Network). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "low",
+      "status": "open",
+      "assignee": {
+        "name": "Emma Wilson",
+        "initials": "EW",
+        "color": "bg-purple-500/80"
+      },
+      "date": "2026-03-22"
+    },
+    {
+      "id": "ISS-1186",
+      "trainId": "T16",
+      "carriageId": "C04",
+      "system": "Power",
+      "title": "Auxiliary Power Voltage Sag",
+      "description": "Auxiliary Power Voltage Sag observed on T16/C04 (Power). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": {
+        "name": "Bao Vu",
+        "initials": "BV",
+        "color": "bg-orange-500/80"
+      },
+      "date": "2026-03-27"
+    },
+    {
+      "id": "ISS-1187",
+      "trainId": "T16",
+      "carriageId": "C05",
+      "system": "Doors",
+      "title": "Door Lock Sensor Mismatch",
+      "description": "Door Lock Sensor Mismatch observed on T16/C05 (Doors). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Resolution note: issue was mitigated and post-fix telemetry returned to nominal range.",
+      "priority": "high",
+      "status": "closed",
+      "assignee": {
+        "name": "Phuc Do",
+        "initials": "PD",
+        "color": "bg-indigo-500/80"
+      },
+      "date": "2026-03-03"
+    },
+    {
+      "id": "ISS-1188",
+      "trainId": "T16",
+      "carriageId": "C05",
+      "system": "Brakes",
+      "title": "Disc Wear Threshold Exceeded",
+      "description": "Disc Wear Threshold Exceeded observed on T16/C05 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "low",
+      "status": "open",
+      "assignee": null,
+      "date": "2026-02-20"
+    },
+    {
+      "id": "ISS-1189",
+      "trainId": "T16",
+      "carriageId": "C07",
+      "system": "Power",
+      "title": "Inverter Thermal Drift",
+      "description": "Inverter Thermal Drift observed on T16/C07 (Power). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": {
+        "name": "Emma Wilson",
+        "initials": "EW",
+        "color": "bg-purple-500/80"
+      },
+      "date": "2026-02-17"
+    },
+    {
+      "id": "ISS-1190",
+      "trainId": "T16",
+      "carriageId": "C07",
+      "system": "Brakes",
+      "title": "Brake Pressure Drift Detected",
+      "description": "Brake Pressure Drift Detected observed on T16/C07 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Resolution note: issue was mitigated and post-fix telemetry returned to nominal range.",
+      "priority": "medium",
+      "status": "closed",
+      "assignee": {
+        "name": "Minh Le",
+        "initials": "ML",
+        "color": "bg-fuchsia-500/80"
+      },
+      "date": "2026-03-18"
+    },
+    {
+      "id": "ISS-1191",
+      "trainId": "T16",
+      "carriageId": "C07",
+      "system": "Brakes",
+      "title": "Brake Pressure Drift Detected",
+      "description": "Brake Pressure Drift Detected observed on T16/C07 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "high",
+      "status": "open",
+      "assignee": null,
+      "date": "2026-02-07"
+    },
+    {
+      "id": "ISS-1192",
+      "trainId": "T16",
+      "carriageId": "C07",
+      "system": "Brakes",
+      "title": "Regenerative Brake Mismatch",
+      "description": "Regenerative Brake Mismatch observed on T16/C07 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Resolution note: issue was mitigated and post-fix telemetry returned to nominal range.",
+      "priority": "high",
+      "status": "closed",
+      "assignee": {
+        "name": "Alex Chen",
+        "initials": "AC",
+        "color": "bg-lime-500/80"
+      },
+      "date": "2026-03-18"
+    },
+    {
+      "id": "ISS-1193",
+      "trainId": "T17",
+      "carriageId": "C01",
+      "system": "Network",
+      "title": "Train Control Link Interruption",
+      "description": "Train Control Link Interruption observed on T17/C01 (Network). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "high",
+      "status": "open",
+      "assignee": {
+        "name": "Bao Vu",
+        "initials": "BV",
+        "color": "bg-orange-500/80"
+      },
+      "date": "2026-03-08"
+    },
+    {
+      "id": "ISS-1194",
+      "trainId": "T17",
+      "carriageId": "C01",
+      "system": "Doors",
+      "title": "Door Actuator Response Delay",
+      "description": "Door Actuator Response Delay observed on T17/C01 (Doors). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": {
+        "name": "Alex Chen",
+        "initials": "AC",
+        "color": "bg-lime-500/80"
+      },
+      "date": "2026-02-22"
+    },
+    {
+      "id": "ISS-1195",
+      "trainId": "T17",
+      "carriageId": "C01",
+      "system": "Network",
+      "title": "Onboard Gateway Timeout",
+      "description": "Onboard Gateway Timeout observed on T17/C01 (Network). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "high",
+      "status": "open",
+      "assignee": {
+        "name": "Emma Wilson",
+        "initials": "EW",
+        "color": "bg-purple-500/80"
+      },
+      "date": "2026-02-14"
+    },
+    {
+      "id": "ISS-1196",
+      "trainId": "T17",
+      "carriageId": "C02",
+      "system": "HVAC",
+      "title": "Cabin Temperature Oscillation",
+      "description": "Cabin Temperature Oscillation observed on T17/C02 (HVAC). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "medium",
+      "status": "in-progress",
+      "assignee": null,
+      "date": "2026-03-25"
+    },
+    {
+      "id": "ISS-1197",
+      "trainId": "T17",
+      "carriageId": "C02",
+      "system": "HVAC",
+      "title": "Airflow Distribution Imbalance",
+      "description": "Airflow Distribution Imbalance observed on T17/C02 (HVAC). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "low",
+      "status": "open",
+      "assignee": null,
+      "date": "2026-03-10"
+    },
+    {
+      "id": "ISS-1198",
+      "trainId": "T17",
+      "carriageId": "C02",
+      "system": "Brakes",
+      "title": "Brake Pressure Drift Detected",
+      "description": "Brake Pressure Drift Detected observed on T17/C02 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "medium",
+      "status": "in-progress",
+      "assignee": {
+        "name": "Linh Tran",
+        "initials": "LT",
+        "color": "bg-cyan-500/80"
+      },
+      "date": "2026-02-25"
+    },
+    {
+      "id": "ISS-1199",
+      "trainId": "T17",
+      "carriageId": "C03",
+      "system": "Doors",
+      "title": "Door Lock Sensor Mismatch",
+      "description": "Door Lock Sensor Mismatch observed on T17/C03 (Doors). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": {
+        "name": "Gia Nguyen",
+        "initials": "GN",
+        "color": "bg-emerald-500/80"
+      },
+      "date": "2026-02-04"
+    },
+    {
+      "id": "ISS-1200",
+      "trainId": "T17",
+      "carriageId": "C03",
+      "system": "Network",
+      "title": "Telemetry Packet Loss Spike",
+      "description": "Telemetry Packet Loss Spike observed on T17/C03 (Network). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "low",
+      "status": "open",
+      "assignee": {
+        "name": "Bao Vu",
+        "initials": "BV",
+        "color": "bg-orange-500/80"
+      },
+      "date": "2026-03-19"
+    },
+    {
+      "id": "ISS-1201",
+      "trainId": "T17",
+      "carriageId": "C03",
+      "system": "HVAC",
+      "title": "Compressor Cycle Instability",
+      "description": "Compressor Cycle Instability observed on T17/C03 (HVAC). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Resolution note: issue was mitigated and post-fix telemetry returned to nominal range.",
+      "priority": "high",
+      "status": "closed",
+      "assignee": {
+        "name": "Raj Kumar",
+        "initials": "RK",
+        "color": "bg-amber-500/80"
+      },
+      "date": "2026-03-06"
+    },
+    {
+      "id": "ISS-1202",
+      "trainId": "T17",
+      "carriageId": "C03",
+      "system": "Network",
+      "title": "Telemetry Packet Loss Spike",
+      "description": "Telemetry Packet Loss Spike observed on T17/C03 (Network). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "medium",
+      "status": "in-progress",
+      "assignee": {
+        "name": "Minh Le",
+        "initials": "ML",
+        "color": "bg-fuchsia-500/80"
+      },
+      "date": "2026-03-15"
+    },
+    {
+      "id": "ISS-1203",
+      "trainId": "T17",
+      "carriageId": "C04",
+      "system": "Doors",
+      "title": "Door Actuator Response Delay",
+      "description": "Door Actuator Response Delay observed on T17/C04 (Doors). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "low",
+      "status": "open",
+      "assignee": {
+        "name": "Emma Wilson",
+        "initials": "EW",
+        "color": "bg-purple-500/80"
+      },
+      "date": "2026-03-08"
+    },
+    {
+      "id": "ISS-1204",
+      "trainId": "T17",
+      "carriageId": "C05",
+      "system": "HVAC",
+      "title": "Compressor Cycle Instability",
+      "description": "Compressor Cycle Instability observed on T17/C05 (HVAC). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "medium",
+      "status": "in-progress",
+      "assignee": {
+        "name": "Alex Chen",
+        "initials": "AC",
+        "color": "bg-lime-500/80"
+      },
+      "date": "2026-02-01"
+    },
+    {
+      "id": "ISS-1205",
+      "trainId": "T18",
+      "carriageId": "C01",
+      "system": "Doors",
+      "title": "Door Actuator Response Delay",
+      "description": "Door Actuator Response Delay observed on T18/C01 (Doors). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Resolution note: issue was mitigated and post-fix telemetry returned to nominal range.",
+      "priority": "high",
+      "status": "closed",
+      "assignee": {
+        "name": "Raj Kumar",
+        "initials": "RK",
+        "color": "bg-amber-500/80"
+      },
+      "date": "2026-03-06"
+    },
+    {
+      "id": "ISS-1206",
+      "trainId": "T18",
+      "carriageId": "C01",
+      "system": "Brakes",
+      "title": "Disc Wear Threshold Exceeded",
+      "description": "Disc Wear Threshold Exceeded observed on T18/C01 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "low",
+      "status": "open",
+      "assignee": {
+        "name": "Raj Kumar",
+        "initials": "RK",
+        "color": "bg-amber-500/80"
+      },
+      "date": "2026-03-03"
+    },
+    {
+      "id": "ISS-1207",
+      "trainId": "T18",
+      "carriageId": "C01",
+      "system": "Network",
+      "title": "Onboard Gateway Timeout",
+      "description": "Onboard Gateway Timeout observed on T18/C01 (Network). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "medium",
+      "status": "in-progress",
+      "assignee": null,
+      "date": "2026-03-06"
+    },
+    {
+      "id": "ISS-1208",
+      "trainId": "T18",
+      "carriageId": "C02",
+      "system": "Power",
+      "title": "Auxiliary Power Voltage Sag",
+      "description": "Auxiliary Power Voltage Sag observed on T18/C02 (Power). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Resolution note: issue was mitigated and post-fix telemetry returned to nominal range.",
+      "priority": "high",
+      "status": "closed",
+      "assignee": {
+        "name": "Sofia Martinez",
+        "initials": "SM",
+        "color": "bg-rose-500/80"
+      },
+      "date": "2026-03-03"
+    },
+    {
+      "id": "ISS-1209",
+      "trainId": "T18",
+      "carriageId": "C04",
+      "system": "Brakes",
+      "title": "Disc Wear Threshold Exceeded",
+      "description": "Disc Wear Threshold Exceeded observed on T18/C04 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "low",
+      "status": "in-progress",
+      "assignee": {
+        "name": "Bao Vu",
+        "initials": "BV",
+        "color": "bg-orange-500/80"
+      },
+      "date": "2026-03-29"
+    },
+    {
+      "id": "ISS-1210",
+      "trainId": "T18",
+      "carriageId": "C06",
+      "system": "Doors",
+      "title": "Emergency Release Calibration Error",
+      "description": "Emergency Release Calibration Error observed on T18/C06 (Doors). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": {
+        "name": "Sofia Martinez",
+        "initials": "SM",
+        "color": "bg-rose-500/80"
+      },
+      "date": "2026-03-12"
+    },
+    {
+      "id": "ISS-1211",
+      "trainId": "T18",
+      "carriageId": "C06",
+      "system": "Brakes",
+      "title": "Brake Pressure Drift Detected",
+      "description": "Brake Pressure Drift Detected observed on T18/C06 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": {
+        "name": "Minh Le",
+        "initials": "ML",
+        "color": "bg-fuchsia-500/80"
+      },
+      "date": "2026-03-07"
+    },
+    {
+      "id": "ISS-1212",
+      "trainId": "T19",
+      "carriageId": "C03",
+      "system": "HVAC",
+      "title": "Compressor Cycle Instability",
+      "description": "Compressor Cycle Instability observed on T19/C03 (HVAC). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": null,
+      "date": "2026-03-26"
+    },
+    {
+      "id": "ISS-1213",
+      "trainId": "T19",
+      "carriageId": "C03",
+      "system": "Doors",
+      "title": "Emergency Release Calibration Error",
+      "description": "Emergency Release Calibration Error observed on T19/C03 (Doors). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": {
+        "name": "Linh Tran",
+        "initials": "LT",
+        "color": "bg-cyan-500/80"
+      },
+      "date": "2026-02-03"
+    },
+    {
+      "id": "ISS-1214",
+      "trainId": "T19",
+      "carriageId": "C03",
+      "system": "Power",
+      "title": "Inverter Thermal Drift",
+      "description": "Inverter Thermal Drift observed on T19/C03 (Power). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "medium",
+      "status": "in-progress",
+      "assignee": {
+        "name": "Linh Tran",
+        "initials": "LT",
+        "color": "bg-cyan-500/80"
+      },
+      "date": "2026-02-25"
+    },
+    {
+      "id": "ISS-1215",
+      "trainId": "T19",
+      "carriageId": "C03",
+      "system": "Doors",
+      "title": "Door Actuator Response Delay",
+      "description": "Door Actuator Response Delay observed on T19/C03 (Doors). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": null,
+      "date": "2026-03-22"
+    },
+    {
+      "id": "ISS-1216",
+      "trainId": "T19",
+      "carriageId": "C04",
+      "system": "HVAC",
+      "title": "Cabin Temperature Oscillation",
+      "description": "Cabin Temperature Oscillation observed on T19/C04 (HVAC). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "low",
+      "status": "in-progress",
+      "assignee": {
+        "name": "Phuc Do",
+        "initials": "PD",
+        "color": "bg-indigo-500/80"
+      },
+      "date": "2026-03-08"
+    },
+    {
+      "id": "ISS-1217",
+      "trainId": "T19",
+      "carriageId": "C04",
+      "system": "Network",
+      "title": "Train Control Link Interruption",
+      "description": "Train Control Link Interruption observed on T19/C04 (Network). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Resolution note: issue was mitigated and post-fix telemetry returned to nominal range.",
+      "priority": "high",
+      "status": "closed",
+      "assignee": {
+        "name": "Raj Kumar",
+        "initials": "RK",
+        "color": "bg-amber-500/80"
+      },
+      "date": "2026-03-03"
+    },
+    {
+      "id": "ISS-1218",
+      "trainId": "T19",
+      "carriageId": "C04",
+      "system": "Doors",
+      "title": "Door Actuator Response Delay",
+      "description": "Door Actuator Response Delay observed on T19/C04 (Doors). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "low",
+      "status": "in-progress",
+      "assignee": {
+        "name": "Alex Chen",
+        "initials": "AC",
+        "color": "bg-lime-500/80"
+      },
+      "date": "2026-02-07"
+    },
+    {
+      "id": "ISS-1219",
+      "trainId": "T19",
+      "carriageId": "C05",
+      "system": "Network",
+      "title": "Train Control Link Interruption",
+      "description": "Train Control Link Interruption observed on T19/C05 (Network). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "high",
+      "status": "open",
+      "assignee": {
+        "name": "Sofia Martinez",
+        "initials": "SM",
+        "color": "bg-rose-500/80"
+      },
+      "date": "2026-03-17"
+    },
+    {
+      "id": "ISS-1220",
+      "trainId": "T19",
+      "carriageId": "C05",
+      "system": "Power",
+      "title": "Battery Module Degradation",
+      "description": "Battery Module Degradation observed on T19/C05 (Power). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "low",
+      "status": "open",
+      "assignee": null,
+      "date": "2026-02-05"
+    },
+    {
+      "id": "ISS-1221",
+      "trainId": "T19",
+      "carriageId": "C07",
+      "system": "Doors",
+      "title": "Door Lock Sensor Mismatch",
+      "description": "Door Lock Sensor Mismatch observed on T19/C07 (Doors). Telemetry indicates sustained deviation across multiple sampling windows. No immediate safety impact observed, but the anomaly should be tracked for recurrence. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "low",
+      "status": "in-progress",
+      "assignee": {
+        "name": "Alex Chen",
+        "initials": "AC",
+        "color": "bg-lime-500/80"
+      },
+      "date": "2026-02-02"
+    },
+    {
+      "id": "ISS-1222",
+      "trainId": "T19",
+      "carriageId": "C07",
+      "system": "Network",
+      "title": "Telemetry Packet Loss Spike",
+      "description": "Telemetry Packet Loss Spike observed on T19/C07 (Network). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "high",
+      "status": "in-progress",
+      "assignee": {
+        "name": "Alex Chen",
+        "initials": "AC",
+        "color": "bg-lime-500/80"
+      },
+      "date": "2026-03-04"
+    },
+    {
+      "id": "ISS-1223",
+      "trainId": "T20",
+      "carriageId": "C01",
+      "system": "Brakes",
+      "title": "Regenerative Brake Mismatch",
+      "description": "Regenerative Brake Mismatch observed on T20/C01 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": {
+        "name": "Linh Tran",
+        "initials": "LT",
+        "color": "bg-cyan-500/80"
+      },
+      "date": "2026-02-13"
+    },
+    {
+      "id": "ISS-1224",
+      "trainId": "T20",
+      "carriageId": "C03",
+      "system": "Brakes",
+      "title": "Disc Wear Threshold Exceeded",
+      "description": "Disc Wear Threshold Exceeded observed on T20/C03 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "high",
+      "status": "open",
+      "assignee": {
+        "name": "Raj Kumar",
+        "initials": "RK",
+        "color": "bg-amber-500/80"
+      },
+      "date": "2026-02-12"
+    },
+    {
+      "id": "ISS-1225",
+      "trainId": "T20",
+      "carriageId": "C03",
+      "system": "Doors",
+      "title": "Emergency Release Calibration Error",
+      "description": "Emergency Release Calibration Error observed on T20/C03 (Doors). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": {
+        "name": "Gia Nguyen",
+        "initials": "GN",
+        "color": "bg-emerald-500/80"
+      },
+      "date": "2026-02-02"
+    },
+    {
+      "id": "ISS-1226",
+      "trainId": "T20",
+      "carriageId": "C04",
+      "system": "Power",
+      "title": "Inverter Thermal Drift",
+      "description": "Inverter Thermal Drift observed on T20/C04 (Power). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "high",
+      "status": "in-progress",
+      "assignee": null,
+      "date": "2026-02-25"
+    },
+    {
+      "id": "ISS-1227",
+      "trainId": "T20",
+      "carriageId": "C04",
+      "system": "Network",
+      "title": "Onboard Gateway Timeout",
+      "description": "Onboard Gateway Timeout observed on T20/C04 (Network). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": {
+        "name": "Raj Kumar",
+        "initials": "RK",
+        "color": "bg-amber-500/80"
+      },
+      "date": "2026-02-10"
+    },
+    {
+      "id": "ISS-1228",
+      "trainId": "T20",
+      "carriageId": "C04",
+      "system": "Power",
+      "title": "Auxiliary Power Voltage Sag",
+      "description": "Auxiliary Power Voltage Sag observed on T20/C04 (Power). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Resolution note: issue was mitigated and post-fix telemetry returned to nominal range.",
+      "priority": "high",
+      "status": "closed",
+      "assignee": {
+        "name": "Gia Nguyen",
+        "initials": "GN",
+        "color": "bg-emerald-500/80"
+      },
+      "date": "2026-03-28"
+    },
+    {
+      "id": "ISS-1229",
+      "trainId": "T20",
+      "carriageId": "C05",
+      "system": "HVAC",
+      "title": "Compressor Cycle Instability",
+      "description": "Compressor Cycle Instability observed on T20/C05 (HVAC). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": null,
+      "date": "2026-03-29"
+    },
+    {
+      "id": "ISS-1230",
+      "trainId": "T20",
+      "carriageId": "C05",
+      "system": "Network",
+      "title": "Train Control Link Interruption",
+      "description": "Train Control Link Interruption observed on T20/C05 (Network). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": {
+        "name": "Nhi Dang",
+        "initials": "ND",
+        "color": "bg-teal-500/80"
+      },
+      "date": "2026-03-22"
+    },
+    {
+      "id": "ISS-1231",
+      "trainId": "T20",
+      "carriageId": "C05",
+      "system": "Power",
+      "title": "Inverter Thermal Drift",
+      "description": "Inverter Thermal Drift observed on T20/C05 (Power). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": {
+        "name": "Gia Nguyen",
+        "initials": "GN",
+        "color": "bg-emerald-500/80"
+      },
+      "date": "2026-02-10"
+    },
+    {
+      "id": "ISS-1232",
+      "trainId": "T20",
+      "carriageId": "C06",
+      "system": "Network",
+      "title": "Train Control Link Interruption",
+      "description": "Train Control Link Interruption observed on T20/C06 (Network). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": {
+        "name": "Sofia Martinez",
+        "initials": "SM",
+        "color": "bg-rose-500/80"
+      },
+      "date": "2026-02-21"
+    },
+    {
+      "id": "ISS-1233",
+      "trainId": "T20",
+      "carriageId": "C06",
+      "system": "Network",
+      "title": "Telemetry Packet Loss Spike",
+      "description": "Telemetry Packet Loss Spike observed on T20/C06 (Network). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "high",
+      "status": "open",
+      "assignee": {
+        "name": "Alex Chen",
+        "initials": "AC",
+        "color": "bg-lime-500/80"
+      },
+      "date": "2026-02-04"
+    },
+    {
+      "id": "ISS-1234",
+      "trainId": "T20",
+      "carriageId": "C06",
+      "system": "Power",
+      "title": "Auxiliary Power Voltage Sag",
+      "description": "Auxiliary Power Voltage Sag observed on T20/C06 (Power). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "medium",
+      "status": "in-progress",
+      "assignee": {
+        "name": "Linh Tran",
+        "initials": "LT",
+        "color": "bg-cyan-500/80"
+      },
+      "date": "2026-03-21"
+    },
+    {
+      "id": "ISS-1235",
+      "trainId": "T20",
+      "carriageId": "C07",
+      "system": "Brakes",
+      "title": "Regenerative Brake Mismatch",
+      "description": "Regenerative Brake Mismatch observed on T20/C07 (Brakes). Telemetry indicates sustained deviation across multiple sampling windows. Risk of service interruption is elevated if not mitigated within the next cycle. Current action: maintenance team is running staged verification and component replacement.",
+      "priority": "high",
+      "status": "in-progress",
+      "assignee": {
+        "name": "Raj Kumar",
+        "initials": "RK",
+        "color": "bg-amber-500/80"
+      },
+      "date": "2026-02-18"
+    },
+    {
+      "id": "ISS-1236",
+      "trainId": "T20",
+      "carriageId": "C07",
+      "system": "Network",
+      "title": "Telemetry Packet Loss Spike",
+      "description": "Telemetry Packet Loss Spike observed on T20/C07 (Network). Telemetry indicates sustained deviation across multiple sampling windows. Operational stability is currently acceptable but trending outside baseline tolerance. Recommended action: dispatch on-site diagnostics and verify subsystem calibration.",
+      "priority": "medium",
+      "status": "open",
+      "assignee": null,
+      "date": "2026-02-21"
+    }
+  ],
+  "navLinks": [
+    {
+      "to": "/rail-dashboard",
+      "label": "Dashboard"
+    }
+  ]
+}

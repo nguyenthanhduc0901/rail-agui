@@ -1,6 +1,4 @@
-"use client";
-
-import { Fragment, useState } from 'react'
+import React, { useState } from 'react'
 import { trains, getCarriagesByTrain } from '../data/mockData'
 import { CarriageDetailsModal } from '../components/CarriageDetailsModal'
 
@@ -10,9 +8,6 @@ const statusConfig = {
   warning: { dot: 'bg-amber-400', text: 'text-amber-600', progress: 'bg-amber-500', label: 'Warning', bg: 'status-warning' },
   critical: { dot: 'bg-red-400', text: 'text-red-600', progress: 'bg-red-500', label: 'Critical', bg: 'status-critical' },
 }
-
-const RAIL_TIE_BACKGROUND =
-  'repeating-linear-gradient(90deg, #475569 0px, #475569 10px, transparent 10px, transparent 22px)'
 
 // --- COMPONENT BÁNH XE (Đã bo tròn & làm nhạt màu) ---
 const TrainBogie = ({ className }) => (
@@ -44,7 +39,7 @@ export function FleetDashboard() {
     <section className="space-y-12 pb-12">
       {/* FLEET HEADER */}
       <div className="flex justify-between items-end">
-        <h2 className="text-2xl font-bold text-slate-800">Live Train Fleet</h2>
+        <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Live Train Fleet</h2>
       </div>
 
       {/* DANH SÁCH CÁC ĐOÀN TÀU */}
@@ -54,22 +49,22 @@ export function FleetDashboard() {
           const carriages = getCarriagesByTrain(train.id)
 
           return (
-            <div key={train.id} className="relative bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+            <div key={train.id} className="relative rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-colors dark:border-slate-700 dark:bg-slate-900/80 dark:shadow-black/20">
               
               {/* Header của từng đoàn tàu */}
-              <div className="flex items-center justify-between mb-6 border-b border-slate-100 pb-4">
+              <div className="mb-6 flex items-center justify-between border-b border-slate-100 pb-4 dark:border-slate-800">
                 <div className="flex items-center gap-3">
                   <div className={`w-3 h-3 rounded-full ${config.dot} animate-pulse`} />
-                  <h3 className="text-xl font-bold text-slate-800">{train.name} <span className="text-sm font-normal text-slate-500 ml-2">(ID: {train.id})</span></h3>
+                  <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">{train.name} <span className="ml-2 text-sm font-normal text-slate-500 dark:text-slate-400">(ID: {train.id})</span></h3>
                 </div>
                 
                 <div className="flex items-center gap-6">
                   <div className="text-right">
-                    <p className="text-xs text-slate-500 uppercase font-bold tracking-wider">Efficiency</p>
-                    <p className="font-bold text-slate-800">{train.efficiency}%</p>
+                    <p className="text-xs text-slate-500 uppercase font-bold tracking-wider dark:text-slate-400">Efficiency</p>
+                    <p className="font-bold text-slate-800 dark:text-slate-100">{train.efficiency}%</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-xs text-slate-500 uppercase font-bold tracking-wider">Issues</p>
+                    <p className="text-xs text-slate-500 uppercase font-bold tracking-wider dark:text-slate-400">Issues</p>
                     <p className={`font-bold ${config.text}`}>{train.openIssues}</p>
                   </div>
 
@@ -79,7 +74,7 @@ export function FleetDashboard() {
               {/* Khu vực vẽ đoàn tàu */}
               <div className="relative pt-4">
                 {/* Scroll Wrapper */}
-                <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-slate-300">
+                <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-700">
                   <div className="flex items-end gap-0 relative w-max min-w-full px-4 pb-[20px] pt-2">
                     
                     {/* ĐƯỜNG RAY THỰC TẾ */}
@@ -87,7 +82,9 @@ export function FleetDashboard() {
                       <div className="w-full h-[4px] bg-slate-400 border-b border-slate-500 shadow-sm" />
                       <div 
                         className="w-full h-[6px] mt-[1px]"
-                        style={{ backgroundImage: RAIL_TIE_BACKGROUND }}
+                        style={{
+                          backgroundImage: 'repeating-linear-gradient(90deg, #475569 0px, #475569 10px, transparent 10px, transparent 22px)'
+                        }}
                       />
                       <div className="w-full h-[4px] bg-slate-200/80 rounded-full mt-[1px]" />
                     </div>
@@ -140,7 +137,7 @@ export function FleetDashboard() {
                       const shapeClasses = isLast ? "rounded-r-[3rem] rounded-l-lg" : "rounded-lg"
 
                       return (
-                        <Fragment key={carriage.id}>
+                        <React.Fragment key={carriage.id}>
                           {/* Khớp nối */}
                           <div className="w-4 h-3 bg-slate-600 mb-6 flex-shrink-0 border-y border-slate-500 shadow-sm z-0" />
 
@@ -184,7 +181,7 @@ export function FleetDashboard() {
                             <TrainBogie className="left-[15%]" />
                             <TrainBogie className="right-[15%]" />
                           </div>
-                        </Fragment>
+                        </React.Fragment>
                       )
                     })}
                   </div>

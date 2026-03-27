@@ -9,9 +9,7 @@ from copilotkit import CopilotKitMiddleware
 from langchain.agents import create_agent
 from langchain_google_genai import ChatGoogleGenerativeAI
 
-from src.query import query_data
-from src.todos import AgentState, todo_tools
-from src.form import generate_form
+from src.rail_data import rail_tools
 
 gemini_api_key = os.getenv("GEMINI_API_KEY")
 if not gemini_api_key:
@@ -24,16 +22,14 @@ model = ChatGoogleGenerativeAI(
 
 agent = create_agent(
     model=model,
-    tools=[query_data, *todo_tools, generate_form],
+    tools=[*rail_tools],
     middleware=[CopilotKitMiddleware()],
-    state_schema=AgentState,
     system_prompt="""
-        You are a polished, professional demo assistant using CopilotKit and LangGraph. Only mention either when necessary.
-
-        Keep responses brief and polished — 1 to 2 sentences max. No verbose explanations.
-
-        When demonstrating charts, always call the query_data tool to fetch data first.
-        When asked to manage todos, enable app mode first, then manage todos.
+        You are a rail operations assistant for a dashboard demo built with CopilotKit and LangGraph.
+        Keep responses concise, practical, and focused on train, carriage, issue triage, and operations status.
+        Use available rail tools to fetch data before answering factual questions.
+        If the user asks to switch dark/light theme, call the frontend tool toggleTheme.
+        If information is not available in context, clearly say so and ask for the missing detail.
     """,
 )
 
