@@ -1,31 +1,33 @@
 "use client";
 
 import { useConfigureSuggestions } from "@copilotkit/react-core/v2";
+import { useRailDashboardAI } from "@/features/rail-dashboard/context/rail-dashboard-ai-context";
 
 export const useRailChatSuggestions = () => {
+  const { filters } = useRailDashboardAI();
+
+  const focusDescription = [
+    `Focused train filter: ${filters.trainId}`,
+    `System filter: ${filters.system}`,
+    `Priority filter: ${filters.priority}`,
+    `Status filter: ${filters.status}`,
+  ].join("; ");
+
   useConfigureSuggestions({
-    suggestions: [
-      {
-        title: "Tổng quan đội tàu",
-        message:
-          "Cho tôi tổng quan toàn bộ đội tàu: số tàu critical/warning/healthy và 5 tàu cần ưu tiên xử lý ngay.",
-      },
-      {
-        title: "Khoanh vùng sự cố theo tàu",
-        message:
-          "Phân tích tàu T01: toa nào có nhiều lỗi nhất, lỗi nào đang open và đề xuất thứ tự xử lý.",
-      },
-      {
-        title: "Lọc sự cố theo hệ thống",
-        message:
-          "Lọc các sự cố hệ thống braking có mức độ high và status open, sau đó tóm tắt theo trainId.",
-      },
-      {
-        title: "Kế hoạch bảo trì ngắn",
-        message:
-          "Lập kế hoạch xử lý trong 24h cho 10 sự cố nghiêm trọng nhất, gồm train, carriage, lý do ưu tiên và hành động đề xuất.",
-      },
-    ],
+    instructions: `
+      You are generating proactive suggestion chips for a rail operations copilot.
+      Current dashboard context: ${focusDescription}.
+
+      Rules:
+      - Suggest concise, actionable prompts in Vietnamese.
+      - Keep suggestions focused on the current filter state.
+      - If train filter is not 'all', include at least one suggestion about that train.
+      - Include one suggestion about maintenance plan generation.
+      - Include one suggestion about creating AI dashboard widgets.
+      - Do not output generic help prompts.
+    `,
+    minSuggestions: 3,
+    maxSuggestions: 4,
     available: "always",
-  });
+  }, [filters.trainId, filters.system, filters.priority, filters.status]);
 };

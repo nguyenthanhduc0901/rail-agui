@@ -1,17 +1,16 @@
 "use client";
 
-import { useCopilotReadable } from "@copilotkit/react-core";
+import { useAgentContext } from "@copilotkit/react-core/v2";
 
 import {
-  carriagesByTrain,
   issues,
   trains,
 } from "@/features/rail-dashboard/data/railDataSource";
 
 export const useRailDashboardContext = () => {
-  useCopilotReadable({
+  useAgentContext({
     description:
-      "FLEET_TRAINS: Danh sach tau va chi so tong quan (status, openIssues, efficiency).",
+      "FLEET_TRAINS: Danh sách tàu và chỉ số tổng quan (status, openIssues, efficiency).",
     value: trains.map((train) => ({
       id: train.id,
       name: train.name,
@@ -22,32 +21,22 @@ export const useRailDashboardContext = () => {
     })),
   });
 
-  useCopilotReadable({
+  // Chỉ gửi tóm tắt sự cố theo từng tàu (không gửi toàn bộ 550 issues)
+  useAgentContext({
     description:
-      "ACTIVE_ISSUES: Danh sach su co bao tri. priority: high|medium|low, status: open|in-progress|closed.",
-    value: issues.map((issue) => ({
-      id: issue.id,
-      trainId: issue.trainId,
-      carriageId: issue.carriageId,
-      system: issue.system,
-      title: issue.description,
-      priority: issue.priority,
-      status: issue.status,
-      date: issue.date,
-    })),
-  });
-
-  useCopilotReadable({
-    description:
-      "CARRIAGES: Danh sach toa theo tung tau, gom type, status va so issue.",
-    value: Object.entries(carriagesByTrain).flatMap(([trainId, carriages]) =>
-      carriages.map((carriage) => ({
-        trainId,
-        id: carriage.id,
-        type: carriage.type,
-        status: carriage.status,
-        issues: carriage.issues,
-      })),
-    ),
+      "ISSUE_SUMMARY: Tóm tắt số sự cố theo tàu và priority. Dùng để trả lời nhanh câu hỏi tổng quan. Gọi tool search_issues hoặc get_train_details khi cần danh sách chi tiết.",
+    value: trains.map((train) => {
+      const trainIssues = issues.filter((i) => i.trainId === train.id);
+      return {
+        trainId: train.id,
+        trainName: train.name,
+        total: trainIssues.length,
+        open: trainIssues.filter((i) => i.status === "open").length,
+        inProgress: trainIssues.filter((i) => i.status === "in-progress").length,
+        high: trainIssues.filter((i) => i.priority === "high").length,
+        medium: trainIssues.filter((i) => i.priority === "medium").length,
+        low: trainIssues.filter((i) => i.priority === "low").length,
+      };
+    }),
   });
 };

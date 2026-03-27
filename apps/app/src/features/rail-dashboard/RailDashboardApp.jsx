@@ -5,14 +5,17 @@ import { CopilotChat } from "@copilotkit/react-core/v2";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { AppLayout } from "./layout/AppLayout";
 import { FleetDashboard } from "./screens/FleetDashboard";
+import { RailDashboardAIProvider } from "./context/rail-dashboard-ai-context";
 import {
+  useRailDashboardAIControls,
   useRailChatSuggestions,
   useRailToolRendering,
   useRailDashboardContext,
 } from "@/hooks";
 
-export function RailDashboardApp() {
+function RailDashboardWorkspace() {
   useRailToolRendering();
+  useRailDashboardAIControls();
   useRailChatSuggestions();
   useRailDashboardContext();
 
@@ -29,3 +32,12 @@ export function RailDashboardApp() {
     />
   );
 }
+
+export function RailDashboardApp() {
+  return (
+    <RailDashboardAIProvider>
+      <RailDashboardWorkspace />
+    </RailDashboardAIProvider>
+  );
+}
+

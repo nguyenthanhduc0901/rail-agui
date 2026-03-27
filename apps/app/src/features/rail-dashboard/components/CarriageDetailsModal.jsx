@@ -4,8 +4,6 @@ import { Fragment, useState, useMemo, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { getCarriageSystems, getActiveIssuesByCarriage } from '../data/railDataSource';
 
-// ─── HELPERS ───────────────────────────────────────────────────────────────────
-
 const getHealthStatus = (health) => {
   if (health >= 85) return {
     color: 'text-emerald-600', bg: 'bg-emerald-500',

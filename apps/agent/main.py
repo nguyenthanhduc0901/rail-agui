@@ -17,10 +17,8 @@ if not gemini_api_key:
     raise ValueError("Missing GEMINI_API_KEY in environment variables.")
 
 model = ChatGoogleGenerativeAI(
-    model="gemini-2.5-flash",
+    model="gemini-3-flash-preview",
     google_api_key=gemini_api_key,
-    temperature=0,
-    max_tokens=None,
     timeout=None,
     max_retries=2,
 )
@@ -34,20 +32,26 @@ agent = create_agent(
 
         Bạn là trợ lý AI hỗ trợ vận hành và bảo trì hệ thống tàu hỏa.
 
-        Dữ liệu có thể đến từ:
-        - Context từ frontend (FLEET_TRAINS, ACTIVE_ISSUES, CARRIAGES)
-        - Tool backend (get_fleet_overview, get_train_details, search_issues)
+        Dữ liệu tóm tắt có sẵn trong context frontend (dùng trước, không cần gọi tool):
+        - FLEET_TRAINS: tổng quan từng tàu (status, openIssues, efficiency)
+        - ISSUE_SUMMARY: số sự cố theo tàu và priority
 
-        Hướng dẫn:
+        Quy tắc chọn tool (chỉ gọi khi context không đủ):
+        - "bao nhiêu sự cố..." → count_issues(filters)  — trả về {"count": N}
+        - "chi tiết tàu X..." → get_train_summary(train_id) — trả stats, không có issue list
+        - "liệt kê sự cố..." → list_issues(filters, limit=10) — tối đa 15 items, fields tóm tắt
+        - "tổng quan đội tàu đầy đủ" → get_fleet_overview() — trả aggregate counts
+        - "lập kế hoạch bảo trì" → generate_maintenance_plan_stream(train_id, priority)
+        - "bulk update issue" → request_bulk_issue_status_update(priority, target_status, train_id)
+
+        KHÔNG BAO GIỜ: gọi list_issues để đếm (dùng count_issues), gọi list_issues với limit > 15.
+
+        Hướng dẫn chung:
         - Trả lời ngắn gọn, rõ ràng, ưu tiên tiếng Việt.
-        - Khi cần thông tin thực tế theo train/carriage/issue, ưu tiên gọi tool trước khi kết luận.
-        - Khi người dùng yêu cầu đổi giao diện/chế độ sáng tối, phải gọi frontend tool tương ứng:
-          + Dùng setTheme khi người dùng chỉ định rõ light/dark/system.
-          + Dùng toggleTheme khi người dùng chỉ yêu cầu "đổi theme" chung chung.
-        - Khi người dùng yêu cầu chuyển bố cục màn hình, dùng enableAppMode hoặc enableChatMode.
-        - Nếu dữ liệu thiếu hoặc không tồn tại, nêu rõ phần thiếu và đề nghị thông tin bổ sung.
+        - Đổi giao diện sáng/tối: setTheme (chỉ định rõ) hoặc toggleTheme (chung chung).
+        - Lọc dashboard: applyDashboardFilters hoặc clearDashboardFilters.
+        - Tạo/xóa widget: createDashboardWidget / clearDashboardWidgets.
         - Không bịa thông tin ngoài dữ liệu có trong context hoặc tool output.
-        - Khi đề xuất xử lý, đưa ra thứ tự ưu tiên dựa trên priority và status hiện tại.
     """,
 )
 

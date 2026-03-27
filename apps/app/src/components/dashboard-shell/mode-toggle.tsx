@@ -1,7 +1,4 @@
-interface ModeToggleProps {
-  mode: "chat" | "app";
-  onModeChange: (mode: "chat" | "app") => void;
-}
+// removed
 
 export function ModeToggle({ mode, onModeChange }: ModeToggleProps) {
   return (
