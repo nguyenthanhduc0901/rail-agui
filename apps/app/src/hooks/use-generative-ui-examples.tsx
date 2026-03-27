@@ -22,12 +22,28 @@ export const useGenerativeUIExamples = () => {
   useFrontendTool(
     {
       name: "toggleTheme",
-      description: "Frontend tool for toggling the theme of the app.",
+      description:
+        "Chuyển đổi nhanh giữa giao diện sáng và tối của ứng dụng.",
       parameters: z.object({}),
       handler: async () => {
         setTheme(theme === "dark" ? "light" : "dark");
       },
     },
     [theme, setTheme],
+  );
+
+  useFrontendTool(
+    {
+      name: "setTheme",
+      description:
+        "Đặt chế độ giao diện chính xác theo yêu cầu người dùng: light, dark hoặc system.",
+      parameters: z.object({
+        mode: z.enum(["light", "dark", "system"]),
+      }),
+      handler: async ({ mode }) => {
+        setTheme(mode);
+      },
+    },
+    [setTheme],
   );
 };

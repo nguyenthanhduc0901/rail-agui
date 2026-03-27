@@ -21,6 +21,7 @@ export const POST = async (req: NextRequest) => {
     serviceAdapter: new ExperimentalEmptyAdapter(),
     runtime: new CopilotRuntime({
       agents: { default: defaultAgent },
+      a2ui: { injectA2UITool: true },
     }),
   });
 

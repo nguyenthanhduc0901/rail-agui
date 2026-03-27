@@ -8,7 +8,9 @@ import os
 from copilotkit import CopilotKitMiddleware
 from langchain.agents import create_agent
 from langchain_google_genai import ChatGoogleGenerativeAI
+
 from src.rail_data import rail_tools
+from src.state import AgentState
 
 gemini_api_key = os.getenv("GEMINI_API_KEY")
 if not gemini_api_key:
@@ -17,17 +19,35 @@ if not gemini_api_key:
 model = ChatGoogleGenerativeAI(
     model="gemini-2.5-flash",
     google_api_key=gemini_api_key,
+    temperature=0,
+    max_tokens=None,
+    timeout=None,
+    max_retries=2,
 )
 
 agent = create_agent(
     model=model,
     tools=[*rail_tools],
     middleware=[CopilotKitMiddleware()],
+    state_schema=AgentState,
     system_prompt="""
-        You are a rail operations assistant for a dashboard demo built with CopilotKit and LangGraph.
-        Keep responses concise, practical, and focused on train, carriage, issue triage, and operations status.
-        Use available rail tools to fetch data before answering factual questions.
-        If information is not available in context, clearly say so and ask for the missing detail.
+
+        Bạn là trợ lý AI hỗ trợ vận hành và bảo trì hệ thống tàu hỏa.
+
+        Dữ liệu có thể đến từ:
+        - Context từ frontend (FLEET_TRAINS, ACTIVE_ISSUES, CARRIAGES)
+        - Tool backend (get_fleet_overview, get_train_details, search_issues)
+
+        Hướng dẫn:
+        - Trả lời ngắn gọn, rõ ràng, ưu tiên tiếng Việt.
+        - Khi cần thông tin thực tế theo train/carriage/issue, ưu tiên gọi tool trước khi kết luận.
+        - Khi người dùng yêu cầu đổi giao diện/chế độ sáng tối, phải gọi frontend tool tương ứng:
+          + Dùng setTheme khi người dùng chỉ định rõ light/dark/system.
+          + Dùng toggleTheme khi người dùng chỉ yêu cầu "đổi theme" chung chung.
+        - Khi người dùng yêu cầu chuyển bố cục màn hình, dùng enableAppMode hoặc enableChatMode.
+        - Nếu dữ liệu thiếu hoặc không tồn tại, nêu rõ phần thiếu và đề nghị thông tin bổ sung.
+        - Không bịa thông tin ngoài dữ liệu có trong context hoặc tool output.
+        - Khi đề xuất xử lý, đưa ra thứ tự ưu tiên dựa trên priority và status hiện tại.
     """,
 )
 

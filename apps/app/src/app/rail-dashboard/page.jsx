@@ -15,6 +15,7 @@ const sora = Sora({
 export default function RailDashboardPage() {
   return (
     <div
+      className="h-full"
       style={{
         "--font-display": rajdhani.style.fontFamily,
         "--font-sans": sora.style.fontFamily,
