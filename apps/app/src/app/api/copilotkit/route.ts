@@ -9,7 +9,7 @@ import { NextRequest } from "next/server";
 // 1. Define the agent connection to LangGraph
 const defaultAgent = new LangGraphAgent({
   deploymentUrl:
-    process.env.LANGGRAPH_DEPLOYMENT_URL || "http://127.0.0.1:8123",
+    process.env.LANGGRAPH_DEPLOYMENT_URL || "http://localhost:8123",
   graphId: "sample_agent",
   langsmithApiKey: process.env.LANGSMITH_API_KEY || "",
 });

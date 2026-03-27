@@ -8,7 +8,7 @@ const statusConfig = {
   warning: { dot: 'bg-amber-400', text: 'text-amber-600', progress: 'bg-amber-500', label: 'Warning', bg: 'bg-[#AFEEEE] border-[#7BCFCF]' },
   critical: { dot: 'bg-red-400', text: 'text-red-600', progress: 'bg-red-500', label: 'Critical', bg: 'bg-[#AFEEEE] border-[#7BCFCF]' },
 }
-
+  
 // --- COMPONENT BÁNH XE (Đã bo tròn & làm nhạt màu) ---
 const TrainBogie = ({ className }) => (
   // Dùng rounded-full để bo tròn cụm bánh xe, đổi bg-slate-800 -> bg-slate-500
