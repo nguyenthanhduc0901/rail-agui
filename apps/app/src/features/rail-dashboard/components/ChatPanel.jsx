@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Bot, X, Send, Minus } from "lucide-react";
 
 const WELCOME_MESSAGE = {
@@ -14,7 +14,9 @@ export function ChatPanel() {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [input, setInput] = useState("");
-  const [messages] = useState([WELCOME_MESSAGE]);
+  const [messages, setMessages] = useState([WELCOME_MESSAGE]);
+  const [isSending, setIsSending] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
@@ -23,10 +25,64 @@ export function ChatPanel() {
     }
   }, [messages, isOpen, isMinimized]);
 
+  const sendMessage = useCallback(async () => {
+    const userInput = input.trim();
+    if (!userInput || isSending) return;
+
+    setErrorMessage("");
+
+    const userMessage = {
+      id: crypto.randomUUID(),
+      role: "user",
+      content: userInput,
+    };
+
+    const nextMessages = [...messages, userMessage];
+    setMessages(nextMessages);
+    setInput("");
+    setIsSending(true);
+
+    try {
+      const response = await fetch("/api/rail-chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: nextMessages }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data?.error || "Không thể gọi LLM API.");
+      }
+
+      const reply = data?.reply?.trim();
+      if (!reply) {
+        throw new Error("LLM trả về phản hồi rỗng.");
+      }
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: crypto.randomUUID(),
+          role: "assistant",
+          content: reply,
+        },
+      ]);
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "Đã xảy ra lỗi khi gọi LLM.",
+      );
+    } finally {
+      setIsSending(false);
+    }
+  }, [input, isSending, messages]);
+
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      // Logic gửi tin nhắn sẽ được định nghĩa sau
+      sendMessage();
     }
   };
 
@@ -110,6 +166,23 @@ export function ChatPanel() {
                     </div>
                   </div>
                 ))}
+
+                {isSending && (
+                  <div className="flex gap-2">
+                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-100">
+                      <Bot className="h-4 w-4 text-emerald-600" />
+                    </div>
+                    <div className="max-w-[80%] rounded-2xl rounded-tl-none bg-white px-3 py-2 text-sm text-slate-700 shadow-sm">
+                      Đang xử lý...
+                    </div>
+                  </div>
+                )}
+
+                {errorMessage && (
+                  <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-600">
+                    {errorMessage}
+                  </div>
+                )}
                 <div ref={messagesEndRef} />
               </div>
 
@@ -122,10 +195,12 @@ export function ChatPanel() {
                     onKeyDown={handleKeyDown}
                     placeholder="Nhập câu hỏi... (Enter để gửi)"
                     rows={1}
+                    disabled={isSending}
                     className="flex-1 resize-none rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-emerald-400 focus:bg-white focus:outline-none transition-colors"
                   />
                   <button
-                    disabled={!input.trim()}
+                    onClick={sendMessage}
+                    disabled={!input.trim() || isSending}
                     className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 transition-all"
                     title="Gửi"
                   >
