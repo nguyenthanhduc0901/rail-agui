@@ -2,7 +2,7 @@
 
 import { Fragment, useState, useMemo, useEffect } from 'react';
 import { X } from 'lucide-react';
-import { getCarriageSystems, getActiveIssuesByCarriage } from '../data/mockData';
+import { getCarriageSystems, getActiveIssuesByCarriage } from '../data/railDataAdapter';
 
 // ─── HELPERS ───────────────────────────────────────────────────────────────────
 

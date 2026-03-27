@@ -41,12 +41,13 @@ const trainNames = [
   "Aurora Line",
 ];
 
-const carriageTypePool = ["Passenger", "Cargo", "Service"];
+const FIXED_CARRIAGE_LAYOUT = ["Head", "Middle", "Middle", "Middle", "Tail"];
 const systems = ["Brakes", "HVAC", "Doors", "Power", "Network"];
 const priorities = ["high", "medium", "low"];
 const statuses = ["open", "in-progress", "closed"];
 const priorityWeight = [0.28, 0.47, 0.25];
 const statusWeight = [0.58, 0.27, 0.15];
+const ISSUE_COUNT_PER_CARRIAGE = { min: 3, max: 8 };
 
 const titleBySystem = {
   Brakes: [
@@ -148,14 +149,16 @@ const carriagesByTrain = {};
 const issues = [];
 
 for (const train of trains) {
-  const carriageCount = randomInt(5, 7);
   const carriages = [];
 
-  for (let i = 1; i <= carriageCount; i += 1) {
+  for (let i = 1; i <= FIXED_CARRIAGE_LAYOUT.length; i += 1) {
     const carriageId = `C${String(i).padStart(2, "0")}`;
-    const type = i === 1 ? "Head" : i === carriageCount ? "Power" : pick(carriageTypePool);
+    const type = FIXED_CARRIAGE_LAYOUT[i - 1];
 
-    const issueCount = randomInt(0, 4);
+    const issueCount = randomInt(
+      ISSUE_COUNT_PER_CARRIAGE.min,
+      ISSUE_COUNT_PER_CARRIAGE.max,
+    );
     let activeForCarriage = 0;
 
     for (let j = 0; j < issueCount; j += 1) {

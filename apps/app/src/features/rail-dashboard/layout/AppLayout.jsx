@@ -1,4 +1,4 @@
-import { navLinks } from '../data/mockData'
+import { navLinks } from '../data/railDataAdapter'
 import { Sidebar } from '../components/Sidebar'
 import { ChatPanel } from '../components/ChatPanel'
 

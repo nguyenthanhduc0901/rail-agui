@@ -1,12 +1,12 @@
 import React, { useState } from 'react'
-import { trains, getCarriagesByTrain } from '../data/mockData'
+import { trains, getCarriagesByTrain } from '../data/railDataAdapter'
 import { CarriageDetailsModal } from '../components/CarriageDetailsModal'
 
 // --- CẤU HÌNH ---
 const statusConfig = {
-  healthy: { dot: 'bg-emerald-400', text: 'text-emerald-600', progress: 'bg-emerald-500', label: 'Healthy', bg: 'status-healthy' },
-  warning: { dot: 'bg-amber-400', text: 'text-amber-600', progress: 'bg-amber-500', label: 'Warning', bg: 'status-warning' },
-  critical: { dot: 'bg-red-400', text: 'text-red-600', progress: 'bg-red-500', label: 'Critical', bg: 'status-critical' },
+  healthy: { dot: 'bg-emerald-400', text: 'text-emerald-600', progress: 'bg-emerald-500', label: 'Healthy', bg: 'bg-[#AFEEEE] border-[#7BCFCF]' },
+  warning: { dot: 'bg-amber-400', text: 'text-amber-600', progress: 'bg-amber-500', label: 'Warning', bg: 'bg-[#AFEEEE] border-[#7BCFCF]' },
+  critical: { dot: 'bg-red-400', text: 'text-red-600', progress: 'bg-red-500', label: 'Critical', bg: 'bg-[#AFEEEE] border-[#7BCFCF]' },
 }
 
 // --- COMPONENT BÁNH XE (Đã bo tròn & làm nhạt màu) ---
@@ -15,6 +15,12 @@ const TrainBogie = ({ className }) => (
   <div className={`absolute -bottom-3 flex gap-1 bg-slate-600 p-1.5 rounded-full z-10 shadow-sm ${className}`}>
     <div className="w-4 h-4 rounded-full bg-slate-200 border-[3px] border-slate-600" />
     <div className="w-4 h-4 rounded-full bg-slate-200 border-[3px] border-slate-600" />
+  </div>
+)
+
+const CarriageWindow = () => (
+  <div className="relative flex-1 h-8 bg-slate-800/90 rounded-sm border border-slate-700/60 shadow-inner">
+    <div className="absolute top-1 right-2 w-5 h-1 bg-white/20 rounded-full" />
   </div>
 )
 
@@ -47,9 +53,12 @@ export function FleetDashboard() {
         {trains.map((train) => {
           const config = statusConfig[train.status]
           const carriages = getCarriagesByTrain(train.id)
+          const headCarriage = carriages[0]
+          const remainingCarriages = carriages.slice(1)
+          const headCarriageConfig = headCarriage ? statusConfig[headCarriage.status] : config
 
           return (
-            <div key={train.id} className="relative rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-colors dark:border-slate-700 dark:bg-slate-900/80 dark:shadow-black/20">
+            <div key={train.id} className="relative rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-colors dark:border-slate-800 dark:bg-slate-900 dark:shadow-none">
               
               {/* Header của từng đoàn tàu */}
               <div className="mb-6 flex items-center justify-between border-b border-slate-100 pb-4 dark:border-slate-800">
@@ -90,10 +99,13 @@ export function FleetDashboard() {
                     </div>
 
 {/* ĐẦU TÀU (Electric Locomotive - Aerodynamic Design) */}
-<div className="relative flex-shrink-0 h-40 w-64 group transition-transform hover:-translate-y-1 z-10 block">
+<div
+  className="relative flex-shrink-0 h-40 w-64 group cursor-pointer transition-transform hover:-translate-y-1 z-10 block"
+  onClick={() => headCarriage && openModal(train, headCarriage)}
+>
   
   {/* 1. THÂN TÀU: Tạo hình mũi tàu điện thuôn dài */}
-  <div className={`absolute inset-0 border-2 ${config.bg} rounded-tl-[100px] rounded-bl-2xl rounded-r-lg overflow-hidden shadow-md flex flex-col`}>
+  <div className={`absolute inset-0 border-2 ${headCarriageConfig.bg} rounded-tl-[100px] rounded-bl-2xl rounded-r-lg overflow-hidden shadow-md flex flex-col`}>
     
     {/* Kính chắn gió (Windshield) - To và vát theo mũi tàu */}
     <div className="absolute top-2 left-7 w-24 h-14 bg-slate-800/90 rounded-tl-[80px] rounded-tr-md rounded-bl-lg border-r-2 border-b-2 border-slate-700/50 shadow-inner flex items-center justify-center">
@@ -110,6 +122,26 @@ export function FleetDashboard() {
     {/* Đường kẻ trang trí (Speed stripes) - Tạo cảm giác tốc độ */}
     <div className="absolute top-20 left-12 right-0 h-1 bg-white/30" />
     <div className="absolute top-[88px] left-20 right-0 h-1 bg-white/20" />
+
+    <div className="absolute left-0 right-0 top-16 px-5 pointer-events-none">
+      <div className="flex justify-between items-end mb-2">
+        <span className="text-[10px] font-bold text-slate-700 bg-white/50 px-1.5 py-0.5 rounded">
+          {headCarriage?.type ?? 'Head'}
+        </span>
+      </div>
+      <div className="space-y-1">
+        <div className="flex justify-between items-center text-[9px] text-slate-600">
+          <span>Issues</span>
+          <span className="font-bold">{headCarriage?.issues ?? 0}</span>
+        </div>
+        <div className="h-1.5 bg-slate-200 rounded-full overflow-hidden">
+          <div
+            className={`h-full ${headCarriageConfig.progress} rounded-full`}
+            style={{ width: `${Math.min((headCarriage?.issues ?? 0) * 20, 100)}%` }}
+          />
+        </div>
+      </div>
+    </div>
 
     <div className="flex-1" />
     
@@ -131,9 +163,9 @@ export function FleetDashboard() {
 </div>
 
                     {/* CÁC TOA TÀU VÀ ĐUÔI TÀU */}
-                    {carriages.map((carriage, index) => {
+                    {remainingCarriages.map((carriage, index) => {
                       const carriageConfig = statusConfig[carriage.status]
-                      const isLast = index === carriages.length - 1
+                      const isLast = index === remainingCarriages.length - 1
                       const shapeClasses = isLast ? "rounded-r-[3rem] rounded-l-lg" : "rounded-lg"
 
                       return (
@@ -151,11 +183,11 @@ export function FleetDashboard() {
                             {/* LỚP 1: KHUNG THÂN TOA TÀU */}
                             <div className={`absolute inset-0 border-2 ${carriageConfig.bg} ${shapeClasses} overflow-hidden shadow-md flex flex-col`}>
                               <div className="absolute top-6 left-0 right-0 px-4 flex gap-2">
-                                <div className="flex-1 h-8 bg-slate-800/60 rounded-sm border border-slate-600" />
-                                <div className="flex-1 h-8 bg-slate-800/60 rounded-sm border border-slate-600" />
-                                {!isLast && <div className="flex-1 h-8 bg-slate-800/60 rounded-sm border border-slate-600" />}
+                                <CarriageWindow />
+                                <CarriageWindow />
+                                {!isLast && <CarriageWindow />}
                               </div>
-                              <div className="absolute inset-0 mt-16 px-4 py-2 flex flex-col justify-end pb-5 pointer-events-none">
+                              <div className="absolute left-0 right-0 bottom-10 px-4 pointer-events-none">
                                 <div className="flex justify-between items-end mb-2">
                                   <span className="text-[10px] font-bold text-slate-700 bg-white/50 px-1.5 py-0.5 rounded">{carriage.type}</span>
                                 </div>
