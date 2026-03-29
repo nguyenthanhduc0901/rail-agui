@@ -14,6 +14,8 @@ const filterSchema = z.object({
 
 export const useRailDashboardAIControls = () => {
   const {
+    filters,
+    widgets,
     updateFilters,
     clearFilters,
     addWidget,
@@ -27,17 +29,28 @@ export const useRailDashboardAIControls = () => {
         "Apply rail dashboard filters for train, system, priority, and status. Use this when users ask to filter the main dashboard.",
       parameters: filterSchema,
       handler: async (args) => {
-        updateFilters({
+        const nextFilters = {
           trainId: args.trainId,
           system: args.system,
           priority: args.priority,
           status: args.status,
+        };
+
+        const hasChanges = Object.entries(nextFilters).some(([key, value]) => {
+          if (value === undefined) return false;
+          return filters[key] !== value;
         });
+
+        if (!hasChanges) {
+          return "Dashboard filters already in the requested state.";
+        }
+
+        updateFilters(nextFilters);
 
         return "Dashboard filters applied.";
       },
     },
-    [updateFilters],
+    [filters, updateFilters],
   );
 
   useFrontendTool(
@@ -47,11 +60,20 @@ export const useRailDashboardAIControls = () => {
         "Reset all rail dashboard filters to show the full fleet view.",
       parameters: z.object({}),
       handler: async () => {
+        if (
+          filters.trainId === "all" &&
+          filters.system === "all" &&
+          filters.priority === "all" &&
+          filters.status === "all"
+        ) {
+          return "Dashboard filters are already reset.";
+        }
+
         clearFilters();
         return "Dashboard filters were reset.";
       },
     },
-    [clearFilters],
+    [filters, clearFilters],
   );
 
   useFrontendTool(
@@ -68,11 +90,26 @@ export const useRailDashboardAIControls = () => {
         trainId: z.string().optional(),
       }),
       handler: async (args) => {
+        const duplicateExists = widgets.slice(0, 5).some((w) => {
+          return (
+            w.kind === args.kind &&
+            w.title === args.title &&
+            (w.summary || "") === (args.summary || "") &&
+            (w.value || "") === (args.value || "") &&
+            w.severity === args.severity &&
+            (w.trainId || "all") === (args.trainId || "all")
+          );
+        });
+
+        if (duplicateExists) {
+          return `Widget '${args.title}' already exists recently.`;
+        }
+
         addWidget(args);
         return `Widget '${args.title}' created on dashboard.`;
       },
     },
-    [addWidget],
+    [widgets, addWidget],
   );
 
   useFrontendTool(
@@ -81,11 +118,15 @@ export const useRailDashboardAIControls = () => {
       description: "Clear all AI-generated dashboard widgets.",
       parameters: z.object({}),
       handler: async () => {
+        if (widgets.length === 0) {
+          return "Dashboard widgets are already empty.";
+        }
+
         clearWidgets();
         return "All dashboard widgets cleared.";
       },
     },
-    [clearWidgets],
+    [widgets.length, clearWidgets],
   );
 
   useInterrupt({

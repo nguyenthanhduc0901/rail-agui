@@ -7,17 +7,17 @@ import { AppLayout } from "./layout/AppLayout";
 import { FleetDashboard } from "./screens/FleetDashboard";
 import { RailDashboardAIProvider } from "./context/rail-dashboard-ai-context";
 import {
+  useChatHistoryGuard,
   useRailDashboardAIControls,
   useRailChatSuggestions,
   useRailToolRendering,
-  useRailDashboardContext,
 } from "@/hooks";
 
 function RailDashboardWorkspace() {
+  useChatHistoryGuard();
   useRailToolRendering();
   useRailDashboardAIControls();
   useRailChatSuggestions();
-  useRailDashboardContext();
 
   return (
     <DashboardShell

@@ -1,5 +1,6 @@
 import json
 import asyncio
+import os
 from pathlib import Path
 from typing import Any
 
@@ -19,6 +20,37 @@ _DATA_PATH = (
 )
 
 _rail_data = None  # lazy load
+_TOOL_DEBUG = os.getenv("AGENT_TOOL_DEBUG", "0") == "1"
+_ALLOWED_PRIORITIES = {"high", "medium", "low"}
+_ALLOWED_STATUSES = {"open", "in-progress", "closed"}
+_MAX_LIST_LIMIT = 15
+_MAX_PLAN_STEPS = 8
+
+
+def _log_tool(tool_name: str, **meta: Any) -> None:
+    if not _TOOL_DEBUG:
+        return
+    safe_meta = {k: v for k, v in meta.items() if isinstance(v, (str, int, float, bool, type(None)))}
+    print(f"[agent-tool] {tool_name}", safe_meta)
+
+
+def _normalize_text(value: str) -> str:
+    return (value or "").strip()
+
+
+def _normalize_priority(value: str) -> str:
+    normalized = _normalize_text(value).lower()
+    return normalized if normalized in _ALLOWED_PRIORITIES else ""
+
+
+def _normalize_status(value: str) -> str:
+    normalized = _normalize_text(value).lower()
+    return normalized if normalized in _ALLOWED_STATUSES else ""
+
+
+def _normalize_train_id(value: str) -> str:
+    normalized = _normalize_text(value).upper()
+    return normalized
 
 
 def _get_rail_data():
@@ -39,6 +71,11 @@ def _filter_issues(
 ) -> list[dict[str, Any]]:
     """Internal filter — returns full issue objects, never called directly by LLM."""
     issues = _get_rail_data().get("issues", [])
+    train_id = _normalize_train_id(train_id or "") or None
+    carriage_id = _normalize_text(carriage_id or "") or None
+    system = _normalize_text(system or "") or None
+    priority = _normalize_priority(priority or "") or None
+    status = _normalize_status(status or "") or None
 
     def matches(issue: dict[str, Any]) -> bool:
         if train_id and issue.get("trainId") != train_id:
@@ -65,10 +102,11 @@ def get_fleet_overview() -> dict[str, Any]:
     """Get fleet-level counts and status breakdown.
     Returns only aggregate numbers — use get_train_summary for one train detail.
     """
+    _log_tool("get_fleet_overview:start")
     trains = _get_rail_data().get("trains", [])
     issues = _get_rail_data().get("issues", [])
     open_issues = [i for i in issues if i.get("status") == "open"]
-    return {
+    result = {
         "totalTrains": len(trains),
         "byStatus": {
             "healthy": sum(1 for t in trains if t.get("status") == "healthy"),
@@ -82,6 +120,8 @@ def get_fleet_overview() -> dict[str, Any]:
             "low": sum(1 for i in open_issues if i.get("priority") == "low"),
         },
     }
+    _log_tool("get_fleet_overview:done", totalTrains=result["totalTrains"], openIssues=result["openIssues"]["total"])
+    return result
 
 
 # ── Tool 2: Count only — for "how many" questions ────────────────────────────
@@ -97,13 +137,27 @@ def count_issues(
     Returns a single number — far cheaper than listing all issues.
     Empty string = no filter for that field.
     """
-    filtered = _filter_issues(
-        train_id=train_id or None,
-        system=system or None,
-        priority=priority or None,
-        status=status or None,
+    normalized_train_id = _normalize_train_id(train_id)
+    normalized_system = _normalize_text(system)
+    normalized_priority = _normalize_priority(priority)
+    normalized_status = _normalize_status(status)
+    _log_tool(
+        "count_issues:start",
+        train_id=normalized_train_id or "all",
+        system=normalized_system or "all",
+        priority=normalized_priority or "all",
+        status=normalized_status or "all",
     )
-    return {"count": len(filtered)}
+
+    filtered = _filter_issues(
+        train_id=normalized_train_id or None,
+        system=normalized_system or None,
+        priority=normalized_priority or None,
+        status=normalized_status or None,
+    )
+    result = {"count": len(filtered)}
+    _log_tool("count_issues:done", count=result["count"])
+    return result
 
 
 # ── Tool 3: Train summary — stats only, no issue list ────────────────────────
@@ -114,15 +168,18 @@ def get_train_summary(train_id: str) -> dict[str, Any]:
     and issue counts by priority/status. Does NOT return individual issue objects.
     Use list_issues if you need the actual issue titles.
     """
+    normalized_train_id = _normalize_train_id(train_id)
+    _log_tool("get_train_summary:start", train_id=normalized_train_id or "")
     train = next(
-        (t for t in _get_rail_data().get("trains", []) if t.get("id") == train_id),
+        (t for t in _get_rail_data().get("trains", []) if t.get("id") == normalized_train_id),
         None,
     )
     if not train:
-        return {"error": f"Train '{train_id}' not found."}
+        _log_tool("get_train_summary:not_found", train_id=normalized_train_id or "")
+        return {"error": f"Train '{normalized_train_id or train_id}' not found."}
 
-    carriages = _get_rail_data().get("carriagesByTrain", {}).get(train_id, [])
-    all_issues = _filter_issues(train_id=train_id)
+    carriages = _get_rail_data().get("carriagesByTrain", {}).get(normalized_train_id, [])
+    all_issues = _filter_issues(train_id=normalized_train_id)
 
     carriage_summary = {
         "total": len(carriages),
@@ -151,7 +208,7 @@ def get_train_summary(train_id: str) -> dict[str, Any]:
             systems[s] = systems.get(s, 0) + 1
     issue_summary["bySystems"] = systems
 
-    return {
+    result = {
         "id": train.get("id"),
         "name": train.get("name"),
         "status": train.get("status"),
@@ -159,6 +216,13 @@ def get_train_summary(train_id: str) -> dict[str, Any]:
         "carriages": carriage_summary,
         "issues": issue_summary,
     }
+    _log_tool(
+        "get_train_summary:done",
+        train_id=str(result["id"]),
+        open_issues=issue_summary["open"],
+        efficiency=result["efficiency"] if isinstance(result["efficiency"], (int, float)) else None,
+    )
+    return result
 
 
 # ── Tool 4: List issues — trimmed fields, hard limit 15 ──────────────────────
@@ -176,15 +240,32 @@ def list_issues(
     carriageId, system, title, priority, status). Hard limit: 15 items.
     Use count_issues first if you only need a number.
     """
-    filtered = _filter_issues(
-        train_id=train_id or None,
-        carriage_id=carriage_id or None,
-        system=system or None,
-        priority=priority or None,
-        status=status or None,
+    normalized_train_id = _normalize_train_id(train_id)
+    normalized_carriage_id = _normalize_text(carriage_id)
+    normalized_system = _normalize_text(system)
+    normalized_priority = _normalize_priority(priority)
+    normalized_status = _normalize_status(status)
+    capped_limit = max(1, min(limit, _MAX_LIST_LIMIT))
+
+    _log_tool(
+        "list_issues:start",
+        train_id=normalized_train_id or "all",
+        carriage_id=normalized_carriage_id or "all",
+        system=normalized_system or "all",
+        priority=normalized_priority or "all",
+        status=normalized_status or "all",
+        limit=capped_limit,
     )
-    capped = filtered[: max(1, min(limit, 15))]
-    return [
+
+    filtered = _filter_issues(
+        train_id=normalized_train_id or None,
+        carriage_id=normalized_carriage_id or None,
+        system=normalized_system or None,
+        priority=normalized_priority or None,
+        status=normalized_status or None,
+    )
+    capped = filtered[:capped_limit]
+    result = [
         {
             "id": i.get("id"),
             "trainId": i.get("trainId"),
@@ -196,6 +277,8 @@ def list_issues(
         }
         for i in capped
     ]
+    _log_tool("list_issues:done", returned=len(result))
+    return result
 
 
 # ── Tool 5: Maintenance plan stream ──────────────────────────────────────────
@@ -210,14 +293,26 @@ async def generate_maintenance_plan_stream(
     """Generate and stream a step-by-step maintenance plan.
     Use when user asks to create a maintenance plan or repair schedule.
     """
+    normalized_train_id = _normalize_train_id(train_id)
+    normalized_priority = _normalize_priority(priority)
+    capped_steps = max(1, min(max_steps, _MAX_PLAN_STEPS))
+
+    _log_tool(
+        "generate_maintenance_plan_stream:start",
+        train_id=normalized_train_id or "all",
+        priority=normalized_priority or "all",
+        max_steps=capped_steps,
+    )
+
     candidates = _filter_issues(
-        train_id=train_id or None,
-        priority=priority or None,
+        train_id=normalized_train_id or None,
+        priority=normalized_priority or None,
         status="open",
-    )[:max(1, min(max_steps, 8))]
+    )[:capped_steps]
 
     if not candidates:
         await copilotkit_emit_state(config, {"maintenancePlan": []})
+        _log_tool("generate_maintenance_plan_stream:done", step_count=0)
         return {"summary": "Không có sự cố open phù hợp.", "stepCount": 0}
 
     steps = [
@@ -238,7 +333,9 @@ async def generate_maintenance_plan_stream(
         steps[idx]["done"] = True
         await copilotkit_emit_state(config, {"maintenancePlan": steps})
 
-    return {"summary": f"Đã tạo {len(steps)} bước bảo trì.", "stepCount": len(steps)}
+    result = {"summary": f"Đã tạo {len(steps)} bước bảo trì.", "stepCount": len(steps)}
+    _log_tool("generate_maintenance_plan_stream:done", step_count=result["stepCount"])
+    return result
 
 
 # ── Tool 6: Bulk status update with human approval ───────────────────────────
@@ -252,34 +349,48 @@ def request_bulk_issue_status_update(
     """Request human approval before bulk-updating open issues to a new status.
     Use when user asks to update many issues at once.
     """
+    normalized_train_id = _normalize_train_id(train_id)
+    normalized_priority = _normalize_priority(priority)
+    normalized_target_status = _normalize_status(target_status) or "in-progress"
+
+    _log_tool(
+        "request_bulk_issue_status_update:start",
+        train_id=normalized_train_id or "all",
+        priority=normalized_priority or "all",
+        target_status=normalized_target_status,
+    )
+
     targets = _filter_issues(
-        train_id=train_id or None,
-        priority=priority or None,
+        train_id=normalized_train_id or None,
+        priority=normalized_priority or None,
         status="open",
     )
 
     if not targets:
+        _log_tool("request_bulk_issue_status_update:done", approved=False, count=0)
         return {"approved": False, "count": 0, "message": "Không có sự cố open phù hợp."}
 
     approval_result = interrupt({
         "type": "bulk_issue_update_approval",
         "priority": priority,
-        "targetStatus": target_status,
-        "trainId": train_id or "all",
+        "targetStatus": normalized_target_status,
+        "trainId": normalized_train_id or "all",
         "count": len(targets),
     })
 
     approved = bool(isinstance(approval_result, dict) and approval_result.get("approved"))
-    return {
+    result = {
         "approved": approved,
         "count": len(targets),
-        "targetStatus": target_status,
+        "targetStatus": normalized_target_status,
         "message": (
-            f"Đã duyệt bulk update {len(targets)} sự cố sang '{target_status}'."
+            f"Đã duyệt bulk update {len(targets)} sự cố sang '{normalized_target_status}'."
             if approved
             else "Người dùng từ chối bulk update."
         ),
     }
+    _log_tool("request_bulk_issue_status_update:done", approved=approved, count=result["count"])
+    return result
 
 
 rail_tools = [

@@ -1,33 +1,33 @@
 "use client";
 
+import { useMemo } from "react";
 import { useConfigureSuggestions } from "@copilotkit/react-core/v2";
 import { useRailDashboardAI } from "@/features/rail-dashboard/context/rail-dashboard-ai-context";
 
 export const useRailChatSuggestions = () => {
   const { filters } = useRailDashboardAI();
 
-  const focusDescription = [
-    `Focused train filter: ${filters.trainId}`,
-    `System filter: ${filters.system}`,
-    `Priority filter: ${filters.priority}`,
-    `Status filter: ${filters.status}`,
-  ].join("; ");
+  const suggestions = useMemo(() => {
+    const trainScoped =
+      filters.trainId && filters.trainId !== "all"
+        ? `Tổng hợp nhanh tình trạng tàu ${filters.trainId}`
+        : "Tàu nào đang có mức rủi ro cao nhất?";
+
+    const systemScoped =
+      filters.system && filters.system !== "all"
+        ? `Liệt kê sự cố open của hệ ${filters.system}`
+        : "Phân tích hệ thống nào đang phát sinh nhiều lỗi nhất";
+
+    return [
+      trainScoped,
+      systemScoped,
+      "Lập kế hoạch bảo trì cho các sự cố priority high",
+      "Tạo widget tổng hợp 3 tàu cần ưu tiên xử lý",
+    ];
+  }, [filters.trainId, filters.system]);
 
   useConfigureSuggestions({
-    instructions: `
-      You are generating proactive suggestion chips for a rail operations copilot.
-      Current dashboard context: ${focusDescription}.
-
-      Rules:
-      - Suggest concise, actionable prompts in Vietnamese.
-      - Keep suggestions focused on the current filter state.
-      - If train filter is not 'all', include at least one suggestion about that train.
-      - Include one suggestion about maintenance plan generation.
-      - Include one suggestion about creating AI dashboard widgets.
-      - Do not output generic help prompts.
-    `,
-    minSuggestions: 3,
-    maxSuggestions: 4,
+    suggestions,
     available: "always",
-  }, [filters.trainId, filters.system, filters.priority, filters.status]);
+  }, [suggestions]);
 };

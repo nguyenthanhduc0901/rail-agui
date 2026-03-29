@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "cross-env PYTHONUTF8=1 uv run langgraph dev --port 8123 --no-browser --allow-blocking",
-    "postinstall": "uv sync"
+    "dev": "cross-env PYTHONUTF8=1 python -m uv run langgraph dev --port 8123 --no-browser --allow-blocking",
+    "postinstall": "python -m uv sync"
   },
   "devDependencies": {
     "@langchain/langgraph-cli": "^1.1.12",

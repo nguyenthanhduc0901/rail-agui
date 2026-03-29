@@ -158,19 +158,6 @@ export const useRailToolRendering = () => {
 
   useFrontendTool(
     {
-      name: "toggleTheme",
-      description:
-        "Chuyển đổi nhanh giữa giao diện sáng và tối của ứng dụng.",
-      parameters: z.object({}),
-      handler: async () => {
-        setTheme(theme === "dark" ? "light" : "dark");
-      },
-    },
-    [theme, setTheme],
-  );
-
-  useFrontendTool(
-    {
       name: "setTheme",
       description:
         "Đặt chế độ giao diện chính xác theo yêu cầu người dùng: light, dark hoặc system.",
@@ -178,9 +165,13 @@ export const useRailToolRendering = () => {
         mode: z.enum(["light", "dark", "system"]),
       }),
       handler: async ({ mode }) => {
+        if (mode === theme) {
+          return `Theme already set to ${mode}.`;
+        }
         setTheme(mode);
+        return `Theme updated to ${mode}.`;
       },
     },
-    [setTheme],
+    [theme, setTheme],
   );
 };
