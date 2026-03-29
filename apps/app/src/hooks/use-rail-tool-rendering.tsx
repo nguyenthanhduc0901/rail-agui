@@ -79,7 +79,10 @@ function FilterActionCard({
 }
 
 function MaintenancePlanCard({ status }: { status: string }) {
-  const { maintenancePlan } = useRailDashboardAI();
+  const { maintenancePlan } = useRailDashboardAI() as {
+    maintenancePlan: Array<{ id?: string; done?: boolean; title?: string; label?: string; details?: string }>;
+    setMaintenancePlan: (plan: unknown[]) => void;
+  };
   return (
     <div className="my-2 rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900">
       <div className="mb-2 flex items-center gap-2">
@@ -92,7 +95,7 @@ function MaintenancePlanCard({ status }: { status: string }) {
         <p className="text-xs text-slate-400">Đang tải các bước...</p>
       ) : (
         <div className="space-y-1.5">
-          {maintenancePlan.map((step: { id?: string; done?: boolean; title?: string; label?: string; details?: string }, i: number) => (
+          {maintenancePlan.map((step, i: number) => (
             <div key={step.id ?? i} className="flex items-start gap-2 text-xs">
               <span className="mt-0.5 shrink-0">{step.done ? "✅" : "⏳"}</span>
               <div>
@@ -116,7 +119,9 @@ function MaintenancePlanCard({ status }: { status: string }) {
 export const useRailToolRendering = () => {
   const { theme, setTheme } = useTheme();
   const { agent } = useAgent();
-  const { setMaintenancePlan } = useRailDashboardAI();
+  const { setMaintenancePlan } = useRailDashboardAI() as {
+    setMaintenancePlan: (plan: unknown[]) => void;
+  };
 
   const ignoredTools = useMemo(() => ["log_a2ui_event"], []);
 
