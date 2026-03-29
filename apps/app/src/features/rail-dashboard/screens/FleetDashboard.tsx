@@ -3,7 +3,9 @@ import { trains, issues, getCarriagesByTrain, type Train, type Carriage } from '
 import { CarriageDetailsModal } from '../components/CarriageDetailsModal'
 import { useRailDashboardAI } from '../context/rail-dashboard-ai-context'
 
-const statusConfig = {
+type StatusKey = 'healthy' | 'warning' | 'critical'
+
+const statusConfig: Record<StatusKey, { dot: string; text: string; progress: string; label: string; bg: string }> = {
   healthy: { dot: 'bg-emerald-400', text: 'text-emerald-600', progress: 'bg-emerald-500', label: 'Healthy', bg: 'bg-[#AFEEEE] border-[#7BCFCF]' },
   warning: { dot: 'bg-amber-400', text: 'text-amber-600', progress: 'bg-amber-500', label: 'Warning', bg: 'bg-[#AFEEEE] border-[#7BCFCF]' },
   critical: { dot: 'bg-red-400', text: 'text-red-600', progress: 'bg-red-500', label: 'Critical', bg: 'bg-[#AFEEEE] border-[#7BCFCF]' },
@@ -264,7 +266,7 @@ export function FleetDashboard() {
   <TrainBogie className="right-[15%]" />
 </div>
 
-                    {remainingCarriages.map((carriage, index) => {
+                    {remainingCarriages.map((carriage: Carriage, index: number) => {
                       const carriageConfig = statusConfig[carriage.status]
                       const isLast = index === remainingCarriages.length - 1
                       const shapeClasses = isLast ? "rounded-r-[3rem] rounded-l-lg" : "rounded-lg"
