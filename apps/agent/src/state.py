@@ -3,19 +3,28 @@ from typing import Literal, Optional, TypedDict
 from langchain.agents import AgentState as BaseAgentState
 
 
+class RailTrainMetrics(TypedDict):
+    openIssues: int
+    efficiency: int
+    totalCarriages: int
+    healthyCarriages: int
+
+
 class RailTrain(TypedDict):
     id: str
     name: str
-    status: Literal["healthy", "warning", "critical"]
-    openIssues: int
-    efficiency: int
+    fleetType: str
+    operationalState: Literal["in-service", "maintenance", "out-of-service"]
+    healthStatus: Literal["healthy", "warning", "critical"]
+    currentLocation: str
+    metrics: RailTrainMetrics
 
 
 class RailIssue(TypedDict):
     id: str
     trainId: str
     carriageId: str
-    system: str
+    systemCategory: str
     title: str
     priority: Literal["high", "medium", "low"]
     status: Literal["open", "in-progress", "closed"]

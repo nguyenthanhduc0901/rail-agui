@@ -2,7 +2,7 @@
 
 import { Fragment, useState, useMemo, useEffect, ReactNode } from 'react';
 import { X } from 'lucide-react';
-import { getCarriageSystems, getActiveIssuesByCarriage, type SystemHealth, type Carriage, type Train, type Assignee } from '../data/railDataSource';
+import { getCarriageSystems, getActiveIssuesByCarriage, getTechnicianById, type SystemHealth, type Carriage, type Train, type Technician } from '../data/railDataSource';
 
 interface HealthStatus {
   color: string;
@@ -113,14 +113,14 @@ function FilterSelect({ label, value, onChange, options }: { label: string; valu
   );
 }
 
-function AssigneeAvatar({ assignee }: { assignee?: Assignee }): ReactNode {
-  if (assignee) {
+function AssigneeAvatar({ technician }: { technician?: Technician }): ReactNode {
+  if (technician) {
     return (
       <div
-        className={`w-8 h-8 rounded-full flex items-center justify-center text-white ${assignee.color} shadow-sm border-2 border-white cursor-help`}
-        title={`Assigned to ${assignee.name}`}
+        className={`w-8 h-8 rounded-full flex items-center justify-center text-white ${technician.avatarColor} shadow-sm border-2 border-white cursor-help`}
+        title={`Assigned to ${technician.name} (${technician.specialty})`}
       >
-        {assignee.initials}
+        {technician.initials}
       </div>
     );
   }
@@ -268,22 +268,24 @@ export function CarriageDetailsModal({ isOpen, onClose, train, carriage }: Carri
   );
 
   const assigneeOptions = useMemo(() => {
-    const names = rawIssues.map(i => i.assignee?.name).filter((n): n is string => Boolean(n));
+    const names = rawIssues
+      .map(i => getTechnicianById(i.assigneeId)?.name)
+      .filter((n): n is string => Boolean(n));
     return ['All', 'Unassigned', ...new Set(names)].map(a => ({ value: a, label: a }));
   }, [rawIssues]);
 
   const filteredIssues = useMemo(() => {
     let result = [...rawIssues];
-    if (filterSystem !== 'All')   result = result.filter(i => i.system === filterSystem);
+    if (filterSystem !== 'All')   result = result.filter(i => i.systemCategory === filterSystem);
     if (filterPriority !== 'All') result = result.filter(i => i.priority === filterPriority.toLowerCase());
     if (filterAssignee !== 'All') {
       result = filterAssignee === 'Unassigned'
-        ? result.filter(i => !i.assignee)
-        : result.filter(i => i.assignee?.name === filterAssignee);
+        ? result.filter(i => !i.assigneeId)
+        : result.filter(i => getTechnicianById(i.assigneeId)?.name === filterAssignee);
     }
     return result.sort((a, b) => {
-      if (sortBy === 'date-desc') return new Date(b.date ?? 0).getTime() - new Date(a.date ?? 0).getTime();
-      if (sortBy === 'date-asc')  return new Date(a.date ?? 0).getTime() - new Date(b.date ?? 0).getTime();
+      if (sortBy === 'date-desc') return new Date(b.planning.reportedAt).getTime() - new Date(a.planning.reportedAt).getTime();
+      if (sortBy === 'date-asc')  return new Date(a.planning.reportedAt).getTime() - new Date(b.planning.reportedAt).getTime();
       if (sortBy === 'priority')  return PRIORITY_LEVEL[b.priority] - PRIORITY_LEVEL[a.priority];
       return 0;
     });
@@ -363,7 +365,7 @@ export function CarriageDetailsModal({ isOpen, onClose, train, carriage }: Carri
               {/* System overlays */}
               {systems.map(system => {
                 const status    = getHealthStatus(system.health);
-                const hasIssues = rawIssues.some(i => i.system === system.name);
+                const hasIssues = rawIssues.some(i => i.systemCategory === system.name);
                 return (
                   <Fragment key={system.id}>
                     {renderSystemUI(system, hasIssues, status)}
@@ -420,7 +422,7 @@ export function CarriageDetailsModal({ isOpen, onClose, train, carriage }: Carri
                           {issue.priority}
                         </span>
                       </div>
-                      <span className="text-xs font-medium text-slate-400 dark:text-slate-500">{issue.date}</span>
+                      <span className="text-xs font-medium text-slate-400 dark:text-slate-500">{new Date(issue.planning.reportedAt).toLocaleDateString()}</span>
                     </div>
 
                     <div className="mb-4">
@@ -438,13 +440,13 @@ export function CarriageDetailsModal({ isOpen, onClose, train, carriage }: Carri
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
-                        {issue.system}
+                        {issue.systemCategory}
                       </div>
                       <div className="flex-1" />
                       <span className={`px-2.5 py-1.5 rounded-lg capitalize border ${issue.status === 'open' ? 'bg-red-50 text-red-600 border-red-100 dark:bg-red-950/40 dark:text-red-300 dark:border-red-900' : 'bg-blue-50 text-blue-600 border-blue-100 dark:bg-sky-950/40 dark:text-sky-300 dark:border-sky-900'}`}>
                         {issue.status.replace('-', ' ')}
                       </span>
-                      <AssigneeAvatar assignee={issue.assignee} />
+                      <AssigneeAvatar technician={getTechnicianById(issue.assigneeId)} />
                     </div>
                   </div>
                 ))

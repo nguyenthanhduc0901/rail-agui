@@ -82,7 +82,7 @@ def _filter_issues(
             return False
         if carriage_id and issue.get("carriageId") != carriage_id:
             return False
-        if system and issue.get("system") != system:
+        if system and issue.get("systemCategory") != system:
             return False
         if priority and issue.get("priority") != priority:
             return False
@@ -91,7 +91,7 @@ def _filter_issues(
         return True
 
     filtered = [issue for issue in issues if matches(issue)]
-    filtered.sort(key=lambda issue: issue.get("date", ""), reverse=True)
+    filtered.sort(key=lambda issue: (issue.get("planning") or {}).get("reportedAt", ""), reverse=True)
     return filtered
 
 
@@ -109,9 +109,9 @@ def get_fleet_overview() -> dict[str, Any]:
     result = {
         "totalTrains": len(trains),
         "byStatus": {
-            "healthy": sum(1 for t in trains if t.get("status") == "healthy"),
-            "warning": sum(1 for t in trains if t.get("status") == "warning"),
-            "critical": sum(1 for t in trains if t.get("status") == "critical"),
+            "healthy": sum(1 for t in trains if t.get("healthStatus") == "healthy"),
+            "warning": sum(1 for t in trains if t.get("healthStatus") == "warning"),
+            "critical": sum(1 for t in trains if t.get("healthStatus") == "critical"),
         },
         "openIssues": {
             "total": len(open_issues),
@@ -178,14 +178,14 @@ def get_train_summary(train_id: str) -> dict[str, Any]:
         _log_tool("get_train_summary:not_found", train_id=normalized_train_id or "")
         return {"error": f"Train '{normalized_train_id or train_id}' not found."}
 
-    carriages = _get_rail_data().get("carriagesByTrain", {}).get(normalized_train_id, [])
+    carriages = _get_rail_data().get("carriages", {}).get(normalized_train_id, [])
     all_issues = _filter_issues(train_id=normalized_train_id)
 
     carriage_summary = {
         "total": len(carriages),
-        "healthy": sum(1 for c in carriages if c.get("status") == "healthy"),
-        "warning": sum(1 for c in carriages if c.get("status") == "warning"),
-        "critical": sum(1 for c in carriages if c.get("status") == "critical"),
+        "healthy": sum(1 for c in carriages if c.get("healthStatus") == "healthy"),
+        "warning": sum(1 for c in carriages if c.get("healthStatus") == "warning"),
+        "critical": sum(1 for c in carriages if c.get("healthStatus") == "critical"),
     }
 
     issue_summary = {
@@ -204,15 +204,15 @@ def get_train_summary(train_id: str) -> dict[str, Any]:
     systems: dict[str, int] = {}
     for i in all_issues:
         if i.get("status") != "closed":
-            s = i.get("system", "Unknown")
+            s = i.get("systemCategory", "Unknown")
             systems[s] = systems.get(s, 0) + 1
     issue_summary["bySystems"] = systems
 
     result = {
         "id": train.get("id"),
         "name": train.get("name"),
-        "status": train.get("status"),
-        "efficiency": train.get("efficiency"),
+        "status": train.get("healthStatus"),
+        "efficiency": (train.get("metrics") or {}).get("efficiency"),
         "carriages": carriage_summary,
         "issues": issue_summary,
     }
@@ -270,7 +270,7 @@ def list_issues(
             "id": i.get("id"),
             "trainId": i.get("trainId"),
             "carriageId": i.get("carriageId"),
-            "system": i.get("system"),
+            "systemCategory": i.get("systemCategory"),
             "title": i.get("title") or i.get("description", "")[:80],
             "priority": i.get("priority"),
             "status": i.get("status"),
@@ -318,7 +318,7 @@ async def generate_maintenance_plan_stream(
     steps = [
         {
             "id": issue.get("id", f"step-{i + 1}"),
-            "title": f"{issue.get('trainId')} / {issue.get('carriageId')} — {issue.get('system')}",
+            "title": f"{issue.get('trainId')} / {issue.get('carriageId')} — {issue.get('systemCategory')}",
             "details": (issue.get("title") or issue.get("description", ""))[:80],
             "priority": issue.get("priority", "medium"),
             "done": False,

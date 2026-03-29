@@ -33,7 +33,7 @@ export function FleetDashboard() {
   } = useRailDashboardAI()
 
   const systemOptions = useMemo(() => {
-    return ['all', ...new Set(issues.map((issue) => issue.system))]
+    return ['all', ...new Set(issues.map((issue) => issue.systemCategory))]
   }, [])
 
   const filteredTrains = useMemo(() => {
@@ -44,7 +44,7 @@ export function FleetDashboard() {
 
       const trainIssues = issues.filter((issue) => issue.trainId === train.id)
 
-      if (filters.system !== 'all' && !trainIssues.some((issue) => issue.system === filters.system)) {
+      if (filters.system !== 'all' && !trainIssues.some((issue) => issue.systemCategory === filters.system)) {
         return false
       }
 
@@ -66,7 +66,7 @@ export function FleetDashboard() {
         return false
       }
 
-      if (filters.system !== 'all' && issue.system !== filters.system) return false
+      if (filters.system !== 'all' && issue.systemCategory !== filters.system) return false
       if (filters.priority !== 'all' && issue.priority !== filters.priority) return false
       if (filters.status !== 'all' && issue.status !== filters.status) return false
 
@@ -166,11 +166,11 @@ export function FleetDashboard() {
 
       <div className="space-y-16">
         {filteredTrains.map((train) => {
-          const config = statusConfig[train.status]
-          const carriages = getCarriagesByTrain(train.id)
-          const headCarriage = carriages[0]
-          const remainingCarriages = carriages.slice(1)
-          const headCarriageConfig = headCarriage ? statusConfig[headCarriage.status] : config
+          const config = statusConfig[train.healthStatus]
+          const carriageList = getCarriagesByTrain(train.id)
+          const headCarriage = carriageList[0]
+          const remainingCarriages = carriageList.slice(1)
+          const headCarriageConfig = headCarriage ? statusConfig[headCarriage.healthStatus] : config
 
           return (
             <div key={train.id} className="relative rounded-2xl bg-white p-6 shadow-[0_10px_30px_rgba(0,0,0,0.04),0_1px_3px_rgba(0,0,0,0.02)] hover:shadow-[0_15px_35px_rgba(0,0,0,0.07)] hover:-translate-y-0.5 transition-[transform,box-shadow] duration-200 dark:bg-slate-900">
@@ -184,11 +184,11 @@ export function FleetDashboard() {
                 <div className="flex items-center gap-6">
                   <div className="text-right">
                     <p className="text-xs text-slate-500 uppercase font-bold tracking-wider dark:text-slate-400">Efficiency</p>
-                    <p className={`font-bold text-lg ${train.efficiency >= 80 ? 'text-emerald-600' : train.efficiency >= 60 ? 'text-amber-500' : 'text-red-500'}`}>{train.efficiency}%</p>
+                    <p className={`font-bold text-lg ${train.metrics.efficiency >= 80 ? 'text-emerald-600' : train.metrics.efficiency >= 60 ? 'text-amber-500' : 'text-red-500'}`}>{train.metrics.efficiency}%</p>
                   </div>
                   <div className="text-right">
                     <p className="text-xs text-slate-500 uppercase font-bold tracking-wider dark:text-slate-400">Issues</p>
-                    <p className={`font-bold text-lg ${train.status === 'critical' ? 'issue-count-danger' : config.text}`}>{train.openIssues}</p>
+                    <p className={`font-bold text-lg ${train.healthStatus === 'critical' ? 'issue-count-danger' : config.text}`}>{train.metrics.openIssues}</p>
                   </div>
 
                 </div>
@@ -237,12 +237,12 @@ export function FleetDashboard() {
       <div className="space-y-1">
         <div className="flex justify-between items-center text-[9px] text-slate-600">
           <span>Issues</span>
-          <span className="font-bold">{headCarriage?.issues ?? 0}</span>
+          <span className="font-bold">{headCarriage?.openIssuesCount ?? 0}</span>
         </div>
         <div className="h-1.5 bg-slate-200 rounded-full overflow-hidden">
           <div
             className={`h-full ${headCarriageConfig.progress} rounded-full`}
-            style={{ width: `${Math.min((headCarriage?.issues ?? 0) * 20, 100)}%` }}
+            style={{ width: `${Math.min((headCarriage?.openIssuesCount ?? 0) * 20, 100)}%` }}
           />
         </div>
       </div>
@@ -265,7 +265,7 @@ export function FleetDashboard() {
 </div>
 
                     {remainingCarriages.map((carriage: Carriage, index: number) => {
-                      const carriageConfig = statusConfig[carriage.status]
+                      const carriageConfig = statusConfig[carriage.healthStatus]
                       const isLast = index === remainingCarriages.length - 1
                       const shapeClasses = isLast ? "rounded-r-[3rem] rounded-l-lg" : "rounded-lg"
 
@@ -291,10 +291,10 @@ export function FleetDashboard() {
                                 <div className="space-y-1">
                                   <div className="flex justify-between items-center text-[9px] text-slate-600">
                                     <span>Issues</span>
-                                    <span className="font-bold">{carriage.issues}</span>
+                                    <span className="font-bold">{carriage.openIssuesCount}</span>
                                   </div>
                                   <div className="h-1.5 bg-slate-200 rounded-full overflow-hidden">
-                                    <div className={`h-full ${carriageConfig.progress} rounded-full`} style={{ width: `${Math.min(carriage.issues * 20, 100)}%` }} />
+                                    <div className={`h-full ${carriageConfig.progress} rounded-full`} style={{ width: `${Math.min(carriage.openIssuesCount * 20, 100)}%` }} />
                                   </div>
                                 </div>
                               </div>
