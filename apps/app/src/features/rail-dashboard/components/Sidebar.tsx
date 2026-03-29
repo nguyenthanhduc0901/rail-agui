@@ -48,7 +48,7 @@ export function Sidebar({ links }: SidebarProps): ReactNode {
                 className={
                   `group flex items-center gap-3 rounded-xl border px-3 py-2.5 transition ${
                     isActive
-                      ? 'border-emerald-200 bg-emerald-50 text-emerald-600 dark:border-emerald-500/40 dark:bg-emerald-500/10 dark:text-emerald-300'
+                      ? 'border-blue-100 border-l-[3px] border-l-blue-600 bg-[#EFF6FF] text-[#2563EB] font-semibold dark:border-blue-800/40 dark:border-l-blue-400 dark:bg-blue-500/10 dark:text-blue-300'
                       : 'border-transparent text-slate-600 hover:border-slate-200 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-300 dark:hover:border-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-100'
                   }`
                 }

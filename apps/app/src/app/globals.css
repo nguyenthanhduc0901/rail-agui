@@ -39,6 +39,17 @@
   /* Fonts */
   --font-body: "Fredoka", "DM Sans", "Segoe UI", sans-serif;
   --font-code: "JetBrains Mono", "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
+
+  /* Rail Dashboard Design System */
+  --rd-primary: #2563EB;
+  --rd-primary-light: #EFF6FF;
+  --rd-status-success: #10B981;
+  --rd-status-warning: #F59E0B;
+  --rd-status-danger: #EF4444;
+  --rd-status-danger-glow: rgba(239, 68, 68, 0.4);
+  --rd-train-body-top: #A6E3E9;
+  --rd-train-body-bottom: #71C9CE;
+  --rd-train-window: #1E293B;
 }
 
 :root.dark {
@@ -162,4 +173,67 @@ body, html {
 :root.dark .rail-scrollbar::-webkit-scrollbar-thumb {
   background: linear-gradient(180deg, #475569 0%, #334155 100%);
   background-clip: padding-box;
+}
+
+/* ─── Rail Dashboard Component Styles ─── */
+
+/* Train car body - gradient by status */
+.train-car-healthy {
+  background: linear-gradient(180deg, #A6E3E9 0%, #71C9CE 100%);
+  border-color: #5BBEC4;
+}
+
+.train-car-warning {
+  background: linear-gradient(180deg, #FDE68A 0%, #FBBF24 100%);
+  border-color: #F59E0B;
+}
+
+.train-car-critical {
+  background: linear-gradient(180deg, #FECACA 0%, #FCA5A5 100%);
+  border-color: #EF4444;
+}
+
+/* Train window with glass glare effect */
+.train-window-glass {
+  background-color: #1E293B;
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+}
+
+.train-window-glass::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    to bottom right,
+    rgba(255, 255, 255, 0.15) 0%,
+    rgba(255, 255, 255, 0) 40%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: rotate(30deg);
+  pointer-events: none;
+}
+
+/* Status dot - danger glow + pulse */
+@keyframes pulse-danger {
+  0%   { box-shadow: 0 0 0 0   rgba(239, 68, 68, 0.7); }
+  70%  { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0);   }
+  100% { box-shadow: 0 0 0 0   rgba(239, 68, 68, 0);   }
+}
+
+.status-dot-danger {
+  background-color: var(--rd-status-danger);
+  box-shadow: 0 0 8px var(--rd-status-danger-glow);
+  animation: pulse-danger 2s infinite;
+}
+
+/* Issue count - danger highlight */
+.issue-count-danger {
+  color: var(--rd-status-danger);
+  font-weight: 700;
+  text-shadow: 0 2px 4px var(--rd-status-danger-glow);
 }

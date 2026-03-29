@@ -5,10 +5,10 @@ import { useRailDashboardAI } from '../context/rail-dashboard-ai-context'
 
 type StatusKey = 'healthy' | 'warning' | 'critical'
 
-const statusConfig: Record<StatusKey, { dot: string; text: string; progress: string; label: string; bg: string }> = {
-  healthy: { dot: 'bg-emerald-400', text: 'text-emerald-600', progress: 'bg-emerald-500', label: 'Healthy', bg: 'bg-[#AFEEEE] border-[#7BCFCF]' },
-  warning: { dot: 'bg-amber-400', text: 'text-amber-600', progress: 'bg-amber-500', label: 'Warning', bg: 'bg-[#AFEEEE] border-[#7BCFCF]' },
-  critical: { dot: 'bg-red-400', text: 'text-red-600', progress: 'bg-red-500', label: 'Critical', bg: 'bg-[#AFEEEE] border-[#7BCFCF]' },
+const statusConfig: Record<StatusKey, { dot: string; text: string; progress: string; label: string; bodyClass: string }> = {
+  healthy:  { dot: 'bg-emerald-400 animate-pulse', text: 'text-emerald-600', progress: 'bg-emerald-500', label: 'Healthy',  bodyClass: 'train-car-healthy' },
+  warning:  { dot: 'bg-amber-400 animate-pulse',   text: 'text-amber-500',   progress: 'bg-amber-500',   label: 'Warning',  bodyClass: 'train-car-warning' },
+  critical: { dot: 'status-dot-danger',             text: 'text-red-500',     progress: 'bg-red-500',     label: 'Critical', bodyClass: 'train-car-critical' },
 }
   
 const TrainBogie = ({ className }: { className?: string }) => (
@@ -19,9 +19,7 @@ const TrainBogie = ({ className }: { className?: string }) => (
 )
 
 const CarriageWindow = () => (
-  <div className="relative flex-1 h-8 bg-slate-800/90 rounded-sm border border-slate-700/60 shadow-inner">
-    <div className="absolute top-1 right-2 w-5 h-1 bg-white/20 rounded-full" />
-  </div>
+  <div className="train-window-glass flex-1 h-8 border border-slate-700/60 shadow-inner" />
 )
 
 export function FleetDashboard() {
@@ -175,22 +173,22 @@ export function FleetDashboard() {
           const headCarriageConfig = headCarriage ? statusConfig[headCarriage.status] : config
 
           return (
-            <div key={train.id} className="relative rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-colors dark:border-slate-800 dark:bg-slate-900 dark:shadow-none">
+            <div key={train.id} className="relative rounded-2xl bg-white p-6 shadow-[0_10px_30px_rgba(0,0,0,0.04),0_1px_3px_rgba(0,0,0,0.02)] hover:shadow-[0_15px_35px_rgba(0,0,0,0.07)] hover:-translate-y-0.5 transition-[transform,box-shadow] duration-200 dark:bg-slate-900">
               
               <div className="mb-6 flex items-center justify-between border-b border-slate-100 pb-4 dark:border-slate-800">
                 <div className="flex items-center gap-3">
-                  <div className={`w-3 h-3 rounded-full ${config.dot} animate-pulse`} />
+                  <div className={`w-3 h-3 rounded-full ${config.dot}`} />
                   <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">{train.name} <span className="ml-2 text-sm font-normal text-slate-500 dark:text-slate-400">(ID: {train.id})</span></h3>
                 </div>
                 
                 <div className="flex items-center gap-6">
                   <div className="text-right">
                     <p className="text-xs text-slate-500 uppercase font-bold tracking-wider dark:text-slate-400">Efficiency</p>
-                    <p className="font-bold text-slate-800 dark:text-slate-100">{train.efficiency}%</p>
+                    <p className={`font-bold text-lg ${train.efficiency >= 80 ? 'text-emerald-600' : train.efficiency >= 60 ? 'text-amber-500' : 'text-red-500'}`}>{train.efficiency}%</p>
                   </div>
                   <div className="text-right">
                     <p className="text-xs text-slate-500 uppercase font-bold tracking-wider dark:text-slate-400">Issues</p>
-                    <p className={`font-bold ${config.text}`}>{train.openIssues}</p>
+                    <p className={`font-bold text-lg ${train.status === 'critical' ? 'issue-count-danger' : config.text}`}>{train.openIssues}</p>
                   </div>
 
                 </div>
@@ -216,7 +214,7 @@ export function FleetDashboard() {
   onClick={() => headCarriage && openModal(train, headCarriage)}
 >
   
-  <div className={`absolute inset-0 border-2 ${headCarriageConfig.bg} rounded-tl-[100px] rounded-bl-2xl rounded-r-lg overflow-hidden shadow-md flex flex-col`}>
+  <div className={`absolute inset-0 border-2 ${headCarriageConfig.bodyClass} rounded-tl-[100px] rounded-bl-2xl rounded-r-lg overflow-hidden shadow-md flex flex-col`}>
     
     <div className="absolute top-2 left-7 w-24 h-14 bg-slate-800/90 rounded-tl-[80px] rounded-tr-md rounded-bl-lg border-r-2 border-b-2 border-slate-700/50 shadow-inner flex items-center justify-center">
       <div className="absolute top-2 right-4 w-8 h-1 bg-white/20 rounded-full rotate-[-10deg]" />
@@ -280,7 +278,7 @@ export function FleetDashboard() {
                             onClick={() => openModal(train, carriage)}
                           >
                             
-                            <div className={`absolute inset-0 border-2 ${carriageConfig.bg} ${shapeClasses} overflow-hidden shadow-md flex flex-col`}>
+                            <div className={`absolute inset-0 border-2 ${carriageConfig.bodyClass} ${shapeClasses} overflow-hidden shadow-md flex flex-col`}>
                               <div className="absolute top-6 left-0 right-0 px-4 flex gap-2">
                                 <CarriageWindow />
                                 <CarriageWindow />
