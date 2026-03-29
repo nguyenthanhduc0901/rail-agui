@@ -1,6 +1,7 @@
 ﻿"use client";
 
-import { Fragment, useState, useMemo, useEffect, ReactNode } from 'react';
+import { Fragment, useState, useMemo, ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { getCarriageSystems, getActiveIssuesByCarriage, getTechnicianById, type SystemHealth, type Carriage, type Train, type Technician } from '../data/railDataSource';
 
@@ -16,26 +17,26 @@ interface HealthStatus {
 const getHealthStatus = (health: number): HealthStatus => {
   if (health >= 85) return {
     color: 'text-emerald-600', bg: 'bg-emerald-500',
-    glow: 'shadow-[0_0_8px_rgba(16,185,129,0.2)]', label: 'Healthy',
+    glow: 'shadow-[0_0_14px_rgba(16,185,129,0.45)]', label: 'Healthy',
     border: 'border-emerald-500/30', lightBg: 'bg-emerald-50',
   };
   if (health >= 70) return {
     color: 'text-amber-600', bg: 'bg-amber-500',
-    glow: 'shadow-[0_0_8px_rgba(245,158,11,0.2)]', label: 'Warning',
+    glow: 'shadow-[0_0_14px_rgba(245,158,11,0.45)]', label: 'Warning',
     border: 'border-amber-500/30', lightBg: 'bg-amber-50',
   };
   return {
     color: 'text-red-600', bg: 'bg-red-500',
-    glow: 'shadow-[0_0_12px_rgba(239,68,68,0.3)]', label: 'Critical',
+    glow: 'shadow-[0_0_20px_rgba(239,68,68,0.65)]', label: 'Critical',
     border: 'border-red-500/30', lightBg: 'bg-red-50',
   };
 };
 
 const getPriorityStyle = (priority: string): string => ({
-  high:   'bg-red-50 text-red-700 border-red-200',
-  medium: 'bg-amber-50 text-amber-700 border-amber-200',
-  low:    'bg-blue-50 text-blue-700 border-blue-200',
-}[priority] ?? 'bg-slate-50 text-slate-700 border-slate-200');
+  high:   'bg-red-100 text-red-700',
+  medium: 'bg-amber-100 text-amber-700',
+  low:    'bg-blue-100 text-blue-700',
+}[priority] ?? 'bg-slate-100 text-slate-700');
 
 const PRIORITY_LEVEL: Record<string, number> = { high: 3, medium: 2, low: 1 };
 
@@ -90,8 +91,8 @@ function SystemTooltip({ system, hasIssues, status }: { system: SystemHealth; ha
 function PingRings({ status, rounded = 'rounded-full' }: { status: HealthStatus; rounded?: string }): ReactNode {
   return (
     <>
-      <span className={`absolute -inset-2 ${status.bg} opacity-10 ${rounded}`} />
-      <span className={`absolute -inset-4 ${status.bg} ${rounded} animate-breathe`} />
+      <span className={`absolute -inset-2 ${status.bg} opacity-20 ${rounded}`} />
+      <span className={`absolute -inset-4 ${status.bg} opacity-10 ${rounded} animate-breathe`} />
     </>
   );
 }
@@ -252,11 +253,6 @@ export function CarriageDetailsModal({ isOpen, onClose, train, carriage }: Carri
   const [filterAssignee, setFilterAssignee] = useState('All');
   const [sortBy,         setSortBy]         = useState('date-desc');
 
-  useEffect(() => {
-    document.body.style.overflow = isOpen ? 'hidden' : 'unset';
-    return () => { document.body.style.overflow = 'unset'; };
-  }, [isOpen]);
-
   const systems = useMemo(
     () => (train && carriage ? getCarriageSystems(train.id, carriage.id) : []),
     [train, carriage],
@@ -293,11 +289,13 @@ export function CarriageDetailsModal({ isOpen, onClose, train, carriage }: Carri
 
   if (!isOpen || !carriage) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+  const portalRoot = typeof document !== 'undefined' ? document.getElementById('app-modal-portal') : null;
+
+  const modalContent = (
+    <div className="absolute inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-slate-800/40 backdrop-blur-md" onClick={onClose} />
 
-      <div className="relative bg-white dark:bg-slate-900 w-full max-w-7xl h-[85vh] rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_60px_rgba(0,0,0,0.45)] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200 border border-slate-100 dark:border-slate-800">
+      <div className="relative bg-white dark:bg-slate-900 w-full max-w-7xl h-[85vh] rounded-3xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] dark:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.50)] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200 border border-black/5 dark:border-slate-800">
 
         {/* Header */}
         <div className="bg-white dark:bg-slate-900 px-8 py-5 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center z-10 shrink-0">
@@ -322,7 +320,11 @@ export function CarriageDetailsModal({ isOpen, onClose, train, carriage }: Carri
         <div className="flex flex-1 overflow-hidden bg-slate-50/50 dark:bg-slate-950">
 
           {/* LEFT: Carriage Blueprint */}
-          <div className="w-[55%] bg-white dark:bg-slate-900 relative overflow-hidden flex items-center justify-center p-8 border-r border-slate-200 dark:border-slate-800">
+          <div className={`w-[55%] relative overflow-hidden flex items-center justify-center p-8 border-r border-slate-200 dark:border-slate-800 ${
+            carriage.healthStatus === 'critical' ? 'bg-red-50/70 dark:bg-red-950/20' :
+            carriage.healthStatus === 'warning'  ? 'bg-amber-50/70 dark:bg-amber-950/20' :
+            'bg-white dark:bg-slate-900'
+          }`}>
             <div
               className="absolute inset-0 opacity-[0.4]"
               style={{ backgroundImage: 'linear-gradient(#cbd5e1 1px, transparent 1px), linear-gradient(90deg, #cbd5e1 1px, transparent 1px)', backgroundSize: '24px 24px' }}
@@ -411,14 +413,14 @@ export function CarriageDetailsModal({ isOpen, onClose, train, carriage }: Carri
                 filteredIssues.map(issue => (
                   <div
                     key={issue.id}
-                    className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-md hover:border-blue-200 dark:hover:border-sky-700 transition-all duration-200 group"
+                    className="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05),0_2px_4px_-2px_rgba(0,0,0,0.05)] hover:shadow-[0_10px_15px_-3px_rgba(0,0,0,0.08),0_4px_6px_-4px_rgba(0,0,0,0.04)] hover:-translate-y-0.5 transition-[transform,box-shadow] duration-200 group"
                   >
                     <div className="flex justify-between items-start mb-3">
                       <div className="flex gap-2 items-center">
                         <span className="text-xs font-mono font-bold text-slate-500 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-md">
                           {issue.id}
                         </span>
-                        <span className={`text-[10px] font-bold uppercase px-2.5 py-1 rounded-md border ${getPriorityStyle(issue.priority)}`}>
+                        <span className={`text-[10px] font-bold uppercase px-2.5 py-1 rounded-full ${getPriorityStyle(issue.priority)}`}>
                           {issue.priority}
                         </span>
                       </div>
@@ -435,7 +437,7 @@ export function CarriageDetailsModal({ isOpen, onClose, train, carriage }: Carri
                     </div>
 
                     <div className="flex items-center gap-3 text-xs font-medium">
-                      <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 px-2.5 py-1.5 rounded-lg">
+                      <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-2.5 py-1.5 rounded-lg">
                         <svg className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -443,7 +445,13 @@ export function CarriageDetailsModal({ isOpen, onClose, train, carriage }: Carri
                         {issue.systemCategory}
                       </div>
                       <div className="flex-1" />
-                      <span className={`px-2.5 py-1.5 rounded-lg capitalize border ${issue.status === 'open' ? 'bg-red-50 text-red-600 border-red-100 dark:bg-red-950/40 dark:text-red-300 dark:border-red-900' : 'bg-blue-50 text-blue-600 border-blue-100 dark:bg-sky-950/40 dark:text-sky-300 dark:border-sky-900'}`}>
+                      <span className={`px-2.5 py-1.5 rounded-full capitalize font-semibold text-xs ${
+                        issue.status === 'open'
+                          ? 'bg-red-100 text-red-600 dark:bg-red-950/40 dark:text-red-300'
+                          : issue.status === 'in-progress'
+                            ? 'bg-blue-100 text-blue-600 dark:bg-sky-950/40 dark:text-sky-300'
+                            : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'
+                      }`}>
                         {issue.status.replace('-', ' ')}
                       </span>
                       <AssigneeAvatar technician={getTechnicianById(issue.assigneeId)} />
@@ -458,4 +466,6 @@ export function CarriageDetailsModal({ isOpen, onClose, train, carriage }: Carri
       </div>
     </div>
   );
+
+  return portalRoot ? createPortal(modalContent, portalRoot) : modalContent;
 }
