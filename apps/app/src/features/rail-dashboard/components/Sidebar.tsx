@@ -1,10 +1,10 @@
 import { useState, ReactNode } from 'react'
-import { ChevronLeft, ChevronRight, LayoutDashboard } from 'lucide-react'
+import { ChevronLeft, ChevronRight, LayoutDashboard, type LucideIcon } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import type { NavLink } from '../data/railDataSource'
 
-const iconMap = {
+const iconMap: Record<string, LucideIcon> = {
   Dashboard: LayoutDashboard,
 }
 

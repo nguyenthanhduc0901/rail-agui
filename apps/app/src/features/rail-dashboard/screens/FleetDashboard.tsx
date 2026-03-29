@@ -1,5 +1,5 @@
-import { useMemo, useState, ReactNode, CSSProperties } from 'react'
-import { trains, issues, getCarriagesByTrain } from '../data/railDataSource'
+import { Fragment, useMemo, useState } from 'react'
+import { trains, issues, getCarriagesByTrain, type Train, type Carriage } from '../data/railDataSource'
 import { CarriageDetailsModal } from '../components/CarriageDetailsModal'
 import { useRailDashboardAI } from '../context/rail-dashboard-ai-context'
 
@@ -9,7 +9,7 @@ const statusConfig = {
   critical: { dot: 'bg-red-400', text: 'text-red-600', progress: 'bg-red-500', label: 'Critical', bg: 'bg-[#AFEEEE] border-[#7BCFCF]' },
 }
   
-const TrainBogie = ({ className }) => (
+const TrainBogie = ({ className }: { className?: string }) => (
   <div className={`absolute -bottom-3 flex gap-1 bg-slate-600 p-1.5 rounded-full z-10 shadow-sm ${className}`}>
     <div className="w-4 h-4 rounded-full bg-slate-200 border-[3px] border-slate-600" />
     <div className="w-4 h-4 rounded-full bg-slate-200 border-[3px] border-slate-600" />
@@ -24,8 +24,8 @@ const CarriageWindow = () => (
 
 export function FleetDashboard() {
   const [modalOpen, setModalOpen] = useState(false)
-  const [selectedTrain, setSelectedTrain] = useState(null)
-  const [selectedCarriage, setSelectedCarriage] = useState(null)
+  const [selectedTrain, setSelectedTrain] = useState<Train | null>(null)
+  const [selectedCarriage, setSelectedCarriage] = useState<Carriage | null>(null)
   const {
     filters,
     updateFilters,
@@ -74,7 +74,7 @@ export function FleetDashboard() {
     }).length
   }, [filteredTrains, filters.priority, filters.status, filters.system])
 
-  const openModal = (train, carriage) => {
+  const openModal = (train: Train, carriage: Carriage) => {
     setSelectedTrain(train)
     setSelectedCarriage(carriage)
     setModalOpen(true)
@@ -270,7 +270,7 @@ export function FleetDashboard() {
                       const shapeClasses = isLast ? "rounded-r-[3rem] rounded-l-lg" : "rounded-lg"
 
                       return (
-                        <React.Fragment key={carriage.id}>
+                        <Fragment key={carriage.id}>
                           <div className="w-4 h-3 bg-slate-600 mb-6 flex-shrink-0 border-y border-slate-500 shadow-sm z-0" />
 
                           <div 
@@ -307,7 +307,7 @@ export function FleetDashboard() {
                             <TrainBogie className="left-[15%]" />
                             <TrainBogie className="right-[15%]" />
                           </div>
-                        </React.Fragment>
+                        </Fragment>
                       )
                     })}
                   </div>

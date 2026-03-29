@@ -1,46 +1,57 @@
 import generatedData from './rail-data.json';
 
-interface Train {
+export interface Train {
   id: string;
   name: string;
   status: 'healthy' | 'warning' | 'critical';
   openIssues: number;
   efficiency: number;
+  healthyCarriages: number;
 }
 
-interface Carriage {
+export interface Carriage {
   id: string;
   type: string;
   status: 'healthy' | 'warning' | 'critical';
   issues: number;
 }
 
-interface Issue {
+export interface Assignee {
+  name: string;
+  initials: string;
+  color: string;
+}
+
+export interface Issue {
   id: string;
   trainId: string;
   carriageId: string;
   system: string;
   title: string;
+  description: string;
   priority: 'high' | 'medium' | 'low';
   status: 'open' | 'in-progress' | 'closed';
+  assignee?: Assignee;
+  date?: string;
 }
 
-interface NavLink {
+export interface NavLink {
   label: string;
   to: string;
 }
 
-interface SystemHealth {
+export interface SystemHealth {
   id: string;
   name: string;
   health: number;
   trend: Array<{ day: string; value: number }>;
 }
 
-export const trains: Train[] = generatedData.trains;
-export const carriagesByTrain: Record<string, Carriage[]> = generatedData.carriagesByTrain;
-export const issues: Issue[] = generatedData.issues;
-export const navLinks: NavLink[] = generatedData.navLinks;
+// Use type assertion since JSON has string types but we validate at runtime
+export const trains = generatedData.trains as unknown as Train[];
+export const carriagesByTrain = generatedData.carriagesByTrain as unknown as Record<string, Carriage[]>;
+export const issues = generatedData.issues as unknown as Issue[];
+export const navLinks = generatedData.navLinks as NavLink[];
 
 const subsystemTemplates = [
   { key: 'brakes', label: 'Brakes' },

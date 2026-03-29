@@ -2,7 +2,7 @@
 
 import { Fragment, useState, useMemo, useEffect, ReactNode } from 'react';
 import { X } from 'lucide-react';
-import { getCarriageSystems, getActiveIssuesByCarriage, type SystemHealth, type Issue, type Carriage, type Train } from '../data/railDataSource';
+import { getCarriageSystems, getActiveIssuesByCarriage, type SystemHealth, type Carriage, type Train, type Assignee } from '../data/railDataSource';
 
 interface HealthStatus {
   color: string;
@@ -63,7 +63,7 @@ const SORT_OPTIONS = [
 
 // ─── SUB-COMPONENTS ────────────────────────────────────────────────────────────
 
-function SystemTooltip({ system, hasIssues, status }) {
+function SystemTooltip({ system, hasIssues, status }: { system: SystemHealth; hasIssues: boolean; status: HealthStatus }): ReactNode {
   return (
     <div className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 w-52 bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 p-3 opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none z-50 transform group-hover:-translate-y-1">
       <div className="flex justify-between items-center mb-2">
@@ -87,7 +87,7 @@ function SystemTooltip({ system, hasIssues, status }) {
   );
 }
 
-function PingRings({ status, rounded = 'rounded-full' }) {
+function PingRings({ status, rounded = 'rounded-full' }: { status: HealthStatus; rounded?: string }): ReactNode {
   return (
     <>
       <span className={`absolute -inset-2 ${status.bg} opacity-10 ${rounded}`} />
@@ -96,7 +96,7 @@ function PingRings({ status, rounded = 'rounded-full' }) {
   );
 }
 
-function FilterSelect({ label, value, onChange, options }) {
+function FilterSelect({ label, value, onChange, options }: { label: string; value: string; onChange: (v: string) => void; options: Array<{ value: string; label: string }> }): ReactNode {
   return (
     <div className="space-y-1">
       <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">{label}</label>
@@ -105,7 +105,7 @@ function FilterSelect({ label, value, onChange, options }) {
         value={value}
         onChange={(e) => onChange(e.target.value)}
       >
-        {options.map(opt => (
+        {options.map((opt: { value: string; label: string }) => (
           <option key={opt.value} value={opt.value}>{opt.label}</option>
         ))}
       </select>
@@ -113,7 +113,7 @@ function FilterSelect({ label, value, onChange, options }) {
   );
 }
 
-function AssigneeAvatar({ assignee }) {
+function AssigneeAvatar({ assignee }: { assignee?: Assignee }): ReactNode {
   if (assignee) {
     return (
       <div
@@ -136,7 +136,7 @@ function AssigneeAvatar({ assignee }) {
 
 // ─── SYSTEM BLUEPRINT RENDERING ────────────────────────────────────────────────
 
-function renderSystemUI(system, hasIssues, status) {
+function renderSystemUI(system: SystemHealth, hasIssues: boolean, status: HealthStatus): ReactNode {
   switch (system.name) {
     case 'HVAC':
       return (
@@ -239,7 +239,14 @@ function renderSystemUI(system, hasIssues, status) {
 
 // ─── MAIN COMPONENT ────────────────────────────────────────────────────────────
 
-export function CarriageDetailsModal({ isOpen, onClose, train, carriage }) {
+interface CarriageDetailsModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  train: Train | null;
+  carriage: Carriage | null;
+}
+
+export function CarriageDetailsModal({ isOpen, onClose, train, carriage }: CarriageDetailsModalProps): ReactNode {
   const [filterSystem,   setFilterSystem]   = useState('All');
   const [filterPriority, setFilterPriority] = useState('All');
   const [filterAssignee, setFilterAssignee] = useState('All');
@@ -261,7 +268,7 @@ export function CarriageDetailsModal({ isOpen, onClose, train, carriage }) {
   );
 
   const assigneeOptions = useMemo(() => {
-    const names = rawIssues.map(i => i.assignee?.name).filter(Boolean);
+    const names = rawIssues.map(i => i.assignee?.name).filter((n): n is string => Boolean(n));
     return ['All', 'Unassigned', ...new Set(names)].map(a => ({ value: a, label: a }));
   }, [rawIssues]);
 
@@ -275,8 +282,8 @@ export function CarriageDetailsModal({ isOpen, onClose, train, carriage }) {
         : result.filter(i => i.assignee?.name === filterAssignee);
     }
     return result.sort((a, b) => {
-      if (sortBy === 'date-desc') return new Date(b.date) - new Date(a.date);
-      if (sortBy === 'date-asc')  return new Date(a.date) - new Date(b.date);
+      if (sortBy === 'date-desc') return new Date(b.date ?? 0).getTime() - new Date(a.date ?? 0).getTime();
+      if (sortBy === 'date-asc')  return new Date(a.date ?? 0).getTime() - new Date(b.date ?? 0).getTime();
       if (sortBy === 'priority')  return PRIORITY_LEVEL[b.priority] - PRIORITY_LEVEL[a.priority];
       return 0;
     });

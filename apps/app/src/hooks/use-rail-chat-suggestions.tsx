@@ -19,10 +19,10 @@ export const useRailChatSuggestions = () => {
         : "Phân tích hệ thống nào đang phát sinh nhiều lỗi nhất";
 
     return [
-      trainScoped,
-      systemScoped,
-      "Lập kế hoạch bảo trì cho các sự cố priority high",
-      "Tạo widget tổng hợp 3 tàu cần ưu tiên xử lý",
+      { title: trainScoped, message: trainScoped },
+      { title: systemScoped, message: systemScoped },
+      { title: "Lập kế hoạch bảo trì cho các sự cố priority high", message: "Lập kế hoạch bảo trì cho các sự cố priority high" },
+      { title: "Tạo widget tổng hợp 3 tàu cần ưu tiên xử lý", message: "Tạo widget tổng hợp 3 tàu cần ưu tiên xử lý" },
     ];
   }, [filters.trainId, filters.system]);
 
