@@ -1,13 +1,18 @@
-import { useState } from 'react'
+import { useState, ReactNode } from 'react'
 import { ChevronLeft, ChevronRight, LayoutDashboard } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import type { NavLink } from '../data/railDataSource'
 
 const iconMap = {
   Dashboard: LayoutDashboard,
 }
 
-export function Sidebar({ links }) {
+interface SidebarProps {
+  links: NavLink[];
+}
+
+export function Sidebar({ links }: SidebarProps): ReactNode {
   const [collapsed, setCollapsed] = useState(false)
   const pathname = usePathname()
 

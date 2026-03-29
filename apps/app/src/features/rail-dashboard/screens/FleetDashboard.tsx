@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import { useMemo, useState, ReactNode, CSSProperties } from 'react'
 import { trains, issues, getCarriagesByTrain } from '../data/railDataSource'
 import { CarriageDetailsModal } from '../components/CarriageDetailsModal'
 import { useRailDashboardAI } from '../context/rail-dashboard-ai-context'

@@ -1,10 +1,19 @@
 ﻿"use client";
 
-import { Fragment, useState, useMemo, useEffect } from 'react';
+import { Fragment, useState, useMemo, useEffect, ReactNode } from 'react';
 import { X } from 'lucide-react';
-import { getCarriageSystems, getActiveIssuesByCarriage } from '../data/railDataSource';
+import { getCarriageSystems, getActiveIssuesByCarriage, type SystemHealth, type Issue, type Carriage, type Train } from '../data/railDataSource';
 
-const getHealthStatus = (health) => {
+interface HealthStatus {
+  color: string;
+  bg: string;
+  glow: string;
+  label: string;
+  border: string;
+  lightBg: string;
+}
+
+const getHealthStatus = (health: number): HealthStatus => {
   if (health >= 85) return {
     color: 'text-emerald-600', bg: 'bg-emerald-500',
     glow: 'shadow-[0_0_8px_rgba(16,185,129,0.2)]', label: 'Healthy',
@@ -22,13 +31,13 @@ const getHealthStatus = (health) => {
   };
 };
 
-const getPriorityStyle = (priority) => ({
+const getPriorityStyle = (priority: string): string => ({
   high:   'bg-red-50 text-red-700 border-red-200',
   medium: 'bg-amber-50 text-amber-700 border-amber-200',
   low:    'bg-blue-50 text-blue-700 border-blue-200',
 }[priority] ?? 'bg-slate-50 text-slate-700 border-slate-200');
 
-const PRIORITY_LEVEL = { high: 3, medium: 2, low: 1 };
+const PRIORITY_LEVEL: Record<string, number> = { high: 3, medium: 2, low: 1 };
 
 const SYSTEM_OPTIONS = [
   { value: 'All',     label: 'All Systems' },

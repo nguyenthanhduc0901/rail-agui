@@ -13,7 +13,9 @@ import {
   useRailToolRendering,
 } from "@/hooks";
 
-function RailDashboardWorkspace() {
+import { ReactNode } from "react";
+
+function RailDashboardWorkspace(): ReactNode {
   useChatHistoryGuard();
   useRailToolRendering();
   useRailDashboardAIControls();
