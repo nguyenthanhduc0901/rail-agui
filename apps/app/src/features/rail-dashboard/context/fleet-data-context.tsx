@@ -9,10 +9,6 @@ import {
   useState,
 } from "react";
 import {
-  trains as staticTrains,
-  carriages as staticCarriages,
-  technicians as staticTechnicians,
-  issues as staticIssues,
   type Train,
   type Carriage,
   type Technician,
@@ -21,17 +17,14 @@ import {
 
 export interface PlanStep {
   id: string;
-  planId: string;
-  order: number;
   issueId: string | null;
+  technicianId: string | null;
+  technicianName: string;
+  order: number;
   title: string;
   details?: string | null;
-  priority: "high" | "medium" | "low";
-  status: "pending" | "in-progress" | "done";
   estimatedHours?: number;
-  assigneeId?: string;
-  assigneeName?: string;
-  createdAt: string;
+  status: "pending" | "doing" | "done";
 }
 
 export interface FleetData {
@@ -45,22 +38,21 @@ export interface FleetData {
 }
 
 const FleetDataContext = createContext<FleetData>({
-  trains: staticTrains,
-  carriages: staticCarriages,
-  technicians: staticTechnicians,
-  issues: staticIssues,
+  trains: [],
+  carriages: {},
+  technicians: [],
+  issues: [],
   planSteps: [],
-  isLoading: false,
+  isLoading: true,
   refresh: () => {},
 });
 
 export function FleetDataProvider({ children }: { children: React.ReactNode }) {
-  const [trains, setTrains] = useState<Train[]>(staticTrains);
-  const [carriages, setCarriages] = useState<Record<string, Carriage[]>>(staticCarriages);
-  const [technicians, setTechnicians] = useState<Technician[]>(staticTechnicians);
-  const [issues, setIssues] = useState<Issue[]>(staticIssues);
+  const [trains, setTrains] = useState<Train[]>([]);
+  const [carriages, setCarriages] = useState<Record<string, Carriage[]>>({});
+  const [technicians, setTechnicians] = useState<Technician[]>([]);
+  const [issues, setIssues] = useState<Issue[]>([]);
   const [planSteps, setPlanSteps] = useState<PlanStep[]>([]);
-  // Start as loading so seeding waits for the first API response
   const [isLoading, setIsLoading] = useState(true);
   const isFetching = useRef(false);
 
@@ -72,14 +64,14 @@ export function FleetDataProvider({ children }: { children: React.ReactNode }) {
       const res = await fetch("/api/fleet", { cache: "no-store" });
       if (res.ok) {
         const data = await res.json();
-        if (data.trains) setTrains(data.trains);
-        if (data.carriages) setCarriages(data.carriages);
+        if (data.trains)      setTrains(data.trains);
+        if (data.carriages)   setCarriages(data.carriages);
         if (data.technicians) setTechnicians(data.technicians);
-        if (data.issues) setIssues(data.issues);
-        if (data.planSteps) setPlanSteps(data.planSteps);
+        if (data.issues)      setIssues(data.issues);
+        if (data.planSteps)   setPlanSteps(data.planSteps);
       }
     } catch {
-      // Keep static fallback data on network/parse error
+      // Keep current data on error
     } finally {
       setIsLoading(false);
       isFetching.current = false;
@@ -99,4 +91,7 @@ export function FleetDataProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-export const useFleetData = () => useContext(FleetDataContext);
+export function useFleetData(): FleetData {
+  return useContext(FleetDataContext);
+}
+

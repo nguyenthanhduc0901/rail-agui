@@ -4,7 +4,7 @@ import fs from "fs";
 
 export const dynamic = "force-dynamic";
 
-// Tailwind avatar colours — matches rail-data.json order (TECH-01…10)
+// Tailwind avatar colours â€” matches technicians ORDER BY id (TECH-01â€¦10)
 const AVATAR_COLORS = [
   "bg-emerald-500/80", "bg-teal-500/80",    "bg-cyan-500/80",    "bg-fuchsia-500/80",
   "bg-orange-500/80",  "bg-indigo-500/80",  "bg-rose-500/80",    "bg-lime-500/80",
@@ -16,101 +16,119 @@ export async function GET() {
 
   if (!fs.existsSync(dbPath)) {
     return NextResponse.json(
-      { error: "fleet.db not found — run `python build_db.py` inside apps/agent first" },
+      { error: "fleet.db not found â€” start the agent once to auto-create it" },
       { status: 503 },
     );
   }
 
   try {
-    // Dynamic import keeps the native addon out of the compilation graph
     const Database = (await import("better-sqlite3")).default;
     const db = new Database(dbPath, { readonly: true });
 
     const trainRows = db.prepare("SELECT * FROM trains").all() as Record<string, unknown>[];
     const carriageRows = db
-      .prepare("SELECT * FROM carriages ORDER BY sequence")
+      .prepare("SELECT * FROM carriages ORDER BY train_id, sequence")
       .all() as Record<string, unknown>[];
     const techRows = db
       .prepare("SELECT id, name, specialty FROM technicians ORDER BY id")
       .all() as Record<string, unknown>[];
+    // JOIN carriages so we can derive train_id per issue
     const issueRows = db
       .prepare(
-        "SELECT id, train_id, carriage_id, system_category, title, description, " +
-          "priority, status, assignee_id, reported_at, scheduled_date, estimated_hours " +
-          "FROM issues",
+        "SELECT i.id, c.train_id, i.carriage_id, i.system_category, i.title, " +
+          "i.description, i.priority, i.status, i.reported_at, i.scheduled_date, " +
+          "i.total_estimated_hours " +
+          "FROM issues i JOIN carriages c ON c.id = i.carriage_id",
       )
       .all() as Record<string, unknown>[];
+    // JOIN technicians so we can resolve technician_name without a second query
     const planStepRows = db
       .prepare(
-        "SELECT id, plan_id, seq_order, issue_id, title, details, priority, status, " +
-          "estimated_hours, assignee_id, assignee_name, created_at FROM plan_steps ORDER BY seq_order",
+        "SELECT ps.id, ps.issue_id, ps.technician_id, ps.seq_order, ps.title, " +
+          "ps.details, ps.estimated_hours, ps.status, t.name AS technician_name " +
+          "FROM plan_steps ps LEFT JOIN technicians t ON t.id = ps.technician_id " +
+          "ORDER BY ps.seq_order",
       )
       .all() as Record<string, unknown>[];
 
     db.close();
 
-    // ── Issues ─────────────────────────────────────────────────────────────
+    // â”€â”€ Issues â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const issues = issueRows.map((i) => ({
-      id:             i.id,
-      trainId:        i.train_id,
-      carriageId:     i.carriage_id,
-      systemCategory: i.system_category,
-      title:          i.title,
-      description:    i.description,
-      priority:       i.priority,
-      status:         i.status,
-      assigneeId:     i.assignee_id ?? null,
-      planning: {
-        reportedAt:     i.reported_at,
-        scheduledDate:  i.scheduled_date ?? null,
-        estimatedHours: i.estimated_hours,
-      },
+      id:                  i.id,
+      trainId:             i.train_id,        // derived from carriages JOIN
+      carriageId:          i.carriage_id,
+      systemCategory:      i.system_category,
+      title:               i.title,
+      description:         i.description,
+      priority:            i.priority,        // low | medium | high | critical
+      status:              i.status,          // open | in-progress | resolved | closed
+      reportedAt:          i.reported_at,
+      scheduledDate:       i.scheduled_date ?? null,
+      totalEstimatedHours: i.total_estimated_hours,
     }));
 
-    // ── Carriage openIssuesCount ────────────────────────────────────────────
-    const openByCarriage: Record<string, number> = {};
-    const openByTrain: Record<string, number> = {};
+    // â”€â”€ Per-carriage issue stats â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    const openByCarriage:   Record<string, number>  = {};
+    const critByCarriage:   Record<string, boolean> = {};
+    const highByCarriage:   Record<string, boolean> = {};
     for (const iss of issues) {
-      if (iss.status !== "closed") {
-        const cid = iss.carriageId as string;
+      const cid = iss.carriageId as string;
+      if (iss.status !== "closed" && iss.status !== "resolved") {
         openByCarriage[cid] = (openByCarriage[cid] ?? 0) + 1;
-        const tid = iss.trainId as string;
-        openByTrain[tid] = (openByTrain[tid] ?? 0) + 1;
+        if      (iss.priority === "critical") critByCarriage[cid] = true;
+        else if (iss.priority === "high")     highByCarriage[cid] = true;
       }
     }
 
-    // ── Carriages grouped by trainId ───────────────────────────────────────
+    // â”€â”€ Carriages grouped by trainId â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const carriages: Record<string, unknown[]> = {};
     for (const c of carriageRows) {
       const tid = c.train_id as string;
       if (!carriages[tid]) carriages[tid] = [];
+      const cid = c.id as string;
+      const healthStatus =
+        critByCarriage[cid] ? "critical" :
+        highByCarriage[cid] ? "warning"  : "healthy";
       carriages[tid].push({
-        id:             c.id,
-        serialNumber:   c.serial_number,
-        sequence:       c.sequence,
-        type:           c.type,
-        healthStatus:   c.health_status,
-        openIssuesCount: openByCarriage[c.id as string] ?? 0,
+        id:              cid,
+        serialNumber:    c.serial_number,
+        sequence:        c.sequence,
+        type:            c.type,
+        healthStatus,
+        openIssuesCount: openByCarriage[cid] ?? 0,
       });
     }
 
-    // ── Trains ─────────────────────────────────────────────────────────────
-    const trains = trainRows.map((t) => ({
-      id:               t.id,
-      name:             t.name,
-      fleetType:        t.fleet_type,
-      operationalState: t.operational_state,
-      healthStatus:     t.health_status,
-      currentLocation:  t.current_location,
-      metrics: {
-        openIssues:      openByTrain[t.id as string] ?? 0,  // computed fresh from issues
-        efficiency:      t.efficiency,
-        totalCarriages:  t.total_carriages,
-        healthyCarriages: t.healthy_carriages,
-      },
-    }));
+    // â”€â”€ Trains â€” compute health / efficiency from carriages & issues â”€â”€â”€â”€â”€â”€â”€â”€
+    const trains = trainRows.map((t) => {
+      const tid  = t.id as string;
+      const cars = (carriages[tid] ?? []) as Array<{ healthStatus: string; openIssuesCount: number }>;
+      const openIssues       = cars.reduce((s, c) => s + c.openIssuesCount, 0);
+      const criticalCars     = cars.filter((c) => c.healthStatus === "critical").length;
+      const warningCars      = cars.filter((c) => c.healthStatus === "warning").length;
+      const healthyCarriages = cars.filter((c) => c.healthStatus === "healthy").length;
+      const healthStatus     =
+        criticalCars >= 2 || openIssues >= 7 ? "critical" :
+        warningCars  >= 2 || openIssues >= 3 ? "warning"  : "healthy";
+      const efficiency = Math.max(70, 99 - warningCars * 3 - criticalCars * 7 - openIssues);
+      return {
+        id:               tid,
+        name:             t.name,
+        fleetType:        t.fleet_type,
+        operationalState: t.operational_state,
+        healthStatus,
+        currentLocation:  t.current_location,
+        metrics: {
+          openIssues,
+          efficiency,
+          totalCarriages:   cars.length,
+          healthyCarriages,
+        },
+      };
+    });
 
-    // ── Technicians (compute display fields not stored in DB) ───────────────
+    // â”€â”€ Technicians â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const technicians = techRows.map((t, idx) => ({
       id:          t.id,
       name:        t.name,
@@ -124,20 +142,17 @@ export async function GET() {
       avatarColor: AVATAR_COLORS[idx % AVATAR_COLORS.length],
     }));
 
-    // ── Plan steps ─────────────────────────────────────────────────────────
+    // â”€â”€ Plan steps â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const planSteps = planStepRows.map((s) => ({
       id:             s.id,
-      planId:         s.plan_id,
-      order:          s.seq_order,
       issueId:        s.issue_id ?? null,
+      technicianId:   s.technician_id ?? null,
+      technicianName: (s.technician_name as string | null) ?? "Unassigned",
+      order:          s.seq_order,
       title:          s.title,
       details:        s.details ?? null,
-      priority:       s.priority,
-      status:         s.status,
       estimatedHours: s.estimated_hours,
-      assigneeId:     s.assignee_id ?? "",
-      assigneeName:   s.assignee_name ?? "Unassigned",
-      createdAt:      s.created_at,
+      status:         s.status,           // pending | doing | done
     }));
 
     return NextResponse.json({ trains, carriages, technicians, issues, planSteps });

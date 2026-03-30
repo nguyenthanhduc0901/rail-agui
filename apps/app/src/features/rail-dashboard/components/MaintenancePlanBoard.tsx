@@ -8,12 +8,6 @@ import {
 
 // ── Style maps ─────────────────────────────────────────────────────────────────
 
-const PRIORITY_CLS: Record<string, string> = {
-  high:   "bg-red-100   text-red-700   dark:bg-red-900/30   dark:text-red-400",
-  medium: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
-  low:    "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
-};
-
 const STATUS_CFG: Record<
   string,
   { label: string; cardCls: string; badgeCls: string }
@@ -23,7 +17,7 @@ const STATUS_CFG: Record<
     cardCls:  "border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900",
     badgeCls: "bg-slate-100 text-slate-500 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700",
   },
-  "in-progress": {
+  doing: {
     label:    "Đang thực hiện",
     cardCls:  "border-sky-200 bg-sky-50/60 dark:border-sky-700/50 dark:bg-sky-900/10",
     badgeCls: "bg-sky-100 text-sky-700 hover:bg-sky-200 dark:bg-sky-800/60 dark:text-sky-300 dark:hover:bg-sky-700/60",
@@ -36,9 +30,9 @@ const STATUS_CFG: Record<
 };
 
 const NEXT: Record<string, MaintenanceStep["status"]> = {
-  pending:       "in-progress",
-  "in-progress": "done",
-  done:          "pending",
+  pending: "doing",
+  doing:   "done",
+  done:    "pending",
 };
 
 // ── Component ──────────────────────────────────────────────────────────────────
@@ -110,7 +104,6 @@ export function MaintenancePlanBoard() {
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {maintenancePlan.map((step, i) => {
           const cfg  = STATUS_CFG[step.status] ?? STATUS_CFG.pending;
-          const pcls = PRIORITY_CLS[step.priority] ?? PRIORITY_CLS.medium;
           const isDone = step.status === "done";
 
           return (
@@ -171,16 +164,12 @@ export function MaintenancePlanBoard() {
                 </p>
               )}
 
-              {/* Row 3 — priority · assignee · hours */}
+              {/* Row 3 — assignee · hours */}
               <div className="mt-auto flex flex-wrap items-center gap-1.5">
-                <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${pcls}`}>
-                  {step.priority}
-                </span>
-
-                {step.assigneeName && step.assigneeName !== "Unassigned" && (
+                {step.technicianName && step.technicianName !== "Unassigned" && (
                   <span className="flex items-center gap-1 text-[11px] text-slate-500 dark:text-slate-400">
                     <span className="text-slate-400">👤</span>
-                    {step.assigneeName}
+                    {step.technicianName}
                   </span>
                 )}
 

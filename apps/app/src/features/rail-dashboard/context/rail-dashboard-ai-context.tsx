@@ -42,11 +42,10 @@ export interface MaintenanceStep {
   order: number;
   title: string;
   details?: string;
-  priority: "high" | "medium" | "low";
-  status: "pending" | "in-progress" | "done";
+  status: "pending" | "doing" | "done";
   estimatedHours?: number;
-  assigneeId?: string;
-  assigneeName?: string;
+  technicianId?: string;
+  technicianName?: string;
 }
 
 export interface RailDashboardAIContextType {

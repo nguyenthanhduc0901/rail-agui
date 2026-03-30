@@ -1,8 +1,9 @@
-"""Rail fleet tools — SQLite query + action tools.
+"""Rail fleet tools â€” SQLite query + action tools.
 
 TOOL SELECT:
   query_database                   <- ALL read queries via SQL (SELECT only)
-  update_issue                     <- update single issue
+  update_issue                     <- update single issue (status/priority)
+  update_plan_step                 <- update a plan step status
   generate_maintenance_plan_stream <- streaming maintenance plan
   schedule_inspection              <- streaming inspection plan
   request_bulk_issue_status_update <- bulk update with human approval
@@ -11,9 +12,10 @@ TOOL SELECT:
 import asyncio
 import json
 import os
+import random
 import re
 import sqlite3
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -23,21 +25,15 @@ from langgraph.types import interrupt
 from copilotkit.langgraph import copilotkit_emit_state
 
 # -- Path & env ----------------------------------------------------------------
-_DATA_PATH = (
-    Path(__file__).resolve().parents[2]
-    / "app" / "src" / "features" / "rail-dashboard" / "data" / "rail-data.json"
-)
-_TOOL_DEBUG = os.getenv("AGENT_TOOL_DEBUG", "0") == "1"
+_TOOL_DEBUG   = os.getenv("AGENT_TOOL_DEBUG", "0") == "1"
+_DB_FILE_PATH = Path(__file__).resolve().parents[1] / "fleet.db"
 
 # -- Constants -----------------------------------------------------------------
-_ALLOWED_PRIORITIES = {"high", "medium", "low"}
-_ALLOWED_STATUSES   = {"open", "in-progress", "closed"}
-_MAX_PLAN_STEPS     = 12
-_MAX_QUERY_ROWS     = 50
-
-# Path to the on-disk SQLite fleet database produced by build_db.py.
-# If it does not exist yet the agent builds an in-memory copy as fallback.
-_DB_FILE_PATH = Path(__file__).resolve().parents[1] / "fleet.db"
+_ALLOWED_PRIORITIES     = {"low", "medium", "high", "critical"}
+_ALLOWED_ISSUE_STATUSES = {"open", "in-progress", "resolved", "closed"}
+_ALLOWED_STEP_STATUSES  = {"pending", "doing", "done"}
+_MAX_PLAN_STEPS         = 12
+_MAX_QUERY_ROWS         = 50
 
 _SYSTEM_SPECIALIST: dict[str, list[str]] = {
     "HVAC":    ["HVAC", "Diagnostics", "Mechanics"],
@@ -48,254 +44,264 @@ _SYSTEM_SPECIALIST: dict[str, list[str]] = {
 }
 _ALL_SYSTEMS = list(_SYSTEM_SPECIALIST.keys())
 
-# -- Lazy state ----------------------------------------------------------------
-_rail_data: dict[str, Any] | None = None
-_db_conn:   sqlite3.Connection | None = None
+# -- Lazy DB connection --------------------------------------------------------
+_db_conn: sqlite3.Connection | None = None
+
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+#  SEED DATA
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+
+_TECHNICIANS: list[tuple] = [
+    ("TECH-01", "Gia Nguyen",     "Mechanics"),
+    ("TECH-02", "Nhi Dang",       "Electronics"),
+    ("TECH-03", "Linh Tran",      "HVAC"),
+    ("TECH-04", "Minh Le",        "Power Systems"),
+    ("TECH-05", "Bao Vu",         "Brake Systems"),
+    ("TECH-06", "Phuc Do",        "Doors & Access"),
+    ("TECH-07", "Sofia Martinez", "Network"),
+    ("TECH-08", "Alex Chen",      "Structural"),
+    ("TECH-09", "Raj Kumar",      "Diagnostics"),
+    ("TECH-10", "Emma Wilson",    "Safety Systems"),
+]
+
+_TRAINS: list[tuple] = [
+    ("T01", "Northline Express", "High-Speed", "in-service",  "Route 1A â€“ Northbound"),
+    ("T02", "Delta Commuter",    "Commuter",   "in-service",  "Route 2B â€“ Southbound"),
+    ("T03", "Harbor Intercity",  "Intercity",  "maintenance", "Northern Depot"),
+    ("T04", "Metro Link",        "Commuter",   "in-service",  "Route 3C â€“ Eastbound"),
+    ("T05", "East Freight",      "Freight",    "in-service",  "West Freight Yard"),
+]
+
+_CARRIAGE_TYPES = ["Passenger", "Cargo", "Service"]
+
+_ISSUE_TITLES: dict[str, list[str]] = {
+    "Brakes":  ["Brake Pressure Drift Detected", "Disc Wear Threshold Exceeded",
+                "Regenerative Brake Mismatch", "Anti-Lock Brake Fault"],
+    "HVAC":    ["Cabin Temperature Oscillation", "Compressor Cycle Instability",
+                "Airflow Distribution Imbalance", "Refrigerant Leak Detected"],
+    "Doors":   ["Door Actuator Response Delay", "Door Lock Sensor Mismatch",
+                "Emergency Release Calibration Error", "Sliding Door Rail Wear"],
+    "Power":   ["Auxiliary Power Voltage Sag", "Inverter Thermal Drift",
+                "Battery Module Degradation", "Pantograph Contact Wear"],
+    "Network": ["Telemetry Packet Loss Spike", "Onboard Gateway Timeout",
+                "Train Control Link Interruption", "Radio Frequency Interference"],
+}
+
+_ISSUE_STATUSES = ["open", "in-progress", "resolved", "closed"]
+_PRIORITIES     = ["low", "medium", "high", "critical"]
+_EST_HOURS      = [1.0, 1.5, 2.0, 2.5, 3.0, 4.0, 4.5, 6.0, 8.0]
+_SERIAL_PFX     = {"Head": "LOC", "Power": "PWR", "Cargo": "CGO",
+                   "Service": "SRV", "Passenger": "PAS"}
 
 
-def _get_rail_data() -> dict[str, Any]:
-    global _rail_data
-    if _rail_data is None:
-        with open(_DATA_PATH, encoding="utf-8") as f:
-            _rail_data = json.load(f)
-    return _rail_data
+def _seed_db(db: sqlite3.Connection, rng: random.Random) -> None:
+    """Create schema and populate demo data into a fresh DB."""
+    cur = db.cursor()
+    cur.executescript("""
+        CREATE TABLE trains (
+            id                TEXT PRIMARY KEY,
+            name              TEXT NOT NULL,
+            fleet_type        TEXT NOT NULL,
+            operational_state TEXT NOT NULL,
+            current_location  TEXT NOT NULL
+        );
+        CREATE TABLE carriages (
+            id            TEXT PRIMARY KEY,
+            train_id      TEXT NOT NULL REFERENCES trains(id),
+            serial_number TEXT NOT NULL,
+            sequence      INTEGER NOT NULL,
+            type          TEXT NOT NULL
+        );
+        CREATE INDEX idx_car_train ON carriages(train_id);
+        CREATE TABLE technicians (
+            id        TEXT PRIMARY KEY,
+            name      TEXT NOT NULL,
+            specialty TEXT NOT NULL
+        );
+        CREATE TABLE issues (
+            id                    TEXT PRIMARY KEY,
+            carriage_id           TEXT NOT NULL REFERENCES carriages(id),
+            system_category       TEXT NOT NULL,
+            title                 TEXT NOT NULL,
+            description           TEXT,
+            priority              TEXT NOT NULL,
+            status                TEXT NOT NULL,
+            reported_at           TEXT NOT NULL,
+            scheduled_date        TEXT,
+            total_estimated_hours REAL
+        );
+        CREATE INDEX idx_iss_carriage ON issues(carriage_id);
+        CREATE INDEX idx_iss_status   ON issues(status);
+        CREATE INDEX idx_iss_priority ON issues(priority);
+        CREATE TABLE plan_steps (
+            id              TEXT PRIMARY KEY,
+            issue_id        TEXT REFERENCES issues(id),
+            technician_id   TEXT REFERENCES technicians(id),
+            seq_order       INTEGER NOT NULL,
+            title           TEXT NOT NULL,
+            details         TEXT,
+            estimated_hours REAL,
+            status          TEXT NOT NULL DEFAULT 'pending'
+        );
+        CREATE INDEX idx_ps_issue ON plan_steps(issue_id);
+    """)
 
+    cur.executemany("INSERT INTO technicians VALUES (?,?,?)", _TECHNICIANS)
+
+    issue_seq = 1001
+    epoch     = datetime(2026, 2, 1, tzinfo=timezone.utc)
+
+    for train_id, name, fleet_type, op_state, location in _TRAINS:
+        cur.execute("INSERT INTO trains VALUES (?,?,?,?,?)",
+                    (train_id, name, fleet_type, op_state, location))
+
+        car_count = rng.randint(5, 7)
+        for i in range(1, car_count + 1):
+            ctype = "Head" if i == 1 else "Power" if i == car_count else rng.choice(_CARRIAGE_TYPES)
+            cid   = f"C{i:02d}-{train_id}"
+            sn    = (f"{_SERIAL_PFX.get(ctype, 'PAS')}-"
+                     f"{rng.randint(1000, 9999)}-{chr(65 + rng.randint(0, 3))}")
+            cur.execute("INSERT INTO carriages VALUES (?,?,?,?,?)",
+                        (cid, train_id, sn, i, ctype))
+
+            for _ in range(rng.randint(1, 4)):
+                sys_  = rng.choice(_ALL_SYSTEMS)
+                pri_  = rng.choices(_PRIORITIES, weights=[0.20, 0.40, 0.28, 0.12])[0]
+                stat_ = rng.choices(_ISSUE_STATUSES, weights=[0.50, 0.22, 0.14, 0.14])[0]
+                ttl_  = rng.choice(_ISSUE_TITLES[sys_])
+                iid   = f"ISS-{issue_seq}"
+                issue_seq += 1
+
+                rep   = epoch + timedelta(days=rng.randint(0, 50), hours=rng.randint(6, 22))
+                sched: str | None = None
+                if stat_ in ("closed", "resolved"):
+                    sched = (rep + timedelta(days=rng.randint(2, 7))).isoformat()
+                elif rng.random() < 0.6:
+                    sched = (epoch + timedelta(days=60 + rng.randint(1, 14))).isoformat()
+
+                desc = (f"{ttl_} detected on {cid} ({sys_}). "
+                        f"Telemetry deviation observed across multiple sampling windows. "
+                        f"Priority: {pri_}.")
+                cur.execute(
+                    "INSERT INTO issues VALUES (?,?,?,?,?,?,?,?,?,?)",
+                    (iid, cid, sys_, ttl_, desc, pri_, stat_,
+                     rep.isoformat(), sched, rng.choice(_EST_HOURS)),
+                )
+
+    db.commit()
+
+
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+#  DB CONNECTION
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def _get_db() -> sqlite3.Connection:
-    """
-    Return the fleet SQLite connection.
-
-    Priority order:
-      1. Already-open connection (_db_conn) → return immediately.
-      2. fleet.db file exists on disk (built by build_db.py) → open it.
-      3. Fallback: build an in-memory DB from rail-data.json at runtime
-         (same behaviour as before; useful during development without a pre-built DB).
+    """Return the fleet SQLite connection (singleton per process).
+    Creates and seeds fleet.db on first use if it does not already exist.
     """
     global _db_conn
     if _db_conn is not None:
         return _db_conn
 
-    if _DB_FILE_PATH.exists():
-        conn = sqlite3.connect(str(_DB_FILE_PATH), check_same_thread=False)
-        conn.row_factory = sqlite3.Row
-        # ── Schema migration: ensure plan_steps exists in older DBs
-        conn.execute("""
-            CREATE TABLE IF NOT EXISTS plan_steps (
-                id              TEXT PRIMARY KEY,
-                plan_id         TEXT NOT NULL,
-                seq_order       INTEGER NOT NULL,
-                issue_id        TEXT REFERENCES issues(id),
-                title           TEXT NOT NULL,
-                details         TEXT,
-                priority        TEXT NOT NULL,
-                status          TEXT NOT NULL DEFAULT 'pending',
-                estimated_hours REAL,
-                assignee_id     TEXT REFERENCES technicians(id),
-                assignee_name   TEXT,
-                created_at      TEXT NOT NULL
-            )
-        """)
-        conn.execute("CREATE INDEX IF NOT EXISTS idx_ps_plan   ON plan_steps(plan_id)")
-        conn.execute("CREATE INDEX IF NOT EXISTS idx_ps_status ON plan_steps(status)")
-        conn.commit()
-        _db_conn = conn
-        _log("_get_db", source="file", path=str(_DB_FILE_PATH))
-        return conn
-
-    # ── Fallback: build in-memory from JSON ───────────────────────────────────
-    _log("_get_db", source="memory", reason="fleet.db not found — run build_db.py to persist")
-    data = _get_rail_data()
-    conn = sqlite3.connect(":memory:", check_same_thread=False)
+    is_new = not _DB_FILE_PATH.exists()
+    conn   = sqlite3.connect(str(_DB_FILE_PATH), check_same_thread=False)
     conn.row_factory = sqlite3.Row
-    cur = conn.cursor()
+    conn.execute("PRAGMA journal_mode=WAL")
+    conn.execute("PRAGMA foreign_keys=ON")
 
-    cur.executescript("""
-        CREATE TABLE trains (
-            id                TEXT PRIMARY KEY,
-            name              TEXT,
-            fleet_type        TEXT,
-            operational_state TEXT,
-            health_status     TEXT,
-            current_location  TEXT,
-            efficiency        INTEGER,
-            total_carriages   INTEGER,
-            healthy_carriages INTEGER,
-            open_issues       INTEGER
-        );
-        CREATE TABLE carriages (
-            id            TEXT PRIMARY KEY,
-            train_id      TEXT REFERENCES trains(id),
-            serial_number TEXT,
-            sequence      INTEGER,
-            type          TEXT,
-            health_status TEXT
-        );
-        CREATE INDEX idx_car_train ON carriages(train_id);
-        CREATE TABLE technicians (
-            id        TEXT PRIMARY KEY,
-            name      TEXT,
-            specialty TEXT,
-            available INTEGER DEFAULT 1
-        );
-        CREATE TABLE issues (
-            id              TEXT PRIMARY KEY,
-            train_id        TEXT REFERENCES trains(id),
-            carriage_id     TEXT REFERENCES carriages(id),
-            system_category TEXT,
-            title           TEXT,
-            description     TEXT,
-            priority        TEXT,
-            status          TEXT,
-            assignee_id     TEXT REFERENCES technicians(id),
-            reported_at     TEXT,
-            scheduled_date  TEXT,
-            estimated_hours REAL
-        );
-        CREATE INDEX idx_iss_train    ON issues(train_id);
-        CREATE INDEX idx_iss_status   ON issues(status);
-        CREATE INDEX idx_iss_priority ON issues(priority);
-        CREATE TABLE plan_steps (
-            id              TEXT PRIMARY KEY,
-            plan_id         TEXT NOT NULL,
-            seq_order       INTEGER NOT NULL,
-            issue_id        TEXT REFERENCES issues(id),
-            title           TEXT NOT NULL,
-            details         TEXT,
-            priority        TEXT NOT NULL,
-            status          TEXT NOT NULL DEFAULT 'pending',
-            estimated_hours REAL,
-            assignee_id     TEXT REFERENCES technicians(id),
-            assignee_name   TEXT,
-            created_at      TEXT NOT NULL
-        );
-        CREATE INDEX idx_ps_plan   ON plan_steps(plan_id);
-        CREATE INDEX idx_ps_status ON plan_steps(status);
-    """)
+    if is_new:
+        _seed_db(conn, random.Random(20260330))
+        _log("_get_db", source="new_seed", path=str(_DB_FILE_PATH))
+    else:
+        _log("_get_db", source="file", path=str(_DB_FILE_PATH))
 
-    for t in data.get("trains", []):
-        m = t.get("metrics") or {}
-        cur.execute(
-            "INSERT OR IGNORE INTO trains VALUES (?,?,?,?,?,?,?,?,?,?)",
-            (t.get("id"), t.get("name"), t.get("fleetType"), t.get("operationalState"),
-             t.get("healthStatus"), t.get("currentLocation"),
-             m.get("efficiency", 100), m.get("totalCarriages", 0),
-             m.get("healthyCarriages", 0), m.get("openIssues", 0)),
-        )
-
-    for train_id, cars in data.get("carriages", {}).items():
-        for c in cars:
-            cur.execute(
-                "INSERT OR IGNORE INTO carriages VALUES (?,?,?,?,?,?)",
-                (c.get("id"), train_id, c.get("serialNumber"),
-                 c.get("sequence"), c.get("type"), c.get("healthStatus")),
-            )
-
-    for t in data.get("technicians", []):
-        cur.execute(
-            "INSERT OR IGNORE INTO technicians VALUES (?,?,?,?)",
-            (t.get("id"), t.get("name"), t.get("specialty"), 1),
-        )
-
-    for i in data.get("issues", []):
-        p = i.get("planning") or {}
-        cur.execute(
-            "INSERT OR IGNORE INTO issues VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
-            (i.get("id"), i.get("trainId"), i.get("carriageId"),
-             i.get("systemCategory"), i.get("title"), i.get("description"),
-             i.get("priority"), i.get("status"), i.get("assigneeId"),
-             p.get("reportedAt"), p.get("scheduledDate"), p.get("estimatedHours")),
-        )
-
-    conn.commit()
     _db_conn = conn
     return conn
 
 
-# -- Utility helpers -----------------------------------------------------------
-def _norm(v: str) -> str:            return (v or "").strip()
-def _norm_priority(v: str) -> str:   n = _norm(v).lower(); return n if n in _ALLOWED_PRIORITIES else ""
-def _norm_status(v: str) -> str:     n = _norm(v).lower(); return n if n in _ALLOWED_STATUSES   else ""
-def _norm_train_id(v: str) -> str:   return _norm(v).upper()
-def _now_utc() -> datetime:          return datetime.now(timezone.utc)
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+#  UTILITY HELPERS
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
+def _norm(v: str) -> str:
+    return (v or "").strip()
 
-def _days_until(s: str) -> int | None:
-    try:
-        d = datetime.fromisoformat(s.replace("Z", "+00:00"))
-        return int((_now_utc() - d.astimezone(timezone.utc)).total_seconds() / -86400)
-    except Exception:
-        return None
+def _norm_priority(v: str) -> str:
+    n = _norm(v).lower()
+    return n if n in _ALLOWED_PRIORITIES else ""
 
+def _norm_issue_status(v: str) -> str:
+    n = _norm(v).lower()
+    return n if n in _ALLOWED_ISSUE_STATUSES else ""
+
+def _norm_train_id(v: str) -> str:
+    return _norm(v).upper()
+
+def _now_utc() -> datetime:
+    return datetime.now(timezone.utc)
 
 def _log(name: str, **kw: Any) -> None:
     if not _TOOL_DEBUG:
         return
     print(f"[agent-tool] {name}",
-          {k: v for k, v in kw.items() if isinstance(v, (str, int, float, bool, type(None)))})
+          {k: vv for k, vv in kw.items()
+           if isinstance(vv, (str, int, float, bool, type(None)))})
 
 
-def _get_issues()                      -> list[dict[str, Any]]: return _get_rail_data().get("issues", [])
-def _get_trains()                      -> list[dict[str, Any]]: return _get_rail_data().get("trains", [])
-def _get_technicians()                 -> list[dict[str, Any]]: return _get_rail_data().get("technicians", [])
-def _get_carriages_for_train(tid: str) -> list[dict[str, Any]]: return _get_rail_data().get("carriages", {}).get(tid, [])
-
-
-def _get_technician_by_id(tid: str) -> dict[str, Any] | None:
-    return next((t for t in _get_technicians() if t.get("id") == tid), None) if tid else None
-
-
-# ========================= QUERY TOOL =========================================
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+#  QUERY TOOL
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 @tool
 def query_database(sql: str) -> str:
     """
-    Execute a read-only SQL SELECT against the in-memory SQLite fleet database.
+    Execute a read-only SQL SELECT against the fleet SQLite database.
     Returns up to 50 rows as a JSON string. Use this for ALL data-lookup needs.
 
     DATABASE SCHEMA:
-      trains(id, name, fleet_type, operational_state, health_status,
-             current_location, efficiency, total_carriages, healthy_carriages, open_issues)
-      carriages(id, train_id, serial_number, sequence, type, health_status)
-      technicians(id, name, specialty, available)
-      issues(id, train_id, carriage_id, system_category, title, description,
-             priority, status, assignee_id, reported_at, scheduled_date, estimated_hours)
+      trains(id, name, fleet_type, operational_state, current_location)
+      carriages(id, train_id, serial_number, sequence, type)
+      technicians(id, name, specialty)
+      issues(id, carriage_id, system_category, title, description,
+             priority, status, reported_at, scheduled_date, total_estimated_hours)
+             priority: low | medium | high | critical
+             status:   open | in-progress | resolved | closed
+      plan_steps(id, issue_id, technician_id, seq_order, title, details,
+                 estimated_hours, status)
+                 status: pending | doing | done
 
-      plan_steps(id, plan_id, seq_order, issue_id, title, details,
-                 priority, status, estimated_hours, assignee_id, assignee_name, created_at)
+    IMPORTANT: issues do NOT have train_id. Join through carriages to filter by train.
 
     EXAMPLE QUERIES:
-      -- Fleet KPIs
-      SELECT health_status, COUNT(*) AS cnt FROM trains GROUP BY health_status
+      -- Count issues by status
+      SELECT status, COUNT(*) AS cnt FROM issues GROUP BY status
 
-      -- Count open high-priority issues
-      SELECT COUNT(*) AS count FROM issues WHERE status='open' AND priority='high'
+      -- All active issues for train T01
+      SELECT i.id, i.carriage_id, i.system_category, i.title, i.priority, i.status
+      FROM issues i JOIN carriages c ON c.id = i.carriage_id
+      WHERE c.train_id = 'T01' AND i.status NOT IN ('resolved','closed')
+      ORDER BY i.priority DESC
 
-      -- Full issue list for a train
-      SELECT id, carriage_id, system_category, title, priority, status
-      FROM issues WHERE train_id='T01' AND status!='closed' ORDER BY priority DESC
+      -- Overdue issues (scheduled past, not yet resolved/closed)
+      SELECT i.id, c.train_id, i.title, i.priority, i.scheduled_date
+      FROM issues i JOIN carriages c ON c.id = i.carriage_id
+      WHERE i.status NOT IN ('resolved','closed') AND i.scheduled_date < date('now')
+      ORDER BY i.scheduled_date LIMIT 10
 
-      -- Overdue issues (scheduled_date in the past)
-      SELECT id, train_id, title, priority, scheduled_date
-      FROM issues WHERE status!='closed' AND scheduled_date < date('now')
-      ORDER BY scheduled_date LIMIT 10
-
-      -- Technician workload
-      SELECT t.name, t.specialty,
-             SUM(CASE WHEN i.status='open'        THEN 1 ELSE 0 END) AS open_cnt,
-             SUM(CASE WHEN i.status='in-progress' THEN 1 ELSE 0 END) AS wip_cnt
+      -- Technician workload (active plan steps)
+      SELECT t.name, t.specialty, COUNT(ps.id) AS active_steps
       FROM technicians t
-      LEFT JOIN issues i ON t.id=i.assignee_id AND i.status!='closed'
-      GROUP BY t.id ORDER BY open_cnt DESC
+      LEFT JOIN plan_steps ps ON ps.technician_id = t.id AND ps.status != 'done'
+      GROUP BY t.id ORDER BY active_steps DESC
 
-      -- Risk ranking (critical carriages x3 + high-open x2 + efficiency gap x0.2)
-      SELECT t.id, t.name,
-             SUM(CASE WHEN c.health_status='critical' THEN 3 ELSE 0 END)
-             + SUM(CASE WHEN i.priority='high' AND i.status='open' THEN 2 ELSE 0 END)
-             + (100 - t.efficiency) * 0.2 AS risk_score
-      FROM trains t
-      LEFT JOIN carriages c ON c.train_id=t.id
-      LEFT JOIN issues    i ON i.train_id=t.id
-      GROUP BY t.id ORDER BY risk_score DESC LIMIT 5
+      -- Risk ranking by train
+      SELECT c.train_id,
+             SUM(CASE WHEN i.priority='critical' THEN 4
+                      WHEN i.priority='high'     THEN 2
+                      WHEN i.priority='medium'   THEN 1 ELSE 0 END) AS risk_score
+      FROM issues i JOIN carriages c ON c.id = i.carriage_id
+      WHERE i.status NOT IN ('resolved','closed')
+      GROUP BY c.train_id ORDER BY risk_score DESC
 
     SAFETY: Only SELECT / WITH are permitted. No mutations.
     """
@@ -317,82 +323,51 @@ def query_database(sql: str) -> str:
         return json.dumps({"error": f"SQL error: {e}"})
 
 
-# ========================= ACTION TOOLS =======================================
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+#  ACTION TOOLS
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 @tool
 def update_issue(
     issue_id: str,
     status: str = "",
     priority: str = "",
-    assignee_id: str = "",
 ) -> dict[str, Any]:
     """
-    Update a single issue: change status, priority, and/or re-assign to a technician.
-    Also syncs the change to SQLite so subsequent query_database calls see it.
-    status: open | in-progress | closed
-    priority: high | medium | low
-    assignee_id: TECH-01 ... TECH-10
-    Use for single-issue updates only. For bulk changes use request_bulk_issue_status_update.
+    Update a single issue: change status and/or priority.
+    status:   open | in-progress | resolved | closed
+    priority: low | medium | high | critical
+    Use for single-issue updates only. For bulk use request_bulk_issue_status_update.
     """
     iid      = _norm(issue_id).upper()
-    new_stat = _norm_status(status)       or None
-    new_pri  = _norm_priority(priority)   or None
-    new_asn  = _norm(assignee_id).upper() or None
+    new_stat = _norm_issue_status(status)  or None
+    new_pri  = _norm_priority(priority)    or None
 
-    if not any([new_stat, new_pri, new_asn]):
-        return {"error": "Can provide at least one of: status, priority, assignee_id."}
+    if not any([new_stat, new_pri]):
+        return {"error": "Provide at least one of: status, priority."}
 
-    # Read from SQLite (authoritative source)
     db  = _get_db()
     row = db.execute("SELECT * FROM issues WHERE id = ?", (iid,)).fetchone()
     if not row:
         return {"error": f"Issue '{iid}' not found."}
     current = dict(row)
 
-    if new_asn:
-        tech_row = db.execute("SELECT id, name FROM technicians WHERE id = ?", (new_asn,)).fetchone()
-        if not tech_row:
-            return {"error": f"Technician '{new_asn}' not found. Use TECH-01...TECH-10."}
-
     final_stat = new_stat or current["status"]
     final_pri  = new_pri  or current["priority"]
-    final_asn  = new_asn  or current["assignee_id"]
 
     changes: list[str] = []
-    if new_stat and current["status"]      != new_stat: changes.append(f"status -> {new_stat}")
-    if new_pri  and current["priority"]    != new_pri:  changes.append(f"priority -> {new_pri}")
-    if new_asn  and current["assignee_id"] != new_asn:
-        t = db.execute("SELECT name FROM technicians WHERE id = ?", (new_asn,)).fetchone()
-        changes.append(f"assignee -> {dict(t)['name'] if t else new_asn}")
+    if new_stat and current["status"]   != new_stat: changes.append(f"status â†’ {new_stat}")
+    if new_pri  and current["priority"] != new_pri:  changes.append(f"priority â†’ {new_pri}")
 
     if not changes:
         return {"message": f"Issue {iid} is already in the requested state."}
 
-    db.execute(
-        "UPDATE issues SET status=?, priority=?, assignee_id=? WHERE id=?",
-        (final_stat, final_pri, final_asn, iid),
-    )
+    db.execute("UPDATE issues SET status=?, priority=? WHERE id=?",
+               (final_stat, final_pri, iid))
     db.commit()
-
-    # Sync JSON in-memory cache for same-session consistency
-    for issue in _get_rail_data().get("issues", []):
-        if issue.get("id") == iid:
-            issue["status"]     = final_stat
-            issue["priority"]   = final_pri
-            issue["assigneeId"] = final_asn
-            break
-
-    tech = _get_technician_by_id(final_asn or "")
     _log("update_issue", issue_id=iid, changes=str(changes))
-    return {
-        "success": True, "issueId": iid, "changes": changes,
-        "current": {
-            "status":       final_stat,
-            "priority":     final_pri,
-            "assigneeId":   final_asn,
-            "assigneeName": tech["name"] if tech else "Unassigned",
-        },
-    }
+    return {"success": True, "issueId": iid, "changes": changes,
+            "current": {"status": final_stat, "priority": final_pri}}
 
 
 @tool
@@ -405,37 +380,37 @@ async def generate_maintenance_plan_stream(
 ) -> dict[str, Any]:
     """
     Generate and STREAM a prioritized maintenance plan from real open issues.
-    Each step has: order (1-based sequence), status (pending/in-progress/done),
-    title, details, estimatedHours, and best-matching assigned technician.
-    Streams step-by-step completions live in the chat panel.
+    Each step shows: order, title, details, estimatedHours, assigned technician.
+    Streams step-by-step live in the chat panel.
     train_id / system: optional scope filters.
-    priority: issue priority level to pull (default: high).
+    priority: issue priority to pull â€” use 'critical' or 'high' for urgent work.
     max_steps: 1-12 (default: 8).
-    Use when user asks to create a maintenance plan or repair schedule.
     """
     cap  = max(1, min(max_steps, _MAX_PLAN_STEPS))
     tid  = _norm_train_id(train_id) or None
     sys_ = _norm(system) or None
     pri_ = _norm_priority(priority) or "high"
 
-    # ── Query candidates directly from SQLite (reflects latest issue updates) ──
     db  = _get_db()
     cur = db.cursor()
-    conditions: list[str] = ["status = 'open'", "priority = ?"]
-    params: list = [pri_]
+
+    # Issues don't have train_id â€” join through carriages
+    where: list[str] = ["i.status = 'open'", "i.priority = ?"]
+    params: list[Any] = [pri_]
     if tid:
-        conditions.append("train_id = ?")
+        where.append("c.train_id = ?")
         params.append(tid)
     if sys_:
-        conditions.append("system_category = ?")
+        where.append("i.system_category = ?")
         params.append(sys_)
     params.append(cap)
 
     cur.execute(
-        "SELECT id, train_id, carriage_id, system_category, title, description, "
-        "priority, estimated_hours FROM issues "
-        "WHERE " + " AND ".join(conditions) +
-        " ORDER BY scheduled_date ASC LIMIT ?",
+        "SELECT i.id, c.train_id, i.carriage_id, i.system_category, "
+        "i.title, i.total_estimated_hours "
+        "FROM issues i JOIN carriages c ON c.id = i.carriage_id "
+        "WHERE " + " AND ".join(where) +
+        " ORDER BY i.scheduled_date ASC LIMIT ?",
         params,
     )
     candidates = [dict(r) for r in cur.fetchall()]
@@ -444,21 +419,19 @@ async def generate_maintenance_plan_stream(
         await copilotkit_emit_state(config, {"maintenancePlan": []})
         return {"summary": "No matching open issues found.", "stepCount": 0, "totalHours": 0}
 
-    # ── Technician workload + list from SQLite ────────────────────────────────
+    # Technician workload from existing plan_steps
     cur.execute(
-        "SELECT assignee_id, COUNT(*) AS cnt FROM issues "
-        "WHERE status IN ('open','in-progress') AND assignee_id IS NOT NULL "
-        "GROUP BY assignee_id"
+        "SELECT technician_id, COUNT(*) AS cnt FROM plan_steps "
+        "WHERE status != 'done' AND technician_id IS NOT NULL GROUP BY technician_id"
     )
-    wl: dict[str, int] = {r["assignee_id"]: r["cnt"] for r in cur.fetchall()}
+    wl: dict[str, int] = {r["technician_id"]: r["cnt"] for r in cur.fetchall()}
 
     cur.execute("SELECT id, name, specialty FROM technicians")
     all_techs = [dict(r) for r in cur.fetchall()]
 
-    # ── Build steps and stream them one-by-one (all remain "pending") ─────────
     assigned: set[str] = set()
     steps: list[dict] = []
-    plan_id = f"PLAN-{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}"
+    batch_id = _now_utc().strftime("%Y%m%d%H%M%S")
 
     for order, issue in enumerate(candidates, start=1):
         sys_name = issue.get("system_category", "")
@@ -474,43 +447,36 @@ async def generate_maintenance_plan_stream(
             assigned.add(tech["id"])
 
         steps.append({
-            "id":             f"{plan_id}-{order}",
+            "id":             f"PLAN-{batch_id}-{order}",
             "order":          order,
-            "title":          f"{issue['train_id']} > {issue['carriage_id']} — {sys_name}",
-            "details":        (issue.get("title") or issue.get("description") or "")[:100],
-            "priority":       issue.get("priority", "medium"),
+            "title":          f"{issue['train_id']} > {issue['carriage_id']} â€” {sys_name}",
+            "details":        (issue.get("title") or "")[:120],
             "status":         "pending",
-            "estimatedHours": issue.get("estimated_hours") or 2.0,
-            "assigneeId":     tech["id"]   if tech else "",
-            "assigneeName":   tech["name"] if tech else "Unassigned",
+            "estimatedHours": issue.get("total_estimated_hours") or 2.0,
+            "technicianId":   tech["id"]   if tech else "",
+            "technicianName": tech["name"] if tech else "Unassigned",
         })
-        # Stream: each new step appears progressively, all in "pending" state
         await asyncio.sleep(0.12)
         await copilotkit_emit_state(config, {"maintenancePlan": steps})
 
     total_hours = round(sum(s["estimatedHours"] for s in steps), 1)
 
-    # ── Persist to plan_steps (replace previous plan) ────────────────────────
-    now_str = datetime.now(timezone.utc).isoformat()
-    db.execute("DELETE FROM plan_steps")           # one active plan at a time
+    # Persist â€” one active plan at a time
+    db.execute("DELETE FROM plan_steps")
     db.executemany(
-        "INSERT INTO plan_steps (id, plan_id, seq_order, issue_id, title, details, "
-        "priority, status, estimated_hours, assignee_id, assignee_name, created_at) "
-        "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
-        [(s["id"], plan_id, s["order"], candidates[i]["id"],
-          s["title"], s["details"], s["priority"], s["status"],
-          s["estimatedHours"], s.get("assigneeId") or None, s.get("assigneeName") or None, now_str)
+        "INSERT INTO plan_steps (id, issue_id, technician_id, seq_order, "
+        "title, details, estimated_hours, status) VALUES (?,?,?,?,?,?,?,?)",
+        [(s["id"], candidates[i]["id"],
+          s["technicianId"] or None,
+          s["order"], s["title"], s["details"],
+          s["estimatedHours"], s["status"])
          for i, s in enumerate(steps)],
     )
     db.commit()
 
     _log("generate_maintenance_plan_stream", steps=len(steps), hours=total_hours)
-    return {
-        "summary":    f"Created {len(steps)} maintenance steps, est. {total_hours}h.",
-        "stepCount":  len(steps),
-        "totalHours": total_hours,
-        "planId":     plan_id,
-    }
+    return {"summary": f"Created {len(steps)} steps, est. {total_hours}h.",
+            "stepCount": len(steps), "totalHours": total_hours}
 
 
 @tool
@@ -522,10 +488,8 @@ async def schedule_inspection(
 ) -> dict[str, Any]:
     """
     Schedule a targeted inspection for specific systems on one train.
-    Creates a streaming plan with one step per system — each step starts as
-    "pending" and is displayed progressively in the chat panel as the plan streams.
+    Creates streaming plan steps â€” one per system, all starting as 'pending'.
     systems: list from HVAC | Brakes | Doors | Power | Network
-    Streams live step completions in the chat panel.
     """
     tid = _norm_train_id(train_id)
     db  = _get_db()
@@ -540,30 +504,29 @@ async def schedule_inspection(
     if not valid_sys:
         return {"error": f"Invalid systems. Supported: {_ALL_SYSTEMS}"}
 
-    # ── Technician workload + list from SQLite ────────────────────────────────
     cur.execute(
-        "SELECT assignee_id, COUNT(*) AS cnt FROM issues "
-        "WHERE status IN ('open','in-progress') AND assignee_id IS NOT NULL "
-        "GROUP BY assignee_id"
+        "SELECT technician_id, COUNT(*) AS cnt FROM plan_steps "
+        "WHERE status != 'done' AND technician_id IS NOT NULL GROUP BY technician_id"
     )
-    wl: dict[str, int] = {r["assignee_id"]: r["cnt"] for r in cur.fetchall()}
+    wl: dict[str, int] = {r["technician_id"]: r["cnt"] for r in cur.fetchall()}
 
     cur.execute("SELECT id, name, specialty FROM technicians")
     all_techs = [dict(r) for r in cur.fetchall()]
 
     assigned: set[str] = set()
     steps: list[dict] = []
-    plan_id = f"INSP-{tid}-{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}"
+    batch_id = f"INSP-{tid}-{_now_utc().strftime('%Y%m%d%H%M%S')}"
 
     for order, sys_name in enumerate(valid_sys, start=1):
         cur.execute(
-            "SELECT estimated_hours FROM issues "
-            "WHERE train_id = ? AND system_category = ? AND status = 'open' LIMIT 3",
+            "SELECT i.total_estimated_hours FROM issues i "
+            "JOIN carriages c ON c.id = i.carriage_id "
+            "WHERE c.train_id = ? AND i.system_category = ? AND i.status = 'open' LIMIT 3",
             (tid, sys_name),
         )
         open_rows  = cur.fetchall()
         open_count = len(open_rows)
-        h = round(sum(r["estimated_hours"] or 0 for r in open_rows) or 2.0, 1)
+        h = round(sum(r["total_estimated_hours"] or 0 for r in open_rows) or 2.0, 1)
 
         pref = _SYSTEM_SPECIALIST.get(sys_name, ["Diagnostics"])
         tech_candidates = sorted(
@@ -577,46 +540,61 @@ async def schedule_inspection(
             assigned.add(tech["id"])
 
         steps.append({
-            "id":             f"{plan_id}-{order}",
+            "id":             f"{batch_id}-{order}",
             "order":          order,
-            "title":          f"[Inspection] {tid} — {sys_name}" + (f"  |  {note}" if note else ""),
-            "details":        f"{open_count} open issue(s). Est: {h}h.",
-            "priority":       "high" if open_count > 2 else ("medium" if open_count > 0 else "low"),
+            "title":          f"[Kiá»ƒm tra] {tid} â€” {sys_name}" + (f" | {note}" if note else ""),
+            "details":        f"{open_count} sá»± cá»‘ Ä‘ang má»Ÿ. Æ¯á»›c tÃ­nh: {h}h.",
             "status":         "pending",
             "estimatedHours": h,
-            "assigneeId":     tech["id"]   if tech else "",
-            "assigneeName":   tech["name"] if tech else "Unassigned",
+            "technicianId":   tech["id"]   if tech else "",
+            "technicianName": tech["name"] if tech else "Unassigned",
         })
-        # Stream: steps appear one-by-one, all in "pending" state
         await asyncio.sleep(0.18)
         await copilotkit_emit_state(config, {"maintenancePlan": steps})
 
     total_hours = round(sum(s["estimatedHours"] for s in steps), 1)
     train_name  = dict(train_row)["name"]
 
-    # ── Persist to plan_steps ─────────────────────────────────────────────────
-    now_str = datetime.now(timezone.utc).isoformat()
     db.execute("DELETE FROM plan_steps")
     db.executemany(
-        "INSERT INTO plan_steps (id, plan_id, seq_order, issue_id, title, details, "
-        "priority, status, estimated_hours, assignee_id, assignee_name, created_at) "
-        "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
-        [(s["id"], plan_id, s["order"], None,
-          s["title"], s["details"], s["priority"], s["status"],
-          s["estimatedHours"], s.get("assigneeId") or None, s.get("assigneeName") or None, now_str)
+        "INSERT INTO plan_steps (id, issue_id, technician_id, seq_order, "
+        "title, details, estimated_hours, status) VALUES (?,?,?,?,?,?,?,?)",
+        [(s["id"], None, s["technicianId"] or None,
+          s["order"], s["title"], s["details"],
+          s["estimatedHours"], s["status"])
          for s in steps],
     )
     db.commit()
 
     _log("schedule_inspection", train_id=tid, systems=valid_sys, hours=total_hours)
     return {
-        "summary":    f"Inspection plan: {len(steps)} systems on {train_name}, {total_hours}h.",
-        "trainId":    tid,
-        "trainName":  train_name,
-        "stepCount":  len(steps),
-        "totalHours": total_hours,
-        "systems":    valid_sys,
+        "summary":   f"Inspection plan: {len(steps)} systems on {train_name}, {total_hours}h.",
+        "trainId":   tid, "trainName": train_name,
+        "stepCount": len(steps), "totalHours": total_hours, "systems": valid_sys,
     }
+
+
+@tool
+def update_plan_step(step_id: str, status: str) -> dict[str, Any]:
+    """
+    Update the status of a maintenance plan step.
+    step_id: the step ID (e.g. PLAN-20260330120000-1)
+    status:  pending | doing | done
+    """
+    sid     = _norm(step_id)
+    new_sta = status.strip().lower()
+    if new_sta not in _ALLOWED_STEP_STATUSES:
+        return {"error": f"Invalid status '{status}'. Use: pending, doing, done"}
+
+    db  = _get_db()
+    row = db.execute("SELECT id FROM plan_steps WHERE id = ?", (sid,)).fetchone()
+    if not row:
+        return {"error": f"Plan step '{sid}' not found. Use query_database to list steps."}
+
+    db.execute("UPDATE plan_steps SET status = ? WHERE id = ?", (new_sta, sid))
+    db.commit()
+    _log("update_plan_step", step_id=sid, status=new_sta)
+    return {"success": True, "stepId": sid, "status": new_sta}
 
 
 @tool
@@ -627,30 +605,31 @@ def request_bulk_issue_status_update(
 ) -> dict[str, Any]:
     """
     Request human approval before bulk-updating open issues to a new status.
-    ALWAYS triggers a human-in-the-loop approval dialog — never skips this.
-    If approved, applies the update in-memory and syncs to SQLite.
-    priority: high | medium | low
-    target_status: in-progress | closed
-    train_id: optional (empty = all trains)
+    ALWAYS triggers a human-in-the-loop approval dialog â€” never skips this.
+    priority:      low | medium | high | critical
+    target_status: in-progress | resolved | closed
+    train_id:      optional (empty = all trains)
     """
     tid      = _norm_train_id(train_id)
     pri_     = _norm_priority(priority)
-    tgt_sta_ = _norm_status(target_status) or "in-progress"
-    if tgt_sta_ not in ("in-progress", "closed"):
-        return {"approved": False, "count": 0, "message": f"Invalid target_status '{tgt_sta_}'. Use: in-progress | closed"}
+    tgt_sta_ = _norm_issue_status(target_status) or "in-progress"
+    if tgt_sta_ not in ("in-progress", "resolved", "closed"):
+        return {"approved": False, "count": 0,
+                "message": f"Invalid target_status '{tgt_sta_}'. Use: in-progress | resolved | closed"}
 
-    # Query targets from SQLite (authoritative, reflects prior updates)
     db = _get_db()
-    conditions: list[str] = ["status = 'open'"]
-    params_q: list = []
+    conditions: list[str] = ["i.status = 'open'"]
+    params_q: list[Any] = []
     if pri_:
-        conditions.append("priority = ?")
+        conditions.append("i.priority = ?")
         params_q.append(pri_)
     if tid:
-        conditions.append("train_id = ?")
+        conditions.append("c.train_id = ?")
         params_q.append(tid)
+
     cur = db.execute(
-        "SELECT id FROM issues WHERE " + " AND ".join(conditions),
+        "SELECT i.id FROM issues i JOIN carriages c ON c.id = i.carriage_id "
+        "WHERE " + " AND ".join(conditions),
         params_q,
     )
     target_ids = {r["id"] for r in cur.fetchall()}
@@ -668,49 +647,21 @@ def request_bulk_issue_status_update(
 
     approved = bool(isinstance(approval, dict) and approval.get("approved"))
     if approved:
-        db.executemany(
-            "UPDATE issues SET status=? WHERE id=?",
-            [(tgt_sta_, iid) for iid in target_ids],
-        )
+        db.executemany("UPDATE issues SET status=? WHERE id=?",
+                       [(tgt_sta_, iid) for iid in target_ids])
         db.commit()
-        # Also sync JSON in-memory cache for same-session consistency
-        for issue in _get_rail_data().get("issues", []):
-            if issue.get("id") in target_ids:
-                issue["status"] = tgt_sta_
         message = f"Updated {len(target_ids)} issues to '{tgt_sta_}'."
     else:
         message = "Bulk update rejected by user."
 
     _log("request_bulk_issue_status_update", approved=approved, count=len(target_ids))
-    return {"approved": approved, "count": len(target_ids), "targetStatus": tgt_sta_, "message": message}
+    return {"approved": approved, "count": len(target_ids),
+            "targetStatus": tgt_sta_, "message": message}
 
 
-# -- Tool registry -------------------------------------------------------------
-
-
-@tool
-def update_plan_step(step_id: str, status: str) -> dict[str, Any]:
-    """
-    Update the status of a specific maintenance plan step.
-    Use when the user says a step is done, in progress, or needs to be reset.
-    step_id: the step ID from plan_steps (e.g. PLAN-20260330120000-1)
-    status:  pending | in-progress | done
-    """
-    sid     = _norm(step_id)
-    new_sta = status.strip().lower()
-    if new_sta not in ("pending", "in-progress", "done"):
-        return {"error": f"Invalid status '{status}'. Use: pending, in-progress, done"}
-
-    db  = _get_db()
-    row = db.execute("SELECT id FROM plan_steps WHERE id = ?", (sid,)).fetchone()
-    if not row:
-        return {"error": f"Plan step '{sid}' not found. Use query_database to list current steps."}
-
-    db.execute("UPDATE plan_steps SET status = ? WHERE id = ?", (new_sta, sid))
-    db.commit()
-    _log("update_plan_step", step_id=sid, status=new_sta)
-    return {"success": True, "stepId": sid, "status": new_sta}
-
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+#  TOOL REGISTRY
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 rail_tools = [
     query_database,

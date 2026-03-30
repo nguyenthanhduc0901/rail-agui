@@ -47,11 +47,10 @@ function RailDashboardWorkspace(): ReactNode {
         order:          s.order,
         title:          s.title,
         details:        s.details ?? undefined,
-        priority:       s.priority,
         status:         s.status,
         estimatedHours: s.estimatedHours,
-        assigneeId:     s.assigneeId,
-        assigneeName:   s.assigneeName,
+        technicianId:   s.technicianId ?? undefined,
+        technicianName: s.technicianName,
       }))
     );
   }, [planSteps, isLoading, agent.isRunning, setMaintenancePlan]);

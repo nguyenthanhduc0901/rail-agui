@@ -144,6 +144,7 @@ export function FleetDashboard() {
               onChange={(e) => updateFilters({ priority: e.target.value })}
             >
               <option value="all">all</option>
+              <option value="critical">critical</option>
               <option value="high">high</option>
               <option value="medium">medium</option>
               <option value="low">low</option>
@@ -160,6 +161,7 @@ export function FleetDashboard() {
               <option value="all">all</option>
               <option value="open">open</option>
               <option value="in-progress">in-progress</option>
+              <option value="resolved">resolved</option>
               <option value="closed">closed</option>
             </select>
           </label>

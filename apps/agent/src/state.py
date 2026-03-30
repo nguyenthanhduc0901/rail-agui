@@ -3,44 +3,15 @@ from typing import Literal, Optional, TypedDict
 from langchain.agents import AgentState as BaseAgentState
 
 
-class RailTrainMetrics(TypedDict):
-    openIssues: int
-    efficiency: int
-    totalCarriages: int
-    healthyCarriages: int
-
-
-class RailTrain(TypedDict):
-    id: str
-    name: str
-    fleetType: str
-    operationalState: Literal["in-service", "maintenance", "out-of-service"]
-    healthStatus: Literal["healthy", "warning", "critical"]
-    currentLocation: str
-    metrics: RailTrainMetrics
-
-
-class RailIssue(TypedDict):
-    id: str
-    trainId: str
-    carriageId: str
-    systemCategory: str
-    title: str
-    priority: Literal["high", "medium", "low"]
-    status: Literal["open", "in-progress", "closed"]
-    assigneeId: str
-
-
 class MaintenanceStep(TypedDict):
     id: str
     order: int
     title: str
     details: str
-    priority: Literal["high", "medium", "low"]
-    status: Literal["pending", "in-progress", "done"]
+    status: Literal["pending", "doing", "done"]
     estimatedHours: float
-    assigneeId: str
-    assigneeName: str
+    technicianId: str
+    technicianName: str
 
 
 class DashboardWidget(TypedDict):
@@ -54,7 +25,5 @@ class DashboardWidget(TypedDict):
 
 
 class AgentState(BaseAgentState):
-    trains: Optional[list[RailTrain]]
-    issues: Optional[list[RailIssue]]
     maintenancePlan: Optional[list[MaintenanceStep]]
     dashboardWidgets: Optional[list[DashboardWidget]]

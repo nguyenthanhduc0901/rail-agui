@@ -1,4 +1,5 @@
-import generatedData from './rail-data.json';
+// Types are populated at runtime from /api/fleet (fleet.db)
+// No static JSON import â€” all data comes from the live API
 
 export interface Technician {
   id: string;
@@ -34,23 +35,18 @@ export interface Carriage {
   openIssuesCount: number;
 }
 
-export interface IssuePlanning {
-  reportedAt: string;
-  scheduledDate: string | null;
-  estimatedHours: number;
-}
-
 export interface Issue {
   id: string;
-  trainId: string;
+  trainId: string;             // derived via carriages JOIN in API
   carriageId: string;
   systemCategory: string;
   title: string;
   description: string;
-  priority: 'high' | 'medium' | 'low';
-  status: 'open' | 'in-progress' | 'closed';
-  assigneeId: string | null;
-  planning: IssuePlanning;
+  priority: 'low' | 'medium' | 'high' | 'critical';
+  status: 'open' | 'in-progress' | 'resolved' | 'closed';
+  reportedAt: string;
+  scheduledDate: string | null;
+  totalEstimatedHours: number;
 }
 
 export interface NavLink {
@@ -65,11 +61,11 @@ export interface SystemHealth {
   trend: Array<{ day: string; value: number }>;
 }
 
-// Use type assertion since JSON has string types but we validate at runtime
-export const technicians  = generatedData.technicians as unknown as Technician[];
-export const trains       = generatedData.trains as unknown as Train[];
-export const carriages    = generatedData.carriages as unknown as Record<string, Carriage[]>;
-export const issues       = generatedData.issues as unknown as Issue[];
+// Empty defaults â€” real data loads from /api/fleet
+export const technicians: Technician[] = [];
+export const trains: Train[] = [];
+export const carriages: Record<string, Carriage[]> = {};
+export const issues: Issue[] = [];
 export const navLinks: NavLink[] = [{ to: '/rail-dashboard', label: 'Dashboard' }];
 
 const subsystemTemplates = [
@@ -88,23 +84,21 @@ export const getAllTechnicians = (_technicians = technicians): Technician[] => _
 export const getCarriagesByTrain = (trainId: string, _carriages = carriages): Carriage[] =>
   _carriages[trainId] || [];
 
-export const getActiveIssuesByCarriage = (trainId: string, carriageId: string, _issues = issues): Issue[] =>
+export const getActiveIssuesByCarriage = (carriageId: string, _issues = issues): Issue[] =>
   _issues.filter(
     (issue) =>
-      issue.trainId === trainId &&
       issue.carriageId === carriageId &&
-      issue.status !== 'closed',
+      issue.status !== 'closed' &&
+      issue.status !== 'resolved',
   );
 
 export const getCarriageSystems = (trainId: string, carriageId: string): SystemHealth[] => {
-  // Extract numeric parts for seed: "C03-T02" → carriage=3, train=2
   const trainNum    = Number(trainId.replace('T', ''))                        || 1;
   const carriageNum = Number(carriageId.replace(/^C(\d+).*/, '$1'))           || 1;
   const seed        = trainNum * 10 + carriageNum;
 
   return subsystemTemplates.map((system, index) => {
     const health = Math.max(52, 97 - ((seed + index * 7) % 43));
-
     return {
       id:     `${trainId}-${carriageId}-${system.key}`,
       name:   system.label,

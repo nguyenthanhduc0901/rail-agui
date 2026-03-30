@@ -3,7 +3,7 @@
 import { Fragment, useState, useMemo, useEffect, ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
-import { getCarriageSystems, getActiveIssuesByCarriage, getTechnicianById, getCarriagesByTrain, getAllTechnicians, type SystemHealth, type Carriage, type Train, type Technician } from '../data/railDataSource';
+import { getCarriageSystems, getActiveIssuesByCarriage, getCarriagesByTrain, type SystemHealth, type Carriage, type Train, type Technician } from '../data/railDataSource';
 import { useFleetData } from '../context/fleet-data-context';
 
 interface HealthStatus {
@@ -34,12 +34,13 @@ const getHealthStatus = (health: number): HealthStatus => {
 };
 
 const getPriorityStyle = (priority: string): string => ({
-  high:   'bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400',
-  medium: 'bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400',
-  low:    'bg-blue-100 text-blue-700 dark:bg-sky-950/40 dark:text-sky-400',
+  critical: 'bg-red-200 text-red-800 dark:bg-red-900/60 dark:text-red-300',
+  high:     'bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400',
+  medium:   'bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400',
+  low:      'bg-blue-100 text-blue-700 dark:bg-sky-950/40 dark:text-sky-400',
 }[priority] ?? 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400');
 
-const PRIORITY_LEVEL: Record<string, number> = { high: 3, medium: 2, low: 1 };
+const PRIORITY_LEVEL: Record<string, number> = { critical: 4, high: 3, medium: 2, low: 1 };
 
 const SYSTEM_OPTIONS = [
   { value: 'All',     label: 'All Systems' },
@@ -51,10 +52,11 @@ const SYSTEM_OPTIONS = [
 ];
 
 const PRIORITY_OPTIONS = [
-  { value: 'All',    label: 'All Priorities' },
-  { value: 'High',   label: 'High' },
-  { value: 'Medium', label: 'Medium' },
-  { value: 'Low',    label: 'Low' },
+  { value: 'All',      label: 'All Priorities' },
+  { value: 'Critical', label: 'Critical' },
+  { value: 'High',     label: 'High' },
+  { value: 'Medium',   label: 'Medium' },
+  { value: 'Low',      label: 'Low' },
 ];
 
 const SORT_OPTIONS = [
@@ -249,22 +251,19 @@ interface CarriageDetailsModalProps {
 }
 
 export function CarriageDetailsModal({ isOpen, onClose, train, carriage }: CarriageDetailsModalProps): ReactNode {
-  const { issues: liveIssues, carriages: liveCarriages, technicians: liveTechnicians } = useFleetData();
+  const { issues: liveIssues, carriages: liveCarriages } = useFleetData();
   const [filterSystem,   setFilterSystem]   = useState('All');
   const [filterPriority, setFilterPriority] = useState('All');
-  const [filterAssignee, setFilterAssignee] = useState('All');
   const [sortBy,         setSortBy]         = useState('date-desc');
 
-  const [selectedIssueId,  setSelectedIssueId]  = useState<string | null>(null);
-  const [planText,         setPlanText]         = useState('');
-  const [selectedAssignee, setSelectedAssignee] = useState('');
+  const [selectedIssueId, setSelectedIssueId] = useState<string | null>(null);
+  const [planText,        setPlanText]        = useState('');
 
   useEffect(() => {
     if (!isOpen) {
       setSelectedIssueId(null);
       setFilterSystem('All');
       setFilterPriority('All');
-      setFilterAssignee('All');
     }
   }, [isOpen]);
 
@@ -274,33 +273,21 @@ export function CarriageDetailsModal({ isOpen, onClose, train, carriage }: Carri
   );
 
   const rawIssues = useMemo(
-    () => (train && carriage ? getActiveIssuesByCarriage(train.id, carriage.id, liveIssues) : []),
-    [train, carriage, liveIssues],
+    () => (carriage ? getActiveIssuesByCarriage(carriage.id, liveIssues) : []),
+    [carriage, liveIssues],
   );
-
-  const assigneeOptions = useMemo(() => {
-    const names = rawIssues
-      .map(i => getTechnicianById(i.assigneeId, liveTechnicians)?.name)
-      .filter((n): n is string => Boolean(n));
-    return ['All', 'Unassigned', ...new Set(names)].map(a => ({ value: a, label: a }));
-  }, [rawIssues, liveTechnicians]);
 
   const filteredIssues = useMemo(() => {
     let result = [...rawIssues];
     if (filterSystem !== 'All')   result = result.filter(i => i.systemCategory === filterSystem);
     if (filterPriority !== 'All') result = result.filter(i => i.priority === filterPriority.toLowerCase());
-    if (filterAssignee !== 'All') {
-      result = filterAssignee === 'Unassigned'
-        ? result.filter(i => !i.assigneeId)
-        : result.filter(i => getTechnicianById(i.assigneeId, liveTechnicians)?.name === filterAssignee);
-    }
     return result.sort((a, b) => {
-      if (sortBy === 'date-desc') return new Date(b.planning.reportedAt).getTime() - new Date(a.planning.reportedAt).getTime();
-      if (sortBy === 'date-asc')  return new Date(a.planning.reportedAt).getTime() - new Date(b.planning.reportedAt).getTime();
+      if (sortBy === 'date-desc') return new Date(b.reportedAt).getTime() - new Date(a.reportedAt).getTime();
+      if (sortBy === 'date-asc')  return new Date(a.reportedAt).getTime() - new Date(b.reportedAt).getTime();
       if (sortBy === 'priority')  return PRIORITY_LEVEL[b.priority] - PRIORITY_LEVEL[a.priority];
       return 0;
     });
-  }, [rawIssues, filterSystem, filterPriority, filterAssignee, sortBy]);
+  }, [rawIssues, filterSystem, filterPriority, sortBy]);
 
   const selectedIssue = useMemo(
     () => rawIssues.find(i => i.id === selectedIssueId),
@@ -310,13 +297,11 @@ export function CarriageDetailsModal({ isOpen, onClose, train, carriage }: Carri
   useEffect(() => {
     if (selectedIssue) {
       setPlanText(selectedIssue.description || '');
-      setSelectedAssignee(selectedIssue.assigneeId || '');
     }
   }, [selectedIssue]);
 
   if (!isOpen || !carriage) return null;
 
-  const allTechnicians = getAllTechnicians(liveTechnicians);
   const portalRoot = typeof document !== 'undefined' ? document.getElementById('app-modal-portal') : null;
 
   const modalContent = (
@@ -445,7 +430,6 @@ export function CarriageDetailsModal({ isOpen, onClose, train, carriage }: Carri
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <FilterSelect label="System"   value={filterSystem}   onChange={setFilterSystem}   options={SYSTEM_OPTIONS} />
                   <FilterSelect label="Priority" value={filterPriority} onChange={setFilterPriority} options={PRIORITY_OPTIONS} />
-                  <FilterSelect label="Assignee" value={filterAssignee} onChange={setFilterAssignee} options={assigneeOptions} />
                   <FilterSelect label="Sort by"  value={sortBy}         onChange={setSortBy}         options={SORT_OPTIONS} />
                 </div>
               </div>
@@ -482,7 +466,7 @@ export function CarriageDetailsModal({ isOpen, onClose, train, carriage }: Carri
                               {issue.priority}
                             </span>
                           </div>
-                          <span className="text-[11px] font-medium text-slate-400 dark:text-slate-500">{new Date(issue.planning.reportedAt).toLocaleDateString()}</span>
+                          <span className="text-[11px] font-medium text-slate-400 dark:text-slate-500">{new Date(issue.reportedAt).toLocaleDateString()}</span>
                         </div>
                         <h4 className={`font-semibold text-sm mb-1.5 line-clamp-1 transition-colors ${isSelected ? 'text-blue-700 dark:text-sky-400' : 'text-slate-800 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-sky-400'}`}>
                           {issue.title ?? issue.description}
@@ -494,12 +478,11 @@ export function CarriageDetailsModal({ isOpen, onClose, train, carriage }: Carri
                           <span className={`px-2 py-1 rounded-full capitalize font-semibold ${
                             issue.status === 'open'        ? 'text-red-600 bg-red-100 dark:bg-red-900/30 dark:text-red-400' :
                             issue.status === 'in-progress' ? 'text-blue-600 bg-blue-100 dark:bg-sky-900/30 dark:text-sky-400' :
+                            issue.status === 'resolved'    ? 'text-emerald-700 bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400' :
                                                              'text-slate-600 bg-slate-100 dark:bg-slate-800 dark:text-slate-400'
                           }`}>
                             {issue.status.replace('-', ' ')}
                           </span>
-                          <div className="flex-1" />
-                          <AssigneeAvatar technician={getTechnicianById(issue.assigneeId, liveTechnicians)} />
                         </div>
                       </div>
                     );
@@ -554,31 +537,14 @@ export function CarriageDetailsModal({ isOpen, onClose, train, carriage }: Carri
                         />
                       </div>
 
-                      <div>
-                        <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2">
-                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-                          Assign Technician
-                        </label>
-                        <select
-                          value={selectedAssignee}
-                          onChange={(e) => setSelectedAssignee(e.target.value)}
-                          className="w-full p-2.5 text-sm bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg shadow-sm text-slate-700 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none cursor-pointer"
-                        >
-                          <option value="">Unassigned</option>
-                          {allTechnicians.map(t => (
-                            <option key={t.id} value={t.id}>{t.name} ({t.specialty})</option>
-                          ))}
-                        </select>
-                      </div>
-
-                      <div>
+                      <div className="col-span-2">
                         <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2">
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                           Target Date
                         </label>
                         <input
                           type="date"
-                          defaultValue={selectedIssue.planning.scheduledDate ?? ''}
+                          defaultValue={selectedIssue.scheduledDate ?? ''}
                           className="w-full p-2.5 text-sm bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg shadow-sm text-slate-700 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none cursor-pointer"
                         />
                       </div>
