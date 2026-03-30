@@ -11,7 +11,7 @@ import {
 import { ToolReasoning } from "@/components/tool-rendering";
 import { useRailDashboardAI } from "@/features/rail-dashboard/context/rail-dashboard-ai-context";
 
-// â”€â”€ Shared primitives â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Shared primitives ─────────────────────────────────────────────────────────
 
 const severityStyles: Record<string, string> = {
   info:     "border-blue-200 bg-blue-50 dark:border-blue-800/40 dark:bg-blue-950/30",
@@ -27,11 +27,11 @@ function Spinner() {
 
 function Done({ done }: { done: boolean }) {
   return done
-    ? <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">âœ“ Xong</span>
+    ? <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">✓ Xong</span>
     : <Spinner />;
 }
 
-// â”€â”€ Individual card components â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Individual card components ────────────────────────────────────────────────
 
 function WidgetToolCard({ params, status }: { params: Record<string, string> | undefined; status: string }) {
   const sev = (params?.severity && severityStyles[params.severity]) ? params.severity : "info";
@@ -70,11 +70,11 @@ function FilterActionCard({
   const parts = Object.entries(params).filter(([, v]) => v && v !== "all");
   return (
     <div className="my-2 flex items-center gap-2 rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-2 text-sm dark:border-indigo-800/40 dark:bg-indigo-950/30">
-      <span className="text-indigo-500">âš™</span>
+      <span className="text-indigo-500">⚙</span>
       <span className="font-medium text-indigo-700 dark:text-indigo-300">{label}</span>
       {parts.length > 0 && (
         <span className="text-xs text-indigo-500 dark:text-indigo-400">
-          {parts.map(([k, v]) => `${k}: ${v}`).join(" Â· ")}
+          {parts.map(([k, v]) => `${k}: ${v}`).join(" · ")}
         </span>
       )}
       {status !== "complete" && <Spinner />}
@@ -95,7 +95,7 @@ function MaintenancePlanCard({ status }: { status: string }) {
     <div className="my-2 rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900">
       <div className="mb-2 flex items-center gap-2">
         <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">
-          Káº¿ hoáº¡ch báº£o trÃ¬
+          Kế hoạch bảo trì
         </span>
         {totalHours > 0 && (
           <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] text-slate-500 dark:bg-slate-800">
@@ -105,22 +105,22 @@ function MaintenancePlanCard({ status }: { status: string }) {
         {status !== "complete" && <Spinner />}
       </div>
       {maintenancePlan.length === 0 ? (
-        <p className="text-xs text-slate-400">Äang táº£i cÃ¡c bÆ°á»›c...</p>
+        <p className="text-xs text-slate-400">Đang tải các bước...</p>
       ) : (
         <div className="space-y-1.5">
           {maintenancePlan.map((step, i: number) => (
             <div key={step.id ?? i} className="flex items-start gap-2 text-xs">
-              <span className="mt-0.5 shrink-0">{step.done ? "âœ…" : "â³"}</span>
+              <span className="mt-0.5 shrink-0">{step.done ? "✅" : "⏳"}</span>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-slate-700 dark:text-slate-200">
-                  {step.title ?? step.label ?? `BÆ°á»›c ${i + 1}`}
+                  {step.title ?? step.label ?? `Bước ${i + 1}`}
                 </p>
                 {step.details && (
                   <p className="text-slate-400 dark:text-slate-500">{step.details}</p>
                 )}
                 {step.assigneeName && step.assigneeName !== "Unassigned" && (
                   <p className="text-blue-500 dark:text-sky-400">
-                    ðŸ‘¤ {step.assigneeName}{step.estimatedHours ? ` Â· ${step.estimatedHours}h` : ""}
+                    👤 {step.assigneeName}{step.estimatedHours ? ` · ${step.estimatedHours}h` : ""}
                   </p>
                 )}
               </div>
@@ -143,12 +143,12 @@ function AnalysisQueryCard({
   status: string;
 }) {
   const LABELS: Record<string, string> = {
-    get_fleet_overview:       "ðŸ“Š Tá»•ng quan Ä‘á»™i tÃ u",
-    get_train_summary:        "ðŸš‚ TÃ³m táº¯t tÃ u",
-    count_issues:             "ðŸ”¢ Äáº¿m sá»± cá»‘",
-    list_issues:              "ðŸ“‹ Danh sÃ¡ch sá»± cá»‘",
-    get_carriage_detail:      "ðŸšƒ Chi tiáº¿t toa",
-    get_issue_detail:         "ðŸ” Chi tiáº¿t sá»± cá»‘",
+    get_fleet_overview:       "📊 Tổng quan đội tàu",
+    get_train_summary:        "🚂 Tóm tắt tàu",
+    count_issues:             "🔢 Đếm sự cố",
+    list_issues:              "📋 Danh sách sự cố",
+    get_carriage_detail:      "🚃 Chi tiết toa",
+    get_issue_detail:         "🔍 Chi tiết sự cố",
   };
   const label = LABELS[toolName] ?? toolName;
   const keyParam = Object.entries(params ?? {}).find(
@@ -167,7 +167,7 @@ function AnalysisQueryCard({
   );
 }
 
-/** update_issue â€” shows what is being changed */
+/** update_issue — shows what is being changed */
 function IssueUpdateCard({
   params,
   status,
@@ -176,14 +176,14 @@ function IssueUpdateCard({
   status: string;
 }) {
   const changes: string[] = [];
-  if (params?.status)      changes.push(`status â†’ ${params.status}`);
-  if (params?.priority)    changes.push(`priority â†’ ${params.priority}`);
-  if (params?.assignee_id) changes.push(`assignee â†’ ${params.assignee_id}`);
+  if (params?.status)      changes.push(`status → ${params.status}`);
+  if (params?.priority)    changes.push(`priority → ${params.priority}`);
+  if (params?.assignee_id) changes.push(`assignee → ${params.assignee_id}`);
   return (
     <div className="my-2 rounded-xl border border-violet-200 bg-violet-50 p-3 text-sm dark:border-violet-800/40 dark:bg-violet-950/30">
       <div className="flex items-center justify-between gap-2">
         <span className="font-semibold text-violet-800 dark:text-violet-200">
-          ðŸ”§ Cáº­p nháº­t {String(params?.issue_id ?? "sá»± cá»‘")}
+          🔧 Cập nhật {String(params?.issue_id ?? "sự cố")}
         </span>
         <Done done={status === "complete"} />
       </div>
@@ -215,12 +215,12 @@ function RiskRankCard({
     <div className="my-2 rounded-xl border border-red-200 bg-red-50 p-3 text-sm dark:border-red-800/40 dark:bg-red-950/30">
       <div className="flex items-center justify-between gap-2">
         <span className="font-semibold text-red-800 dark:text-red-200">
-          ðŸ† Xáº¿p háº¡ng rá»§i ro Ä‘á»™i tÃ u
+          🏆 Xếp hạng rủi ro đội tàu
         </span>
         <Done done={status === "complete"} />
       </div>
       <p className="mt-0.5 text-xs text-red-600 dark:text-red-400">
-        Top {String(params?.top_n ?? 5)} tÃ u Â· Ä‘iá»ƒm rá»§i ro = toa há»ng Ã— 3 + lá»—i cao Ã— 2 + quÃ¡ háº¡n Ã— 1.5
+        Top {String(params?.top_n ?? 5)} tàu · điểm rủi ro = toa hỏng × 3 + lỗi cao × 2 + quá hạn × 1.5
       </p>
     </div>
   );
@@ -239,12 +239,12 @@ function SystemAnalyticsCard({
     <div className="my-2 rounded-xl border border-sky-200 bg-sky-50 p-3 text-sm dark:border-sky-800/40 dark:bg-sky-950/30">
       <div className="flex items-center justify-between gap-2">
         <span className="font-semibold text-sky-800 dark:text-sky-200">
-          âš™ï¸ PhÃ¢n tÃ­ch há»‡ thá»‘ng{target ? ` â€” ${target}` : " (toÃ n bá»™)"}
+          ⚙️ Phân tích hệ thống{target ? ` — ${target}` : " (toàn bộ)"}
         </span>
         <Done done={status === "complete"} />
       </div>
       <p className="mt-0.5 text-xs text-sky-600 dark:text-sky-400">
-        HVAC Â· Brakes Â· Doors Â· Power Â· Network
+        HVAC · Brakes · Doors · Power · Network
       </p>
     </div>
   );
@@ -265,13 +265,13 @@ function WorkloadCard({
     <div className="my-2 rounded-xl border border-teal-200 bg-teal-50 p-3 text-sm dark:border-teal-800/40 dark:bg-teal-950/30">
       <div className="flex items-center justify-between gap-2">
         <span className="font-semibold text-teal-800 dark:text-teal-200">
-          {isFindMode ? "ðŸ”Ž TÃ¬m ká»¹ thuáº­t viÃªn ráº£nh" : "ðŸ‘· Khá»‘i lÆ°á»£ng cÃ´ng viá»‡c"}
+          {isFindMode ? "🔎 Tìm kỹ thuật viên rảnh" : "👷 Khối lượng công việc"}
         </span>
         <Done done={status === "complete"} />
       </div>
       {isFindMode && !!params?.specialty && (
         <p className="mt-0.5 text-xs text-teal-600 dark:text-teal-400">
-          ChuyÃªn mÃ´n: {String(params.specialty)}
+          Chuyên môn: {String(params.specialty)}
         </p>
       )}
     </div>
@@ -290,20 +290,20 @@ function OverdueCard({
     <div className="my-2 rounded-xl border border-orange-200 bg-orange-50 p-3 text-sm dark:border-orange-800/40 dark:bg-orange-950/30">
       <div className="flex items-center justify-between gap-2">
         <span className="font-semibold text-orange-800 dark:text-orange-200">
-          â° Sá»± cá»‘ trá»… háº¡n
+          ⏰ Sự cố trễ hạn
         </span>
         <Done done={status === "complete"} />
       </div>
       {!!(params?.train_id || params?.priority) && (
         <p className="mt-0.5 text-xs text-orange-600 dark:text-orange-400">
-          {[params?.train_id, params?.priority].filter(Boolean).join(" Â· ")}
+          {[params?.train_id, params?.priority].filter(Boolean).join(" · ")}
         </p>
       )}
     </div>
   );
 }
 
-// â”€â”€ Hook â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Hook ──────────────────────────────────────────────────────────────────────
 
 export const useRailToolRendering = () => {
   const { theme, setTheme } = useTheme();
@@ -331,25 +331,25 @@ export const useRailToolRendering = () => {
       if (ignoredTools.includes(name)) return <></>;
       const p = (parameters ?? {}) as Record<string, unknown>;
 
-      // â”€â”€ Widget / filter frontend tools
+      // ── Widget / filter frontend tools
       if (name === "createDashboardWidget")
         return <WidgetToolCard params={p as Record<string, string>} status={status} />;
       if (name === "applyDashboardFilters")
-        return <FilterActionCard params={p as Record<string, string>} status={status} label="ÄÃ£ Ã¡p dá»¥ng bá»™ lá»c" />;
+        return <FilterActionCard params={p as Record<string, string>} status={status} label="Đã áp dụng bộ lọc" />;
       if (name === "clearDashboardFilters")
-        return <FilterActionCard params={{}} status={status} label="ÄÃ£ xoÃ¡ bá»™ lá»c" />;
+        return <FilterActionCard params={{}} status={status} label="Đã xoá bộ lọc" />;
       if (name === "clearDashboardWidgets")
-        return <FilterActionCard params={{}} status={status} label="ÄÃ£ xoÃ¡ widgets" />;
+        return <FilterActionCard params={{}} status={status} label="Đã xoá widgets" />;
 
-      // â”€â”€ Streaming plan tools (both share the same card)
+      // ── Streaming plan tools (both share the same card)
       if (name === "generate_maintenance_plan_stream" || name === "schedule_inspection")
         return <MaintenancePlanCard status={status} />;
 
-      // â”€â”€ Write tool
+      // ── Write tool
       if (name === "update_issue")
         return <IssueUpdateCard params={p} status={status} />;
 
-      // â”€â”€ Analytics tools
+      // ── Analytics tools
       if (name === "rank_trains_by_risk")
         return <RiskRankCard params={p} status={status} />;
       if (name === "get_system_analytics")
@@ -359,7 +359,7 @@ export const useRailToolRendering = () => {
       if (name === "find_overdue_issues")
         return <OverdueCard params={p} status={status} />;
 
-      // â”€â”€ Generic read-query tools
+      // ── Generic read-query tools
       const queryTools = new Set([
         "get_fleet_overview", "get_train_summary", "count_issues",
         "list_issues", "get_carriage_detail", "get_issue_detail",
@@ -367,7 +367,7 @@ export const useRailToolRendering = () => {
       if (queryTools.has(name))
         return <AnalysisQueryCard toolName={name} params={p} status={status} />;
 
-      // â”€â”€ Fallback for anything else
+      // ── Fallback for anything else
       return <ToolReasoning name={name} status={status} args={parameters} />;
     },
   });
@@ -376,7 +376,7 @@ export const useRailToolRendering = () => {
     {
       name: "setTheme",
       description:
-        "Äáº·t cháº¿ Ä‘á»™ giao diá»‡n chÃ­nh xÃ¡c theo yÃªu cáº§u ngÆ°á»i dÃ¹ng: light, dark hoáº·c system.",
+        "Đặt chế độ giao diện chính xác theo yêu cầu người dùng: light, dark hoặc system.",
       parameters: z.object({
         mode: z.enum(["light", "dark", "system"]),
       }),
