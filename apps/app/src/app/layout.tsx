@@ -3,7 +3,7 @@
 import "./globals.css";
 import "@copilotkit/react-core/v2/styles.css";
 
-import { CopilotKit } from "@copilotkit/react-core";
+import { CopilotKitProvider } from "@copilotkit/react-core/v2";
 import { ThemeProvider } from "@/hooks/use-theme";
 
 export default function RootLayout({
@@ -13,9 +13,9 @@ export default function RootLayout({
     <html lang="en">
       <body className={`antialiased`}>
         <ThemeProvider>
-          <CopilotKit runtimeUrl="/api/copilotkit">
+          <CopilotKitProvider runtimeUrl="/api/copilotkit" useSingleEndpoint>
             {children}
-          </CopilotKit>
+          </CopilotKitProvider>
         </ThemeProvider>
       </body>
     </html>

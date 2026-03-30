@@ -1,7 +1,7 @@
 "use client";
 
 import { ReactNode, useState } from "react";
-import { useFrontendTool } from "@copilotkit/react-core";
+import { useFrontendTool } from "@copilotkit/react-core/v2";
 
 import { ModeToggle } from "./mode-toggle";
 
