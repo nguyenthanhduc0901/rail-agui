@@ -410,41 +410,54 @@ def update_issue(
     if not any([new_stat, new_pri, new_asn]):
         return {"error": "Can provide at least one of: status, priority, assignee_id."}
 
-    issues = _get_rail_data().get("issues", [])
-    target = next((i for i in issues if i.get("id") == iid), None)
-    if not target:
+    # Read from SQLite (authoritative source)
+    db  = _get_db()
+    row = db.execute("SELECT * FROM issues WHERE id = ?", (iid,)).fetchone()
+    if not row:
         return {"error": f"Issue '{iid}' not found."}
-    if new_asn and not _get_technician_by_id(new_asn):
-        return {"error": f"Technician '{new_asn}' not found. Use TECH-01...TECH-10."}
+    current = dict(row)
+
+    if new_asn:
+        tech_row = db.execute("SELECT id, name FROM technicians WHERE id = ?", (new_asn,)).fetchone()
+        if not tech_row:
+            return {"error": f"Technician '{new_asn}' not found. Use TECH-01...TECH-10."}
+
+    final_stat = new_stat or current["status"]
+    final_pri  = new_pri  or current["priority"]
+    final_asn  = new_asn  or current["assignee_id"]
 
     changes: list[str] = []
-    if new_stat and target.get("status") != new_stat:
-        target["status"] = new_stat;   changes.append(f"status -> {new_stat}")
-    if new_pri  and target.get("priority") != new_pri:
-        target["priority"] = new_pri;  changes.append(f"priority -> {new_pri}")
-    if new_asn  and target.get("assigneeId") != new_asn:
-        target["assigneeId"] = new_asn
-        tech = _get_technician_by_id(new_asn)
-        changes.append(f"assignee -> {tech['name'] if tech else new_asn}")
+    if new_stat and current["status"]      != new_stat: changes.append(f"status -> {new_stat}")
+    if new_pri  and current["priority"]    != new_pri:  changes.append(f"priority -> {new_pri}")
+    if new_asn  and current["assignee_id"] != new_asn:
+        t = db.execute("SELECT name FROM technicians WHERE id = ?", (new_asn,)).fetchone()
+        changes.append(f"assignee -> {dict(t)['name'] if t else new_asn}")
 
     if not changes:
         return {"message": f"Issue {iid} is already in the requested state."}
 
-    if _db_conn is not None:
-        _db_conn.execute(
-            "UPDATE issues SET status=?, priority=?, assignee_id=? WHERE id=?",
-            (target["status"], target["priority"], target.get("assigneeId"), iid),
-        )
-        _db_conn.commit()
+    db.execute(
+        "UPDATE issues SET status=?, priority=?, assignee_id=? WHERE id=?",
+        (final_stat, final_pri, final_asn, iid),
+    )
+    db.commit()
 
-    tech = _get_technician_by_id(target.get("assigneeId") or "")
+    # Also sync JSON in-memory cache so same-session _filter_issues() calls stay consistent
+    for issue in _get_rail_data().get("issues", []):
+        if issue.get("id") == iid:
+            issue["status"]     = final_stat
+            issue["priority"]   = final_pri
+            issue["assigneeId"] = final_asn
+            break
+
+    tech = _get_technician_by_id(final_asn or "")
     _log("update_issue", issue_id=iid, changes=str(changes))
     return {
         "success": True, "issueId": iid, "changes": changes,
         "current": {
-            "status":       target.get("status"),
-            "priority":     target.get("priority"),
-            "assigneeId":   target.get("assigneeId"),
+            "status":       final_stat,
+            "priority":     final_pri,
+            "assigneeId":   final_asn,
             "assigneeName": tech["name"] if tech else "Unassigned",
         },
     }
@@ -692,8 +705,23 @@ def request_bulk_issue_status_update(
     pri_     = _norm_priority(priority)
     tgt_sta_ = _norm_status(target_status) or "in-progress"
 
-    targets = _filter_issues(train_id=tid or None, priority=pri_ or None, status="open")
-    if not targets:
+    # Query targets from SQLite (authoritative, reflects prior updates)
+    db = _get_db()
+    conditions: list[str] = ["status = 'open'"]
+    params_q: list = []
+    if pri_:
+        conditions.append("priority = ?")
+        params_q.append(pri_)
+    if tid:
+        conditions.append("train_id = ?")
+        params_q.append(tid)
+    cur = db.execute(
+        "SELECT id FROM issues WHERE " + " AND ".join(conditions),
+        params_q,
+    )
+    target_ids = {r["id"] for r in cur.fetchall()}
+
+    if not target_ids:
         return {"approved": False, "count": 0, "message": "No matching open issues."}
 
     approval = interrupt({
@@ -701,29 +729,26 @@ def request_bulk_issue_status_update(
         "priority":     priority,
         "targetStatus": tgt_sta_,
         "trainId":      tid or "all",
-        "count":        len(targets),
+        "count":        len(target_ids),
     })
 
     approved = bool(isinstance(approval, dict) and approval.get("approved"))
     if approved:
-        target_ids = {t["id"] for t in targets}
-        updated = 0
+        db.executemany(
+            "UPDATE issues SET status=? WHERE id=?",
+            [(tgt_sta_, iid) for iid in target_ids],
+        )
+        db.commit()
+        # Also sync JSON in-memory cache for same-session consistency
         for issue in _get_rail_data().get("issues", []):
             if issue.get("id") in target_ids:
                 issue["status"] = tgt_sta_
-                updated += 1
-        if _db_conn is not None:
-            _db_conn.executemany(
-                "UPDATE issues SET status=? WHERE id=?",
-                [(tgt_sta_, iid) for iid in target_ids],
-            )
-            _db_conn.commit()
-        message = f"Updated {updated} issues to '{tgt_sta_}'."
+        message = f"Updated {len(target_ids)} issues to '{tgt_sta_}'."
     else:
         message = "Bulk update rejected by user."
 
-    _log("request_bulk_issue_status_update", approved=approved, count=len(targets))
-    return {"approved": approved, "count": len(targets), "targetStatus": tgt_sta_, "message": message}
+    _log("request_bulk_issue_status_update", approved=approved, count=len(target_ids))
+    return {"approved": approved, "count": len(target_ids), "targetStatus": tgt_sta_, "message": message}
 
 
 # -- Tool registry -------------------------------------------------------------

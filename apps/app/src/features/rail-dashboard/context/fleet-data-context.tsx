@@ -19,11 +19,27 @@ import {
   type Issue,
 } from "../data/railDataSource";
 
+export interface PlanStep {
+  id: string;
+  planId: string;
+  order: number;
+  issueId: string | null;
+  title: string;
+  details?: string | null;
+  priority: "high" | "medium" | "low";
+  status: "pending" | "in-progress" | "done";
+  estimatedHours?: number;
+  assigneeId?: string;
+  assigneeName?: string;
+  createdAt: string;
+}
+
 export interface FleetData {
   trains: Train[];
   carriages: Record<string, Carriage[]>;
   technicians: Technician[];
   issues: Issue[];
+  planSteps: PlanStep[];
   isLoading: boolean;
   refresh: () => void;
 }
@@ -33,6 +49,7 @@ const FleetDataContext = createContext<FleetData>({
   carriages: staticCarriages,
   technicians: staticTechnicians,
   issues: staticIssues,
+  planSteps: [],
   isLoading: false,
   refresh: () => {},
 });
@@ -42,7 +59,9 @@ export function FleetDataProvider({ children }: { children: React.ReactNode }) {
   const [carriages, setCarriages] = useState<Record<string, Carriage[]>>(staticCarriages);
   const [technicians, setTechnicians] = useState<Technician[]>(staticTechnicians);
   const [issues, setIssues] = useState<Issue[]>(staticIssues);
-  const [isLoading, setIsLoading] = useState(false);
+  const [planSteps, setPlanSteps] = useState<PlanStep[]>([]);
+  // Start as loading so seeding waits for the first API response
+  const [isLoading, setIsLoading] = useState(true);
   const isFetching = useRef(false);
 
   const refresh = useCallback(async () => {
@@ -57,6 +76,7 @@ export function FleetDataProvider({ children }: { children: React.ReactNode }) {
         if (data.carriages) setCarriages(data.carriages);
         if (data.technicians) setTechnicians(data.technicians);
         if (data.issues) setIssues(data.issues);
+        if (data.planSteps) setPlanSteps(data.planSteps);
       }
     } catch {
       // Keep static fallback data on network/parse error
@@ -72,7 +92,7 @@ export function FleetDataProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <FleetDataContext.Provider
-      value={{ trains, carriages, technicians, issues, isLoading, refresh }}
+      value={{ trains, carriages, technicians, issues, planSteps, isLoading, refresh }}
     >
       {children}
     </FleetDataContext.Provider>

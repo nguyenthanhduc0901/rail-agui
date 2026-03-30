@@ -40,6 +40,12 @@ export async function GET() {
           "FROM issues",
       )
       .all() as Record<string, unknown>[];
+    const planStepRows = db
+      .prepare(
+        "SELECT id, plan_id, seq_order, issue_id, title, details, priority, status, " +
+          "estimated_hours, assignee_id, assignee_name, created_at FROM plan_steps ORDER BY seq_order",
+      )
+      .all() as Record<string, unknown>[];
 
     db.close();
 
@@ -63,10 +69,13 @@ export async function GET() {
 
     // ── Carriage openIssuesCount ────────────────────────────────────────────
     const openByCarriage: Record<string, number> = {};
+    const openByTrain: Record<string, number> = {};
     for (const iss of issues) {
       if (iss.status !== "closed") {
         const cid = iss.carriageId as string;
         openByCarriage[cid] = (openByCarriage[cid] ?? 0) + 1;
+        const tid = iss.trainId as string;
+        openByTrain[tid] = (openByTrain[tid] ?? 0) + 1;
       }
     }
 
@@ -94,7 +103,7 @@ export async function GET() {
       healthStatus:     t.health_status,
       currentLocation:  t.current_location,
       metrics: {
-        openIssues:      t.open_issues,
+        openIssues:      openByTrain[t.id as string] ?? 0,  // computed fresh from issues
         efficiency:      t.efficiency,
         totalCarriages:  t.total_carriages,
         healthyCarriages: t.healthy_carriages,
@@ -115,7 +124,23 @@ export async function GET() {
       avatarColor: AVATAR_COLORS[idx % AVATAR_COLORS.length],
     }));
 
-    return NextResponse.json({ trains, carriages, technicians, issues });
+    // ── Plan steps ─────────────────────────────────────────────────────────
+    const planSteps = planStepRows.map((s) => ({
+      id:             s.id,
+      planId:         s.plan_id,
+      order:          s.seq_order,
+      issueId:        s.issue_id ?? null,
+      title:          s.title,
+      details:        s.details ?? null,
+      priority:       s.priority,
+      status:         s.status,
+      estimatedHours: s.estimated_hours,
+      assigneeId:     s.assignee_id ?? "",
+      assigneeName:   s.assignee_name ?? "Unassigned",
+      createdAt:      s.created_at,
+    }));
+
+    return NextResponse.json({ trains, carriages, technicians, issues, planSteps });
   } catch (err) {
     return NextResponse.json({ error: String(err) }, { status: 500 });
   }
