@@ -1,9 +1,9 @@
 ﻿"use client";
 
-import { Fragment, useState, useMemo, ReactNode } from 'react';
+import { Fragment, useState, useMemo, useEffect, ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
-import { getCarriageSystems, getActiveIssuesByCarriage, getTechnicianById, getCarriagesByTrain, type SystemHealth, type Carriage, type Train, type Technician } from '../data/railDataSource';
+import { getCarriageSystems, getActiveIssuesByCarriage, getTechnicianById, getCarriagesByTrain, getAllTechnicians, type SystemHealth, type Carriage, type Train, type Technician } from '../data/railDataSource';
 
 interface HealthStatus {
   color: string;
@@ -33,10 +33,10 @@ const getHealthStatus = (health: number): HealthStatus => {
 };
 
 const getPriorityStyle = (priority: string): string => ({
-  high:   'bg-red-100 text-red-700',
-  medium: 'bg-amber-100 text-amber-700',
-  low:    'bg-blue-100 text-blue-700',
-}[priority] ?? 'bg-slate-100 text-slate-700');
+  high:   'bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400',
+  medium: 'bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400',
+  low:    'bg-blue-100 text-blue-700 dark:bg-sky-950/40 dark:text-sky-400',
+}[priority] ?? 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400');
 
 const PRIORITY_LEVEL: Record<string, number> = { high: 3, medium: 2, low: 1 };
 
@@ -118,7 +118,7 @@ function AssigneeAvatar({ technician }: { technician?: Technician }): ReactNode 
   if (technician) {
     return (
       <div
-        className={`w-8 h-8 rounded-full flex items-center justify-center text-white ${technician.avatarColor} shadow-sm border-2 border-white cursor-help`}
+        className={`w-8 h-8 rounded-full flex items-center justify-center text-white ${technician.avatarColor} shadow-sm border-2 border-white dark:border-slate-800 cursor-help shrink-0`}
         title={`Assigned to ${technician.name} (${technician.specialty})`}
       >
         {technician.initials}
@@ -127,7 +127,7 @@ function AssigneeAvatar({ technician }: { technician?: Technician }): ReactNode 
   }
   return (
     <div
-      className="w-8 h-8 rounded-full flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-300 dark:border-slate-700 border-dashed cursor-help"
+      className="w-8 h-8 rounded-full flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-300 dark:border-slate-700 border-dashed cursor-help shrink-0"
       title="Unassigned"
     >
       ?
@@ -253,6 +253,19 @@ export function CarriageDetailsModal({ isOpen, onClose, train, carriage }: Carri
   const [filterAssignee, setFilterAssignee] = useState('All');
   const [sortBy,         setSortBy]         = useState('date-desc');
 
+  const [selectedIssueId,  setSelectedIssueId]  = useState<string | null>(null);
+  const [planText,         setPlanText]         = useState('');
+  const [selectedAssignee, setSelectedAssignee] = useState('');
+
+  useEffect(() => {
+    if (!isOpen) {
+      setSelectedIssueId(null);
+      setFilterSystem('All');
+      setFilterPriority('All');
+      setFilterAssignee('All');
+    }
+  }, [isOpen]);
+
   const systems = useMemo(
     () => (train && carriage ? getCarriageSystems(train.id, carriage.id) : []),
     [train, carriage],
@@ -287,18 +300,31 @@ export function CarriageDetailsModal({ isOpen, onClose, train, carriage }: Carri
     });
   }, [rawIssues, filterSystem, filterPriority, filterAssignee, sortBy]);
 
+  const selectedIssue = useMemo(
+    () => rawIssues.find(i => i.id === selectedIssueId),
+    [rawIssues, selectedIssueId],
+  );
+
+  useEffect(() => {
+    if (selectedIssue) {
+      setPlanText(selectedIssue.description || '');
+      setSelectedAssignee(selectedIssue.assigneeId || '');
+    }
+  }, [selectedIssue]);
+
   if (!isOpen || !carriage) return null;
 
+  const allTechnicians = getAllTechnicians();
   const portalRoot = typeof document !== 'undefined' ? document.getElementById('app-modal-portal') : null;
 
   const modalContent = (
     <div className="absolute inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-slate-800/40 backdrop-blur-md" onClick={onClose} />
 
-      <div className="relative bg-white dark:bg-slate-900 w-full max-w-7xl h-[85vh] rounded-3xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] dark:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.50)] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200 border border-black/5 dark:border-slate-800">
+      <div className="relative bg-white dark:bg-slate-900 w-full max-w-7xl h-[88vh] rounded-3xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] dark:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.50)] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200 border border-black/5 dark:border-slate-800">
 
         {/* Header */}
-        <div className="bg-white dark:bg-slate-900 px-8 py-5 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center z-10 shrink-0">
+        <div className="bg-white dark:bg-slate-900 px-8 py-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center z-10 shrink-0">
           <div>
             <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-3">
               <span className="bg-blue-600 text-white px-3 py-1 rounded-lg text-sm shadow-sm">{carriage.id}</span>
@@ -317,10 +343,10 @@ export function CarriageDetailsModal({ isOpen, onClose, train, carriage }: Carri
         </div>
 
         {/* Body */}
-        <div className="flex flex-1 overflow-hidden bg-slate-50/50 dark:bg-slate-950">
+        <div className="flex flex-col flex-1 overflow-hidden bg-slate-50/50 dark:bg-slate-950">
 
-          {/* LEFT: Carriage Blueprint */}
-          <div className={`w-[55%] relative overflow-hidden flex items-center justify-center p-8 border-r border-slate-200 dark:border-slate-800 ${
+          {/* TOP: Carriage Blueprint */}
+          <div className={`h-[40%] min-h-[220px] relative overflow-hidden flex items-center justify-center p-6 border-b border-slate-200 dark:border-slate-800 shrink-0 shadow-sm z-20 ${
             carriage.healthStatus === 'critical' ? 'bg-red-50/70 dark:bg-red-950/20' :
             carriage.healthStatus === 'warning'  ? 'bg-amber-50/70 dark:bg-amber-950/20' :
             'bg-white dark:bg-slate-900'
@@ -329,7 +355,7 @@ export function CarriageDetailsModal({ isOpen, onClose, train, carriage }: Carri
               className="absolute inset-0 opacity-[0.4]"
               style={{ backgroundImage: 'linear-gradient(#cbd5e1 1px, transparent 1px), linear-gradient(90deg, #cbd5e1 1px, transparent 1px)', backgroundSize: '24px 24px' }}
             />
-            <div className="absolute top-6 left-6 flex items-center gap-2 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm z-20">
+            <div className="absolute top-4 left-6 flex items-center gap-2 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm z-20">
               <span className="relative flex h-3 w-3">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
                 <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-500" />
@@ -341,69 +367,51 @@ export function CarriageDetailsModal({ isOpen, onClose, train, carriage }: Carri
               const allCarriages = train ? getCarriagesByTrain(train.id) : [];
               const isHead = allCarriages.length > 0 && allCarriages[0].id === carriage.id;
               const isLast = allCarriages.length > 1 && allCarriages[allCarriages.length - 1].id === carriage.id;
-
               const shapeClasses = isHead
-                ? 'rounded-tl-[100px] rounded-bl-3xl rounded-r-2xl'
+                ? 'rounded-tl-[80px] rounded-bl-3xl rounded-r-2xl'
                 : isLast
-                  ? 'rounded-r-[100px] rounded-l-2xl'
+                  ? 'rounded-r-[80px] rounded-l-2xl'
                   : 'rounded-2xl';
-
               return (
-                <div className={`relative w-full max-w-2xl aspect-[2/1] bg-gradient-to-b from-slate-50 to-slate-200 border-2 border-slate-300 shadow-xl flex flex-col justify-between z-10 transition-all duration-300 ${shapeClasses}`}>
+                <div className={`relative h-full aspect-[2.5/1] max-w-4xl max-h-56 bg-gradient-to-b from-slate-50 to-slate-200 border-2 border-slate-300 shadow-xl flex flex-col justify-between z-10 transition-all duration-300 ${shapeClasses}`}>
                   <div className="absolute top-[60%] left-0 right-0 h-2 bg-blue-600 opacity-80" />
-
-                  {/* Windows */}
-                  <div className={`flex justify-between pt-12 gap-5 absolute inset-x-0 ${isHead ? 'pl-6 pr-10' : isLast ? 'pl-10 pr-6' : 'px-10'}`}>
-
-                    {/* Cab glass — Head */}
+                  <div className={`flex justify-between pt-8 gap-5 absolute inset-x-0 ${isHead ? 'pl-6 pr-8' : isLast ? 'pl-8 pr-6' : 'px-8'}`}>
                     {isHead && (
-                      <div className="w-32 h-14 bg-slate-800 rounded-tl-[60px] rounded-tr-md rounded-bl-lg border-2 border-slate-400 shadow-inner relative overflow-hidden shrink-0">
+                      <div className="w-28 h-12 bg-slate-800 rounded-tl-[60px] rounded-tr-md rounded-bl-lg border-2 border-slate-400 shadow-inner relative overflow-hidden shrink-0">
                         <div className="absolute top-0 right-4 w-12 h-full bg-white/10 skew-x-12" />
                       </div>
                     )}
-
                     {[1, 2].map(i => (
-                      <div key={i} className="h-14 flex-1 bg-slate-800 rounded-lg border-2 border-slate-400 shadow-inner relative overflow-hidden">
+                      <div key={i} className="h-12 flex-1 bg-slate-800 rounded-lg border-2 border-slate-400 shadow-inner relative overflow-hidden">
                         <div className="absolute top-0 right-2 w-16 h-full bg-white/10 skew-x-12" />
                       </div>
                     ))}
-
-                    {/* Door gap */}
                     <div className="w-[60px] shrink-0" />
-
                     {[3, 4].map(i => (
-                      <div key={i} className="h-14 flex-1 bg-slate-800 rounded-lg border-2 border-slate-400 shadow-inner relative overflow-hidden">
+                      <div key={i} className="h-12 flex-1 bg-slate-800 rounded-lg border-2 border-slate-400 shadow-inner relative overflow-hidden">
                         <div className="absolute top-0 right-2 w-16 h-full bg-white/10 skew-x-12" />
                       </div>
                     ))}
-
-                    {/* Cab glass — Last */}
                     {isLast && (
-                      <div className="w-32 h-14 bg-slate-800 rounded-tr-[60px] rounded-tl-md rounded-br-lg border-2 border-slate-400 shadow-inner relative overflow-hidden shrink-0">
+                      <div className="w-28 h-12 bg-slate-800 rounded-tr-[60px] rounded-tl-md rounded-br-lg border-2 border-slate-400 shadow-inner relative overflow-hidden shrink-0">
                         <div className="absolute top-0 right-4 w-12 h-full bg-white/10 skew-x-12" />
                       </div>
                     )}
                   </div>
-
-                  {/* Bogies — left */}
-                  <div className="absolute bottom-[-20px] left-[15%] flex gap-4 z-0">
+                  <div className="absolute bottom-[-18px] left-[15%] flex gap-3 z-0">
                     {[0, 1].map(i => (
-                      <div key={`wheel-l-${i}`} className="w-10 h-10 rounded-full border-[3px] border-slate-600 bg-slate-300 flex items-center justify-center">
-                        <div className="w-4 h-4 rounded-full border border-slate-400 bg-slate-200" />
+                      <div key={`wheel-l-${i}`} className="w-9 h-9 rounded-full border-[3px] border-slate-600 bg-slate-300 flex items-center justify-center shadow-md">
+                        <div className="w-3.5 h-3.5 rounded-full border border-slate-400 bg-slate-200" />
                       </div>
                     ))}
                   </div>
-
-                  {/* Bogies — right */}
-                  <div className="absolute bottom-[-20px] right-[15%] flex gap-4 z-0">
+                  <div className="absolute bottom-[-18px] right-[15%] flex gap-3 z-0">
                     {[0, 1].map(i => (
-                      <div key={`wheel-r-${i}`} className="w-10 h-10 rounded-full border-[3px] border-slate-600 bg-slate-300 flex items-center justify-center">
-                        <div className="w-4 h-4 rounded-full border border-slate-400 bg-slate-200" />
+                      <div key={`wheel-r-${i}`} className="w-9 h-9 rounded-full border-[3px] border-slate-600 bg-slate-300 flex items-center justify-center shadow-md">
+                        <div className="w-3.5 h-3.5 rounded-full border border-slate-400 bg-slate-200" />
                       </div>
                     ))}
                   </div>
-
-                  {/* System overlays */}
                   {systems.map(system => {
                     const status    = getHealthStatus(system.health);
                     const hasIssues = rawIssues.some(i => i.systemCategory === system.name);
@@ -418,90 +426,190 @@ export function CarriageDetailsModal({ isOpen, onClose, train, carriage }: Carri
             })()}
           </div>
 
-          {/* RIGHT: Issues List */}
-          <div className="w-[45%] flex flex-col bg-slate-50 dark:bg-slate-950 relative z-10">
+          {/* BOTTOM: Issues list + Detail pane */}
+          <div className="flex-1 flex overflow-hidden z-10">
 
-            {/* Filters toolbar */}
-            <div className="bg-white dark:bg-slate-900 px-6 py-4 border-b border-slate-200 dark:border-slate-800 shrink-0 space-y-4 shadow-sm z-10">
-              <div className="flex items-center justify-between">
-                <h3 className="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2 text-lg">
-                  Reported Issues
-                  <span className="bg-red-100 text-red-600 px-2.5 py-0.5 rounded-full text-sm font-bold">
-                    {filteredIssues.length}
-                  </span>
-                </h3>
+            {/* LEFT: Issues list */}
+            <div className="w-[45%] flex flex-col border-r border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/80">
+              <div className="bg-white dark:bg-slate-900 px-5 py-4 border-b border-slate-200 dark:border-slate-800 shrink-0 shadow-sm z-10">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                    Reported Issues
+                    <span className="bg-red-100 text-red-600 px-2 py-0.5 rounded-full text-xs font-bold">
+                      {filteredIssues.length}
+                    </span>
+                  </h3>
+                </div>
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <FilterSelect label="System"   value={filterSystem}   onChange={setFilterSystem}   options={SYSTEM_OPTIONS} />
+                  <FilterSelect label="Priority" value={filterPriority} onChange={setFilterPriority} options={PRIORITY_OPTIONS} />
+                  <FilterSelect label="Assignee" value={filterAssignee} onChange={setFilterAssignee} options={assigneeOptions} />
+                  <FilterSelect label="Sort by"  value={sortBy}         onChange={setSortBy}         options={SORT_OPTIONS} />
+                </div>
               </div>
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <FilterSelect label="System"   value={filterSystem}   onChange={setFilterSystem}   options={SYSTEM_OPTIONS} />
-                <FilterSelect label="Priority" value={filterPriority} onChange={setFilterPriority} options={PRIORITY_OPTIONS} />
-                <FilterSelect label="Assignee" value={filterAssignee} onChange={setFilterAssignee} options={assigneeOptions} />
-                <FilterSelect label="Sort by"  value={sortBy}         onChange={setSortBy}         options={SORT_OPTIONS} />
+
+              <div className="flex-1 overflow-y-auto p-4 space-y-3 rail-scrollbar">
+                {filteredIssues.length === 0 ? (
+                  <div className="h-full flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 space-y-3">
+                    <div className="w-14 h-14 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center">
+                      <svg className="w-6 h-6 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <p className="font-medium text-slate-500 dark:text-slate-400">No active issues found.</p>
+                  </div>
+                ) : (
+                  filteredIssues.map(issue => {
+                    const isSelected = selectedIssueId === issue.id;
+                    return (
+                      <div
+                        key={issue.id}
+                        onClick={() => setSelectedIssueId(issue.id)}
+                        className={`cursor-pointer p-4 rounded-2xl transition-all duration-200 group border ${
+                          isSelected
+                            ? 'bg-blue-50/50 dark:bg-sky-900/20 border-blue-200 dark:border-sky-800 shadow-md ring-1 ring-blue-500/20 dark:ring-sky-500/30'
+                            : 'bg-white dark:bg-slate-900 border-transparent shadow-[0_2px_4px_rgba(0,0,0,0.02)] hover:shadow-md hover:border-slate-200 dark:hover:border-slate-700'
+                        }`}
+                      >
+                        <div className="flex justify-between items-start mb-2.5">
+                          <div className="flex gap-2 items-center">
+                            <span className={`text-xs font-mono font-bold px-2 py-0.5 rounded ${isSelected ? 'text-blue-700 bg-blue-100 dark:text-sky-300 dark:bg-sky-900/50' : 'text-slate-500 bg-slate-100 dark:text-slate-400 dark:bg-slate-800'}`}>
+                              {issue.id}
+                            </span>
+                            <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${getPriorityStyle(issue.priority)}`}>
+                              {issue.priority}
+                            </span>
+                          </div>
+                          <span className="text-[11px] font-medium text-slate-400 dark:text-slate-500">{new Date(issue.planning.reportedAt).toLocaleDateString()}</span>
+                        </div>
+                        <h4 className={`font-semibold text-sm mb-1.5 line-clamp-1 transition-colors ${isSelected ? 'text-blue-700 dark:text-sky-400' : 'text-slate-800 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-sky-400'}`}>
+                          {issue.title ?? issue.description}
+                        </h4>
+                        <div className="flex items-center gap-2 text-xs font-medium mt-3">
+                          <span className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-2.5 py-1 rounded-md">
+                            {issue.systemCategory}
+                          </span>
+                          <span className={`px-2 py-1 rounded-full capitalize font-semibold ${
+                            issue.status === 'open'        ? 'text-red-600 bg-red-100 dark:bg-red-900/30 dark:text-red-400' :
+                            issue.status === 'in-progress' ? 'text-blue-600 bg-blue-100 dark:bg-sky-900/30 dark:text-sky-400' :
+                                                             'text-slate-600 bg-slate-100 dark:bg-slate-800 dark:text-slate-400'
+                          }`}>
+                            {issue.status.replace('-', ' ')}
+                          </span>
+                          <div className="flex-1" />
+                          <AssigneeAvatar technician={getTechnicianById(issue.assigneeId)} />
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
               </div>
             </div>
 
-            {/* Issues list */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-4 rail-scrollbar">
-              {filteredIssues.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 space-y-3">
-                  <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center">
-                    <svg className="w-8 h-8 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
+            {/* RIGHT: Detail / Planning pane */}
+            <div className="w-[55%] bg-white dark:bg-slate-900 flex flex-col z-10">
+              {selectedIssue ? (
+                <div className="flex flex-col h-full animate-in slide-in-from-right-2 duration-300">
+                  <div className="p-6 border-b border-slate-100 dark:border-slate-800">
+                    <div className="flex items-center gap-3 mb-3">
+                      <span className="text-sm font-mono font-bold text-blue-700 bg-blue-50 dark:bg-sky-900/40 dark:text-sky-300 px-2.5 py-1 rounded-md border border-blue-100 dark:border-sky-800">
+                        {selectedIssue.id}
+                      </span>
+                      <span className={`text-xs font-bold uppercase px-2.5 py-1 rounded-full ${getPriorityStyle(selectedIssue.priority)}`}>
+                        {selectedIssue.priority} PRIORITY
+                      </span>
+                      <div className="flex-1" />
+                      <span className="text-sm font-semibold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full">
+                        {selectedIssue.systemCategory} System
+                      </span>
+                    </div>
+                    <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100 leading-snug">
+                      {selectedIssue.title ?? selectedIssue.description}
+                    </h3>
                   </div>
-                  <p className="font-medium text-slate-500 dark:text-slate-400">No active issues found.</p>
+
+                  <div className="flex-1 p-6 overflow-y-auto space-y-6 rail-scrollbar">
+                    <div>
+                      <label className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 block">Initial Diagnostics Description</label>
+                      <div className="p-4 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-100 dark:border-slate-700/50">
+                        <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-300">
+                          {selectedIssue.description}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-6">
+                      <div className="col-span-2">
+                        <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                          Action Plan / Repair Notes
+                        </label>
+                        <textarea
+                          value={planText}
+                          onChange={(e) => setPlanText(e.target.value)}
+                          placeholder="Detail the steps for resolution..."
+                          className="w-full h-32 p-3.5 text-sm bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl shadow-sm text-slate-700 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none transition-shadow"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                          Assign Technician
+                        </label>
+                        <select
+                          value={selectedAssignee}
+                          onChange={(e) => setSelectedAssignee(e.target.value)}
+                          className="w-full p-2.5 text-sm bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg shadow-sm text-slate-700 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none cursor-pointer"
+                        >
+                          <option value="">Unassigned</option>
+                          {allTechnicians.map(t => (
+                            <option key={t.id} value={t.id}>{t.name} ({t.specialty})</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                          Target Date
+                        </label>
+                        <input
+                          type="date"
+                          defaultValue={selectedIssue.planning.scheduledDate ?? ''}
+                          className="w-full p-2.5 text-sm bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg shadow-sm text-slate-700 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none cursor-pointer"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50 shrink-0">
+                    <button
+                      onClick={() => setSelectedIssueId(null)}
+                      className="px-4 py-2 text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                    >
+                      Clear Selection
+                    </button>
+                    <button className="px-6 py-2.5 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-xl shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 transition-all active:scale-[0.98]">
+                      Save Repair Plan
+                    </button>
+                  </div>
                 </div>
               ) : (
-                filteredIssues.map(issue => (
-                  <div
-                    key={issue.id}
-                    className="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05),0_2px_4px_-2px_rgba(0,0,0,0.05)] hover:shadow-[0_10px_15px_-3px_rgba(0,0,0,0.08),0_4px_6px_-4px_rgba(0,0,0,0.04)] hover:-translate-y-0.5 transition-[transform,box-shadow] duration-200 group"
-                  >
-                    <div className="flex justify-between items-start mb-3">
-                      <div className="flex gap-2 items-center">
-                        <span className="text-xs font-mono font-bold text-slate-500 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-md">
-                          {issue.id}
-                        </span>
-                        <span className={`text-[10px] font-bold uppercase px-2.5 py-1 rounded-full ${getPriorityStyle(issue.priority)}`}>
-                          {issue.priority}
-                        </span>
-                      </div>
-                      <span className="text-xs font-medium text-slate-400 dark:text-slate-500">{new Date(issue.planning.reportedAt).toLocaleDateString()}</span>
-                    </div>
-
-                    <div className="mb-4">
-                      <h4 className="font-semibold text-slate-800 dark:text-slate-100 text-[15px] leading-snug group-hover:text-blue-600 dark:group-hover:text-sky-400 transition-colors">
-                        {issue.title ?? issue.description}
-                      </h4>
-                      <p className="mt-1 text-[13px] leading-relaxed text-slate-600 dark:text-slate-300">
-                        {issue.description}
-                      </p>
-                    </div>
-
-                    <div className="flex items-center gap-3 text-xs font-medium">
-                      <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-2.5 py-1.5 rounded-lg">
-                        <svg className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        {issue.systemCategory}
-                      </div>
-                      <div className="flex-1" />
-                      <span className={`px-2.5 py-1.5 rounded-full capitalize font-semibold text-xs ${
-                        issue.status === 'open'
-                          ? 'bg-red-100 text-red-600 dark:bg-red-950/40 dark:text-red-300'
-                          : issue.status === 'in-progress'
-                            ? 'bg-blue-100 text-blue-600 dark:bg-sky-950/40 dark:text-sky-300'
-                            : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'
-                      }`}>
-                        {issue.status.replace('-', ' ')}
-                      </span>
-                      <AssigneeAvatar technician={getTechnicianById(issue.assigneeId)} />
-                    </div>
+                <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-slate-50/30 dark:bg-slate-900/30">
+                  <div className="w-20 h-20 mb-6 rounded-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 border-dashed flex items-center justify-center">
+                    <svg className="w-10 h-10 text-slate-300 dark:text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
                   </div>
-                ))
+                  <h4 className="text-lg font-bold text-slate-700 dark:text-slate-300 mb-2">Issue Diagnostic Planner</h4>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 max-w-sm leading-relaxed">
+                    Select an issue from the reported list on the left to review its details, assign a technician, and construct a repair action plan.
+                  </p>
+                </div>
               )}
             </div>
-
           </div>
         </div>
       </div>

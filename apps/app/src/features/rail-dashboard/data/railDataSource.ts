@@ -83,6 +83,8 @@ const subsystemTemplates = [
 export const getTechnicianById = (id: string | null): Technician | undefined =>
   id ? technicians.find((t) => t.id === id) : undefined;
 
+export const getAllTechnicians = (): Technician[] => technicians;
+
 export const getCarriagesByTrain = (trainId: string): Carriage[] =>
   carriages[trainId] || [];
 
