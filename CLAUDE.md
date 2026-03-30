@@ -1,299 +1,115 @@
-# CopilotKit + LangGraph Todo Demo
+# Rail AI Dashboard (CopilotKit + LangGraph)
 
 ## Purpose
+This repo is a starter template for building an AI-assisted rail operations dashboard.
 
-This repository serves as both a **showcase** and **template** for building AI agents with CopilotKit and LangGraph. It demonstrates how CopilotKit can drive interactive UI beyond just chat, using a **collaborative todo list** as the primary example.
+It demonstrates:
+- A Next.js frontend with CopilotKit chat + frontend tools
+- A LangGraph backend agent with domain tools
+- A shared workflow where AI helps inspect fleet status and maintenance issues
 
-**Target audience:** Developers evaluating CopilotKit or starting new projects with AI agents.
+## Current Scope
+This project is a **rail dashboard demo**, not the old todo demo.
 
-## Core Concept
+Core UX:
+- Inspect trains, carriages, and issues
+- Ask the agent for summaries and recommendations
+- Let the agent trigger frontend actions (theme toggle, mode switch, issue card rendering)
 
-The todo list demonstrates **agent-driven UI** where:
+## Monorepo Structure
 
-- The agent can manipulate application state (adding todos, updating status, organizing tasks)
-- Users can interact with the same state (editing titles, checking off tasks, deleting todos)
-- Both agent and user changes update the same shared state
-- The UI reactively updates based on agent state changes
-
-This uses CopilotKit's **v2 agent state pattern** where state lives in the agent and syncs to the frontend.
-
-## Architecture
-
-This is a **Turborepo monorepo** with three apps:
-
-### Repository Structure
-
-```
+```text
 apps/
-├── app/                         # Next.js frontend
-│   ├── src/
-│   │   ├── app/
-│   │   │   ├── page.tsx        # Main page - wires up all components
-│   │   │   └── api/copilotkit/ # CopilotKit API route
-│   │   ├── components/
-│   │   │   ├── canvas/         # Todo list UI
-│   │   │   │   ├── index.tsx   # Canvas container
-│   │   │   │   ├── todo-list.tsx    # Todo list with columns
-│   │   │   │   ├── todo-column.tsx  # Column (pending/completed)
-│   │   │   │   └── todo-card.tsx    # Individual todo card
-│   │   │   ├── example-layout/ # Layout: chat + canvas side-by-side
-│   │   │   └── generative-ui/  # Example generative UI components
-│   │   └── hooks/
-│   │       ├── use-generative-ui-examples.tsx  # Example CopilotKit patterns
-│   │       └── use-example-suggestions.tsx     # Chat suggestions
-├── agent/                       # LangGraph Python agent
-│   ├── main.py                  # Agent entry point
-│   └── src/
-│       ├── todos.py             # Todo tools and state schema
-│       └── query.py             # Example data query tool
-└── mcp/                         # MCP (Model Context Protocol) integration
+├── app/      # Next.js frontend
+├── agent/    # LangGraph Python agent
+└── mcp/      # MCP integration
 ```
 
-## Key Pattern: Agent State with CopilotKit v2
+Key frontend files:
+- `apps/app/src/app/layout.tsx`
+- `apps/app/src/app/api/copilotkit/route.ts`
+- `apps/app/src/features/rail-dashboard/RailDashboardApp.jsx`
+- `apps/app/src/hooks/use-generative-ui-examples.tsx`
+- `apps/app/src/hooks/use-example-suggestions.tsx`
 
-The todo list uses **CopilotKit v2's agent state pattern** where state lives in the agent backend and syncs bidirectionally with the frontend.
+Key backend files:
+- `apps/agent/main.py`
+- `apps/agent/src/rail_data.py`
+- `apps/agent/src/state.py`
 
-### How It Works
+## CopilotKit v2 Setup (Current)
 
-1. **Agent defines state schema and tools** (Python)
+Frontend package versions:
+- `@copilotkit/react-core`: `1.54.1`
+- `@copilotkit/runtime`: `1.54.1`
 
-   ```python
-   # apps/agent/src/todos.py
-   class Todo(TypedDict):
-       id: str
-       title: str
-       description: str
-       emoji: str
-       status: Literal["pending", "completed"]
+Backend package version:
+- `copilotkit==0.1.78` (Python)
 
-   class AgentState(TypedDict):
-       todos: list[Todo]
+Frontend imports use v2 path:
+- `@copilotkit/react-core/v2`
+- `@copilotkit/react-core/v2/styles.css`
 
-   @tool
-   def manage_todos(todos: list[Todo], runtime: ToolRuntime) -> Command:
-       """Manage the current todos."""
-       return Command(update={"todos": todos, ...})
-   ```
+### Important Runtime Compatibility Note
+This repo currently uses a **single runtime endpoint** in Next.js:
+- `POST /api/copilotkit`
 
-2. **Frontend reads from agent state**
+Because of that, provider config in `layout.tsx` uses:
+- `CopilotKitProvider`
+- `runtimeUrl="/api/copilotkit"`
+- `useSingleEndpoint`
 
-   ```typescript
-   // apps/app/src/components/canvas/index.tsx
-   const { agent } = useAgent();
+This avoids 404 errors from nested REST-style paths like `/api/copilotkit/agent/default/run`.
 
-   return (
-     <TodoList
-       todos={agent.state?.todos || []}
-       onUpdate={(updatedTodos) => agent.setState({ todos: updatedTodos })}
-       isAgentRunning={agent.isRunning}
-     />
-   );
-   ```
+## Migration Notes (v1 -> v2)
+- `useCopilotReadable` context injection is removed from this project.
+- Prefer v2 patterns: `useAgent`, frontend tools, and structured tool rendering.
+- Migration reference:
+  - https://docs.copilotkit.ai/langgraph/troubleshooting/migrate-to-v2
 
-3. **User interactions update agent state**
+## Backend Runtime Route
+`apps/app/src/app/api/copilotkit/route.ts` wires:
+- `CopilotRuntime`
+- `LangGraphAgent` (default agent)
+- `copilotRuntimeNextJSAppRouterEndpoint`
 
-   ```typescript
-   // User clicks checkbox → frontend calls agent.setState()
-   const toggleStatus = (todo) => {
-     const updated = todos.map((t) =>
-       t.id === todo.id
-         ? { ...t, status: t.status === "completed" ? "pending" : "completed" }
-         : t,
-     );
-     agent.setState({ todos: updated });
-   };
-   ```
-
-4. **Agent can manipulate state via tools**
-   - The agent calls `manage_todos` tool to update the todo list
-   - Both user and agent changes update the same `agent.state.todos`
-   - Frontend automatically re-renders when state changes
-
-### Why This Pattern?
-
-- **Single source of truth**: State lives in the agent, not duplicated in frontend
-- **Bidirectional sync**: User changes → agent state, Agent changes → UI update
-- **Simple**: No need for separate frontend state management
-- **Observable**: Agent has full visibility into state changes
-
-## Implementation Details
-
-### Agent Backend
-
-**Agent Definition** (`apps/agent/main.py`):
-
-```python
-from langchain.agents import create_agent
-from copilotkit import CopilotKitMiddleware
-from src.todos import todo_tools, AgentState
-
-agent = create_agent(
-    model="gpt-5.2",
-    tools=[*todo_tools, ...],  # manage_todos, get_todos
-    middleware=[CopilotKitMiddleware()],
-    state_schema=AgentState,  # Defines state shape
-    system_prompt="You are a helpful assistant..."
-)
-```
-
-**Todo Tools** (`apps/agent/src/todos.py`):
-
-```python
-@tool
-def manage_todos(todos: list[Todo], runtime: ToolRuntime) -> Command:
-    """Manage the current todos."""
-    # Ensure todos have unique IDs
-    for todo in todos:
-        if "id" not in todo or not todo["id"]:
-            todo["id"] = str(uuid.uuid4())
-
-    # Update agent state
-    return Command(update={
-        "todos": todos,
-        "messages": [ToolMessage(...)]
-    })
-
-@tool
-def get_todos(runtime: ToolRuntime):
-    """Get the current todos."""
-    return runtime.state.get("todos", [])
-```
-
-### Frontend
-
-**Canvas Component** (`apps/app/src/components/canvas/index.tsx`):
-
-```typescript
-export function Canvas() {
-  const { agent } = useAgent();  // CopilotKit v2 hook
-
-  return (
-    <div className="h-full p-8 bg-gray-50">
-      <TodoList
-        // Read state from agent
-        todos={agent.state?.todos || []}
-        // Update state in agent
-        onUpdate={(updatedTodos) => agent.setState({ todos: updatedTodos })}
-        // React to agent execution
-        isAgentRunning={agent.isRunning}
-      />
-    </div>
-  );
-}
-```
-
-**Todo List** (`apps/app/src/components/canvas/todo-list.tsx`):
-
-```typescript
-export function TodoList({ todos, onUpdate, isAgentRunning }: TodoListProps) {
-  const toggleStatus = (todo: Todo) => {
-    const updated = todos.map((t) =>
-      t.id === todo.id
-        ? { ...t, status: t.status === "completed" ? "pending" : "completed" }
-        : t
-    );
-    onUpdate(updated);  // Calls agent.setState()
-  };
-
-  const addTodo = () => {
-    const newTodo = { id: crypto.randomUUID(), ... };
-    onUpdate([...todos, newTodo]);
-  };
-
-  return (
-    <div className="flex gap-8">
-      <TodoColumn title="To Do" todos={pendingTodos} onAddTodo={addTodo} ... />
-      <TodoColumn title="Done" todos={completedTodos} ... />
-    </div>
-  );
-}
-```
-
-### How State Flows
-
-1. **User adds/edits todo** → Frontend calls `agent.setState({ todos: [...] })`
-2. **Agent state updates** → CopilotKit syncs to backend
-3. **Agent observes change** → Can respond via `manage_todos` tool
-4. **Agent modifies todos** → Calls `manage_todos` tool
-5. **State syncs to frontend** → `agent.state.todos` updates
-6. **UI re-renders** → React sees new state and updates display
-
-**Key insight**: State lives in the agent, frontend just reads/writes to it via CopilotKit hooks.
-
-## Tech Stack
-
-- **Frontend**: Next.js 16, React 19, TailwindCSS 4
-- **Agent**: LangGraph (Python), Google Gemini
-- **CopilotKit**: React hooks for agent integration (v2)
-- **Monorepo**: Turborepo with pnpm workspaces
-- **Other**: MCP (Model Context Protocol) integration, Recharts for generative UI examples
+Current agent mapping:
+- Agent id: `default`
+- LangGraph graph id: `sample_agent`
+- Deployment URL: `LANGGRAPH_DEPLOYMENT_URL` or `http://localhost:8123`
 
 ## Development
 
-This is a Turborepo monorepo using pnpm workspaces.
+From repo root:
 
 ```bash
-# Install dependencies (all apps)
 pnpm install
-
-# Start all apps (app, agent, mcp)
 pnpm dev
-
-# Start individually
-pnpm dev:app    # Next.js frontend on port 3000
-pnpm dev:agent  # LangGraph agent on port 8123
-pnpm dev:mcp    # MCP server
-
-# Build all apps
-pnpm build
-
-# Lint all apps
-pnpm lint
 ```
 
-### Environment Setup
+Useful scripts:
+- `pnpm dev:app`
+- `pnpm dev:agent`
+- `pnpm dev:mcp`
+- `pnpm build`
+- `pnpm lint`
+
+Agent environment:
 
 ```bash
-# Set Gemini API key for the agent
-echo 'GEMINI_API_KEY=your-key-here' > apps/agent/.env
+# apps/agent/.env
+GEMINI_API_KEY=your-key-here
 ```
 
 ## Design Principles
+- Keep architecture simple and inspectable
+- Keep CopilotKit integration explicit and version-safe
+- Prefer domain tools over prompt-only answers
+- Avoid unnecessary client-side context flooding
 
-1. **Simple over complex** - The todo list is intentionally simple and focused
-2. **CopilotKit v2 patterns** - Uses modern agent state management
-3. **Template-first** - Code is meant to be forked and extended
-4. **Showcasing agent-driven UI** - Demonstrates AI manipulating application state beyond chat
-
-## Future Enhancements
-
-Possible extensions to demonstrate more CopilotKit capabilities:
-
-- Todo categories/tags/priorities
-- Agent-driven task organization (auto-categorize, suggest priorities)
-- Due dates and reminders
-- Subtasks and dependencies
-- Export/import todo lists
-- Undo/redo with state history
-- Real-time collaboration
-
----
-
-## Key Takeaways for Developers
-
-**State Management Pattern**: This app uses CopilotKit v2's agent state pattern where:
-
-- State is defined in the agent backend (Python TypedDict)
-- Frontend reads via `agent.state.todos`
-- Frontend writes via `agent.setState({ todos: ... })`
-- Agent can modify state via tools (`manage_todos`)
-- Changes sync bidirectionally automatically
-
-**When extending this template**:
-
-- Define state schema in the agent (`AgentState`)
-- Create tools that manipulate state via `Command(update={...})`
-- Use `useAgent()` hook in frontend to read/write state
-- Let CopilotKit handle the sync - no manual state management needed
-
-This pattern works great for **agent-driven applications** where the AI needs to manipulate structured application state, not just chat.
+## Extension Guidance
+When extending this template:
+- Add/modify backend tools in `apps/agent/src/rail_data.py`
+- Keep agent state schema in `apps/agent/src/state.py`
+- Add frontend tools/renderers in `apps/app/src/hooks/use-generative-ui-examples.tsx`
+- Keep runtime endpoint and provider transport mode aligned

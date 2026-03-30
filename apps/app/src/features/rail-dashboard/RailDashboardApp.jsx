@@ -8,13 +8,11 @@ import { FleetDashboard } from "./screens/FleetDashboard";
 import {
   useExampleSuggestions,
   useGenerativeUIExamples,
-  useRailDashboardContext,
 } from "@/hooks";
 
 export function RailDashboardApp() {
   useGenerativeUIExamples();
   useExampleSuggestions();
-  useRailDashboardContext();
 
   return (
     <ExampleLayout

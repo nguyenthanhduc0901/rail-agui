@@ -99,5 +99,4 @@ def search_issues(
         limit=limit,
     )
 
-
 rail_tools = [get_fleet_overview, get_train_details, search_issues]
