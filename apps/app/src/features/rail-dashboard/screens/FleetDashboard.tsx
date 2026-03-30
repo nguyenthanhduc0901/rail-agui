@@ -2,7 +2,6 @@ import { Fragment, useMemo, useState } from 'react'
 import { getCarriagesByTrain, type Train, type Carriage } from '../data/railDataSource'
 import { useFleetData } from '../context/fleet-data-context'
 import { CarriageDetailsModal } from '../components/CarriageDetailsModal'
-import { MaintenancePlanBoard } from '../components/MaintenancePlanBoard'
 import { useRailDashboardAI } from '../context/rail-dashboard-ai-context'
 
 type StatusKey = 'healthy' | 'warning' | 'critical'
@@ -33,10 +32,20 @@ export function FleetDashboard() {
     filters,
     updateFilters,
     clearFilters,
+    highlightByStatus,
+    setActiveCarriage,
   } = useRailDashboardAI()
 
   const systemOptions = useMemo(() => {
     return ['all', ...new Set(issues.map((issue) => issue.systemCategory))]
+  }, [issues])
+
+  const issuesByTrainId = useMemo(() => {
+    return issues.reduce<Record<string, typeof issues>>((acc, issue) => {
+      if (!acc[issue.trainId]) acc[issue.trainId] = []
+      acc[issue.trainId].push(issue)
+      return acc
+    }, {})
   }, [issues])
 
   const filteredTrains = useMemo(() => {
@@ -45,7 +54,7 @@ export function FleetDashboard() {
         return false
       }
 
-      const trainIssues = issues.filter((issue) => issue.trainId === train.id)
+      const trainIssues = issuesByTrainId[train.id] ?? []
 
       if (filters.system !== 'all' && !trainIssues.some((issue) => issue.systemCategory === filters.system)) {
         return false
@@ -61,11 +70,15 @@ export function FleetDashboard() {
 
       return true
     })
-  }, [trains, issues, filters.priority, filters.status, filters.system, filters.trainId])
+  }, [trains, issuesByTrainId, filters.priority, filters.status, filters.system, filters.trainId])
+
+  const filteredTrainIds = useMemo(() => {
+    return new Set(filteredTrains.map((train) => train.id))
+  }, [filteredTrains])
 
   const openIssuesInFilteredScope = useMemo(() => {
     return issues.filter((issue) => {
-      if (!filteredTrains.some((train) => train.id === issue.trainId)) {
+      if (!filteredTrainIds.has(issue.trainId)) {
         return false
       }
 
@@ -75,21 +88,24 @@ export function FleetDashboard() {
 
       return issue.status === 'open'
     }).length
-  }, [issues, filteredTrains, filters.priority, filters.status, filters.system])
+  }, [issues, filteredTrainIds, filters.priority, filters.status, filters.system])
 
   const openModal = (train: Train, carriage: Carriage) => {
     setSelectedTrain(train)
     setSelectedCarriage(carriage)
     setModalOpen(true)
+    setActiveCarriage(carriage.id, train.id)
   }
 
   const closeModal = () => {
     setModalOpen(false)
     setSelectedTrain(null)
     setSelectedCarriage(null)
+    setActiveCarriage(null, null)
   }
 
-  if (isLoading) {
+  // Only show loading skeleton on initial load (no data yet), not on background refreshes
+  if (isLoading && trains.length === 0) {
     return (
       <section className="space-y-12 pb-12">
         <div className="space-y-5">
@@ -191,6 +207,7 @@ export function FleetDashboard() {
           const headCarriage = carriageList[0]
           const remainingCarriages = carriageList.slice(1)
           const headCarriageConfig = headCarriage ? statusConfig[headCarriage.healthStatus] : config
+          const headBodyClass = highlightByStatus ? headCarriageConfig.bodyClass : 'train-car-default'
 
           return (
             <div key={train.id} className="relative rounded-2xl bg-white p-6 shadow-[0_10px_30px_rgba(0,0,0,0.04),0_1px_3px_rgba(0,0,0,0.02)] hover:shadow-[0_15px_35px_rgba(0,0,0,0.07)] hover:-translate-y-0.5 transition-[transform,box-shadow] duration-200 dark:bg-slate-900">
@@ -234,7 +251,7 @@ export function FleetDashboard() {
   onClick={() => headCarriage && openModal(train, headCarriage)}
 >
   
-  <div className={`absolute inset-0 border-2 ${headCarriageConfig.bodyClass} rounded-tl-[100px] rounded-bl-2xl rounded-r-lg overflow-hidden shadow-md flex flex-col`}>
+  <div className={`absolute inset-0 border-2 ${headBodyClass} rounded-tl-[100px] rounded-bl-2xl rounded-r-lg overflow-hidden shadow-md flex flex-col`}>
     
     <div className="absolute top-2 left-7 w-24 h-14 bg-slate-800/90 rounded-tl-[80px] rounded-tr-md rounded-bl-lg border-r-2 border-b-2 border-slate-700/50 shadow-inner flex items-center justify-center">
       <div className="absolute top-2 right-4 w-8 h-1 bg-white/20 rounded-full rotate-[-10deg]" />
@@ -288,6 +305,7 @@ export function FleetDashboard() {
                       const carriageConfig = statusConfig[carriage.healthStatus]
                       const isLast = index === remainingCarriages.length - 1
                       const shapeClasses = isLast ? "rounded-r-[3rem] rounded-l-lg" : "rounded-lg"
+                      const carriageBodyClass = highlightByStatus ? carriageConfig.bodyClass : 'train-car-default'
 
                       return (
                         <Fragment key={carriage.id}>
@@ -298,7 +316,7 @@ export function FleetDashboard() {
                             onClick={() => openModal(train, carriage)}
                           >
                             
-                            <div className={`absolute inset-0 border-2 ${carriageConfig.bodyClass} ${shapeClasses} overflow-hidden shadow-md flex flex-col`}>
+                            <div className={`absolute inset-0 border-2 ${carriageBodyClass} ${shapeClasses} overflow-hidden shadow-md flex flex-col`}>
                               <div className="absolute top-6 left-0 right-0 px-4 flex gap-2">
                                 <CarriageWindow />
                                 <CarriageWindow />
@@ -344,9 +362,6 @@ export function FleetDashboard() {
           </div>
         )}
       </div>
-
-      {/* ── Maintenance Plan Board (shown when AI generates a plan) ─────── */}
-      <MaintenancePlanBoard />
 
       <CarriageDetailsModal 
         isOpen={modalOpen}

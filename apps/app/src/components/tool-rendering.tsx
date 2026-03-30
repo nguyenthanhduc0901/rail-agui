@@ -1,22 +1,13 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { StatusIndicator } from "@/components/ui/status-indicator";
 
 interface ToolReasoningProps {
   name: string;
   args?: object | unknown;
   status: string;
 }
-
-const statusIndicator = {
-  executing: (
-    <span className="inline-block h-3 w-3 rounded-full border-2 border-gray-400 border-t-transparent animate-spin" />
-  ),
-  inProgress: (
-    <span className="inline-block h-3 w-3 rounded-full border-2 border-gray-400 border-t-transparent animate-spin" />
-  ),
-  complete: <span className="text-green-500 text-xs">✓</span>,
-};
 
 function formatValue(value: unknown): string {
   if (Array.isArray(value)) return `[${value.length} items]`;
@@ -29,7 +20,6 @@ function formatValue(value: unknown): string {
 export function ToolReasoning({ name, args, status }: ToolReasoningProps) {
   const entries = args ? Object.entries(args) : [];
   const detailsRef = useRef<HTMLDetailsElement>(null);
-  const toolStatus = status as "complete" | "inProgress" | "executing";
 
   useEffect(() => {
     if (!detailsRef.current) return;
@@ -41,7 +31,7 @@ export function ToolReasoning({ name, args, status }: ToolReasoningProps) {
       {entries.length > 0 ? (
         <details ref={detailsRef} open>
           <summary className="flex items-center gap-2 text-gray-600 dark:text-gray-400 cursor-pointer list-none">
-            {statusIndicator[toolStatus]}
+            <StatusIndicator status={status} size="sm" />
             <span className="font-medium">{name}</span>
             <span className="text-[10px]">▼</span>
           </summary>
@@ -58,7 +48,7 @@ export function ToolReasoning({ name, args, status }: ToolReasoningProps) {
         </details>
       ) : (
         <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-          {statusIndicator[toolStatus]}
+          <StatusIndicator status={status} size="sm" />
           <span className="font-medium">{name}</span>
         </div>
       )}

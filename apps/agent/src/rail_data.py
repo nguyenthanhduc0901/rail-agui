@@ -24,11 +24,8 @@ from langchain_core.runnables import RunnableConfig
 from langgraph.types import interrupt
 from copilotkit.langgraph import copilotkit_emit_state
 
-# -- Path & env ----------------------------------------------------------------
-_TOOL_DEBUG   = os.getenv("AGENT_TOOL_DEBUG", "0") == "1"
 _DB_FILE_PATH = Path(__file__).resolve().parents[1] / "fleet.db"
 
-# -- Constants -----------------------------------------------------------------
 _ALLOWED_PRIORITIES     = {"low", "medium", "high", "critical"}
 _ALLOWED_ISSUE_STATUSES = {"open", "in-progress", "resolved", "closed"}
 _ALLOWED_STEP_STATUSES  = {"pending", "doing", "done"}
@@ -44,12 +41,7 @@ _SYSTEM_SPECIALIST: dict[str, list[str]] = {
 }
 _ALL_SYSTEMS = list(_SYSTEM_SPECIALIST.keys())
 
-# -- Lazy DB connection --------------------------------------------------------
 _db_conn: sqlite3.Connection | None = None
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-#  SEED DATA
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 _TECHNICIANS: list[tuple] = [
     ("TECH-01", "Gia Nguyen",     "Mechanics"),
@@ -65,13 +57,19 @@ _TECHNICIANS: list[tuple] = [
 ]
 
 _TRAINS: list[tuple] = [
-    ("T01", "Northline Express", "High-Speed", "in-service",  "Route 1A â€“ Northbound"),
-    ("T02", "Delta Commuter",    "Commuter",   "in-service",  "Route 2B â€“ Southbound"),
+    ("T01", "Northline Express", "High-Speed", "in-service",  "Route 1A Northbound"),
+    ("T02", "Delta Commuter",    "Commuter",   "in-service",  "Route 2B Southbound"),
     ("T03", "Harbor Intercity",  "Intercity",  "maintenance", "Northern Depot"),
-    ("T04", "Metro Link",        "Commuter",   "in-service",  "Route 3C â€“ Eastbound"),
+    ("T04", "Metro Link",        "Commuter",   "in-service",  "Route 3C Eastbound"),
     ("T05", "East Freight",      "Freight",    "in-service",  "West Freight Yard"),
 ]
-
+_PLAN_STEP_TEMPLATES: dict[str, list[str]] = {
+    "HVAC":    ["Kiểm tra hệ thống điều hòa", "Vệ sinh bộ lọc khí", "Kiểm tra compressor", "Hiệu chỉnh nhiệt độ"],
+    "Brakes":  ["Kiểm tra áp suất phanh", "Thay má phanh", "Hiệu chỉnh hệ thống ABS", "Kiểm tra dầu phanh"],
+    "Doors":   ["Kiểm tra cơ cấu cửa", "Bôi trơn ray trượt", "Hiệu chỉnh cảm biến", "Kiểm tra khóa an toàn"],
+    "Power":   ["Kiểm tra hệ thống điện", "Đo điện áp inverter", "Kiểm tra pin dự phòng", "Bảo dưỡng pantograph"],
+    "Network": ["Kiểm tra kết nối mạng", "Cập nhật firmware", "Kiểm tra gateway", "Tối ưu tín hiệu RF"],
+}
 _CARRIAGE_TYPES = ["Passenger", "Cargo", "Service"]
 
 _ISSUE_TITLES: dict[str, list[str]] = {
@@ -139,7 +137,6 @@ def _seed_db(db: sqlite3.Connection, rng: random.Random) -> None:
             technician_id   TEXT REFERENCES technicians(id),
             seq_order       INTEGER NOT NULL,
             title           TEXT NOT NULL,
-            details         TEXT,
             estimated_hours REAL,
             status          TEXT NOT NULL DEFAULT 'pending'
         );
@@ -149,13 +146,15 @@ def _seed_db(db: sqlite3.Connection, rng: random.Random) -> None:
     cur.executemany("INSERT INTO technicians VALUES (?,?,?)", _TECHNICIANS)
 
     issue_seq = 1001
+    plan_step_seq = 1
     epoch     = datetime(2026, 2, 1, tzinfo=timezone.utc)
+    all_issues: list[tuple] = []
 
     for train_id, name, fleet_type, op_state, location in _TRAINS:
         cur.execute("INSERT INTO trains VALUES (?,?,?,?,?)",
                     (train_id, name, fleet_type, op_state, location))
 
-        car_count = rng.randint(5, 7)
+        car_count = 5
         for i in range(1, car_count + 1):
             ctype = "Head" if i == 1 else "Power" if i == car_count else rng.choice(_CARRIAGE_TYPES)
             cid   = f"C{i:02d}-{train_id}"
@@ -182,18 +181,58 @@ def _seed_db(db: sqlite3.Connection, rng: random.Random) -> None:
                 desc = (f"{ttl_} detected on {cid} ({sys_}). "
                         f"Telemetry deviation observed across multiple sampling windows. "
                         f"Priority: {pri_}.")
+                est_hours = rng.choice(_EST_HOURS)
                 cur.execute(
                     "INSERT INTO issues VALUES (?,?,?,?,?,?,?,?,?,?)",
                     (iid, cid, sys_, ttl_, desc, pri_, stat_,
-                     rep.isoformat(), sched, rng.choice(_EST_HOURS)),
+                     rep.isoformat(), sched, est_hours),
                 )
+                all_issues.append((iid, sys_, stat_, est_hours))
+
+    for issue_id, system_category, status, total_hours in all_issues:
+        if status in ("open", "in-progress"):
+            num_steps = rng.randint(2, 4)
+        elif status == "resolved":
+            num_steps = rng.randint(1, 3)
+        else:
+            num_steps = rng.randint(1, 2)
+        
+        specialties = _SYSTEM_SPECIALIST.get(system_category, ["Diagnostics"])
+        step_templates = _PLAN_STEP_TEMPLATES.get(system_category, ["Kiểm tra tổng quát", "Sửa chữa", "Kiểm tra lại"])
+        
+        for step_idx in range(num_steps):
+            step_id = f"STEP-{plan_step_seq:04d}"
+            plan_step_seq += 1
+            
+            matching_techs = [t for t in _TECHNICIANS if t[2] in specialties]
+            if matching_techs:
+                tech = rng.choice(matching_techs)
+                tech_id = tech[0]
+            else:
+                tech_id = rng.choice(_TECHNICIANS)[0]
+            
+            step_title = step_templates[step_idx % len(step_templates)]
+            
+            step_hours = round(total_hours / num_steps + rng.uniform(-0.5, 0.5), 1)
+            step_hours = max(0.5, step_hours)
+            
+            if status == "closed":
+                step_status = "done"
+            elif status == "resolved":
+                step_status = rng.choice(["done", "done", "doing"])
+            elif status == "in-progress":
+                step_status = rng.choice(["done", "doing", "pending"])
+            else:
+                step_status = "pending"
+            
+            cur.execute(
+                "INSERT INTO plan_steps (id, issue_id, technician_id, seq_order, title, estimated_hours, status) "
+                "VALUES (?,?,?,?,?,?,?)",
+                (step_id, issue_id, tech_id, step_idx + 1, step_title, step_hours, step_status)
+            )
 
     db.commit()
 
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-#  DB CONNECTION
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def _get_db() -> sqlite3.Connection:
     """Return the fleet SQLite connection (singleton per process).
@@ -211,17 +250,10 @@ def _get_db() -> sqlite3.Connection:
 
     if is_new:
         _seed_db(conn, random.Random(20260330))
-        _log("_get_db", source="new_seed", path=str(_DB_FILE_PATH))
-    else:
-        _log("_get_db", source="file", path=str(_DB_FILE_PATH))
 
     _db_conn = conn
     return conn
 
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-#  UTILITY HELPERS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def _norm(v: str) -> str:
     return (v or "").strip()
@@ -240,17 +272,6 @@ def _norm_train_id(v: str) -> str:
 def _now_utc() -> datetime:
     return datetime.now(timezone.utc)
 
-def _log(name: str, **kw: Any) -> None:
-    if not _TOOL_DEBUG:
-        return
-    print(f"[agent-tool] {name}",
-          {k: vv for k, vv in kw.items()
-           if isinstance(vv, (str, int, float, bool, type(None)))})
-
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-#  QUERY TOOL
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 @tool
 def query_database(sql: str) -> str:
@@ -266,7 +287,7 @@ def query_database(sql: str) -> str:
              priority, status, reported_at, scheduled_date, total_estimated_hours)
              priority: low | medium | high | critical
              status:   open | in-progress | resolved | closed
-      plan_steps(id, issue_id, technician_id, seq_order, title, details,
+      plan_steps(id, issue_id, technician_id, seq_order, title,
                  estimated_hours, status)
                  status: pending | doing | done
 
@@ -317,15 +338,10 @@ def query_database(sql: str) -> str:
         cur.execute(clean)
         cols = [d[0] for d in cur.description] if cur.description else []
         rows = [dict(zip(cols, r)) for r in cur.fetchmany(_MAX_QUERY_ROWS)]
-        _log("query_database", rows=len(rows))
         return json.dumps(rows, ensure_ascii=False, default=str)
     except sqlite3.Error as e:
         return json.dumps({"error": f"SQL error: {e}"})
 
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-#  ACTION TOOLS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 @tool
 def update_issue(
@@ -365,7 +381,6 @@ def update_issue(
     db.execute("UPDATE issues SET status=?, priority=? WHERE id=?",
                (final_stat, final_pri, iid))
     db.commit()
-    _log("update_issue", issue_id=iid, changes=str(changes))
     return {"success": True, "issueId": iid, "changes": changes,
             "current": {"status": final_stat, "priority": final_pri}}
 
@@ -394,7 +409,7 @@ async def generate_maintenance_plan_stream(
     db  = _get_db()
     cur = db.cursor()
 
-    # Issues don't have train_id â€” join through carriages
+
     where: list[str] = ["i.status = 'open'", "i.priority = ?"]
     params: list[Any] = [pri_]
     if tid:
@@ -419,7 +434,6 @@ async def generate_maintenance_plan_stream(
         await copilotkit_emit_state(config, {"maintenancePlan": []})
         return {"summary": "No matching open issues found.", "stepCount": 0, "totalHours": 0}
 
-    # Technician workload from existing plan_steps
     cur.execute(
         "SELECT technician_id, COUNT(*) AS cnt FROM plan_steps "
         "WHERE status != 'done' AND technician_id IS NOT NULL GROUP BY technician_id"
@@ -449,8 +463,7 @@ async def generate_maintenance_plan_stream(
         steps.append({
             "id":             f"PLAN-{batch_id}-{order}",
             "order":          order,
-            "title":          f"{issue['train_id']} > {issue['carriage_id']} â€” {sys_name}",
-            "details":        (issue.get("title") or "")[:120],
+            "title":          f"{issue['train_id']} > {issue['carriage_id']} — {sys_name}: {issue.get('title', 'Untitled')}",
             "status":         "pending",
             "estimatedHours": issue.get("total_estimated_hours") or 2.0,
             "technicianId":   tech["id"]   if tech else "",
@@ -461,20 +474,19 @@ async def generate_maintenance_plan_stream(
 
     total_hours = round(sum(s["estimatedHours"] for s in steps), 1)
 
-    # Persist â€” one active plan at a time
+
     db.execute("DELETE FROM plan_steps")
     db.executemany(
         "INSERT INTO plan_steps (id, issue_id, technician_id, seq_order, "
-        "title, details, estimated_hours, status) VALUES (?,?,?,?,?,?,?,?)",
+        "title, estimated_hours, status) VALUES (?,?,?,?,?,?,?)",
         [(s["id"], candidates[i]["id"],
           s["technicianId"] or None,
-          s["order"], s["title"], s["details"],
+          s["order"], s["title"],
           s["estimatedHours"], s["status"])
          for i, s in enumerate(steps)],
     )
     db.commit()
 
-    _log("generate_maintenance_plan_stream", steps=len(steps), hours=total_hours)
     return {"summary": f"Created {len(steps)} steps, est. {total_hours}h.",
             "stepCount": len(steps), "totalHours": total_hours}
 
@@ -539,11 +551,11 @@ async def schedule_inspection(
         if tech:
             assigned.add(tech["id"])
 
+        note_suffix = f" | {note}" if note else f" ({open_count} sự cố)"
         steps.append({
             "id":             f"{batch_id}-{order}",
             "order":          order,
-            "title":          f"[Kiá»ƒm tra] {tid} â€” {sys_name}" + (f" | {note}" if note else ""),
-            "details":        f"{open_count} sá»± cá»‘ Ä‘ang má»Ÿ. Æ¯á»›c tÃ­nh: {h}h.",
+            "title":          f"[Kiểm tra] {tid} — {sys_name}{note_suffix}",
             "status":         "pending",
             "estimatedHours": h,
             "technicianId":   tech["id"]   if tech else "",
@@ -558,15 +570,14 @@ async def schedule_inspection(
     db.execute("DELETE FROM plan_steps")
     db.executemany(
         "INSERT INTO plan_steps (id, issue_id, technician_id, seq_order, "
-        "title, details, estimated_hours, status) VALUES (?,?,?,?,?,?,?,?)",
+        "title, estimated_hours, status) VALUES (?,?,?,?,?,?,?)",
         [(s["id"], None, s["technicianId"] or None,
-          s["order"], s["title"], s["details"],
+          s["order"], s["title"],
           s["estimatedHours"], s["status"])
          for s in steps],
     )
     db.commit()
 
-    _log("schedule_inspection", train_id=tid, systems=valid_sys, hours=total_hours)
     return {
         "summary":   f"Inspection plan: {len(steps)} systems on {train_name}, {total_hours}h.",
         "trainId":   tid, "trainName": train_name,
@@ -593,7 +604,6 @@ def update_plan_step(step_id: str, status: str) -> dict[str, Any]:
 
     db.execute("UPDATE plan_steps SET status = ? WHERE id = ?", (new_sta, sid))
     db.commit()
-    _log("update_plan_step", step_id=sid, status=new_sta)
     return {"success": True, "stepId": sid, "status": new_sta}
 
 
@@ -654,14 +664,9 @@ def request_bulk_issue_status_update(
     else:
         message = "Bulk update rejected by user."
 
-    _log("request_bulk_issue_status_update", approved=approved, count=len(target_ids))
     return {"approved": approved, "count": len(target_ids),
             "targetStatus": tgt_sta_, "message": message}
 
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-#  TOOL REGISTRY
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 rail_tools = [
     query_database,

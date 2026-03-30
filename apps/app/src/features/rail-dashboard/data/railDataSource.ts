@@ -35,6 +35,17 @@ export interface Carriage {
   openIssuesCount: number;
 }
 
+export interface PlanStep {
+  id: string;
+  issueId: string;
+  technicianId: string | null;
+  technicianName: string;
+  seqOrder: number;
+  title: string;
+  estimatedHours: number;
+  status: 'pending' | 'doing' | 'done';
+}
+
 export interface Issue {
   id: string;
   trainId: string;             // derived via carriages JOIN in API
@@ -47,6 +58,7 @@ export interface Issue {
   reportedAt: string;
   scheduledDate: string | null;
   totalEstimatedHours: number;
+  planSteps: PlanStep[];
 }
 
 export interface NavLink {
@@ -75,11 +87,6 @@ const subsystemTemplates = [
   { key: 'power',   label: 'Power'    },
   { key: 'network', label: 'Network'  },
 ];
-
-export const getTechnicianById = (id: string | null, _technicians = technicians): Technician | undefined =>
-  id ? _technicians.find((t) => t.id === id) : undefined;
-
-export const getAllTechnicians = (_technicians = technicians): Technician[] => _technicians;
 
 export const getCarriagesByTrain = (trainId: string, _carriages = carriages): Carriage[] =>
   _carriages[trainId] || [];
@@ -110,3 +117,4 @@ export const getCarriageSystems = (trainId: string, carriageId: string): SystemH
     };
   });
 };
+

@@ -45,7 +45,7 @@ export async function GET() {
     const planStepRows = db
       .prepare(
         "SELECT ps.id, ps.issue_id, ps.technician_id, ps.seq_order, ps.title, " +
-          "ps.details, ps.estimated_hours, ps.status, t.name AS technician_name " +
+          "ps.estimated_hours, ps.status, t.name AS technician_name " +
           "FROM plan_steps ps LEFT JOIN technicians t ON t.id = ps.technician_id " +
           "ORDER BY ps.seq_order",
       )
@@ -53,26 +53,47 @@ export async function GET() {
 
     db.close();
 
-    // â”€â”€ Issues â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const issues = issueRows.map((i) => ({
       id:                  i.id,
-      trainId:             i.train_id,        // derived from carriages JOIN
+      trainId:             i.train_id,
       carriageId:          i.carriage_id,
       systemCategory:      i.system_category,
       title:               i.title,
       description:         i.description,
-      priority:            i.priority,        // low | medium | high | critical
-      status:              i.status,          // open | in-progress | resolved | closed
+      priority:            i.priority,
+      status:              i.status,
       reportedAt:          i.reported_at,
       scheduledDate:       i.scheduled_date ?? null,
       totalEstimatedHours: i.total_estimated_hours,
+    }));
+
+    const planStepsByIssue: Record<string, Array<any>> = {};
+    for (const s of planStepRows) {
+      const issueId = s.issue_id as string;
+      if (!planStepsByIssue[issueId]) planStepsByIssue[issueId] = [];
+      planStepsByIssue[issueId].push({
+        id:             s.id,
+        issueId,
+        technicianId:   s.technician_id ?? null,
+        technicianName: (s.technician_name as string | null) ?? "Unassigned",
+        seqOrder:       s.seq_order,
+        title:          s.title,
+        estimatedHours: s.estimated_hours,
+        status:         s.status,           // pending | doing | done
+      });
+    }
+
+    // Issues WITH action plans
+    const issuesWithPlans = issues.map((i: any) => ({
+      ...i,
+      planSteps: planStepsByIssue[i.id as string] ?? [],
     }));
 
     // â”€â”€ Per-carriage issue stats â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const openByCarriage:   Record<string, number>  = {};
     const critByCarriage:   Record<string, boolean> = {};
     const highByCarriage:   Record<string, boolean> = {};
-    for (const iss of issues) {
+    for (const iss of issuesWithPlans) {
       const cid = iss.carriageId as string;
       if (iss.status !== "closed" && iss.status !== "resolved") {
         openByCarriage[cid] = (openByCarriage[cid] ?? 0) + 1;
@@ -155,7 +176,7 @@ export async function GET() {
       status:         s.status,           // pending | doing | done
     }));
 
-    return NextResponse.json({ trains, carriages, technicians, issues, planSteps });
+    return NextResponse.json({ trains, carriages, technicians, issues: issuesWithPlans, planSteps });
   } catch (err) {
     return NextResponse.json({ error: String(err) }, { status: 500 });
   }

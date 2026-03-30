@@ -48,6 +48,23 @@ export interface MaintenanceStep {
   technicianName?: string;
 }
 
+export interface PendingPlanStep {
+  seqOrder: number;
+  title: string;
+  estimatedHours: number;
+  technicianId?: string | null;
+  technicianName?: string | null;
+}
+
+export interface PendingIssuePlan {
+  issueId: string;
+  issueTitle: string;
+  mode: 'create' | 'append';
+  existingCount: number;
+  rationale?: string;
+  steps: PendingPlanStep[];
+}
+
 export interface RailDashboardAIContextType {
   filters: DashboardFilters;
   updateFilters: (partial: Partial<DashboardFilters>) => void;
@@ -57,6 +74,18 @@ export interface RailDashboardAIContextType {
   clearWidgets: () => void;
   maintenancePlan: MaintenanceStep[];
   setMaintenancePlan: (plan: MaintenanceStep[]) => void;
+  highlightByStatus: boolean;
+  setHighlightByStatus: (value: boolean) => void;
+  // Per-carriage system highlight
+  highlightedCarriageIds: Set<string>;
+  toggleCarriageHighlight: (carriageId: string, enabled: boolean) => void;
+  // Currently open carriage (modal context)
+  activeCarriageId: string | null;
+  activeTrainId: string | null;
+  setActiveCarriage: (carriageId: string | null, trainId: string | null) => void;
+  // Pending AI-proposed issue plan awaiting approval
+  pendingIssuePlan: PendingIssuePlan | null;
+  setPendingIssuePlan: (plan: PendingIssuePlan | null) => void;
 }
 
 const RailDashboardAIContext = createContext<RailDashboardAIContextType | null>(
@@ -75,6 +104,38 @@ export function RailDashboardAIProvider({
   const [maintenancePlan, setMaintenancePlanState] = useState<MaintenanceStep[]>(
     [],
   );
+  const [highlightByStatus, setHighlightByStatus] = useState(false);
+  const [highlightedCarriageIds, setHighlightedCarriageIds] = useState<Set<string>>(new Set());
+  const [activeCarriageId, setActiveCarriageIdState] = useState<string | null>(null);
+  const [activeTrainId, setActiveTrainIdState] = useState<string | null>(null);
+  const [pendingIssuePlan, setPendingIssuePlan] = useState<PendingIssuePlan | null>(null);
+
+  const toggleCarriageHighlight = useCallback((carriageId: string, enabled: boolean) => {
+    setHighlightedCarriageIds((prev) => {
+      const next = new Set(prev);
+      if (enabled) {
+        next.add(carriageId);
+      } else {
+        next.delete(carriageId);
+      }
+      return next;
+    });
+  }, []);
+
+  const setActiveCarriage = useCallback((carriageId: string | null, trainId: string | null) => {
+    setActiveCarriageIdState(carriageId);
+    setActiveTrainIdState(trainId);
+    // Clear highlight for this carriage when closed
+    if (carriageId === null) {
+      setHighlightedCarriageIds((prev) => {
+        if (prev.size === 0) return prev;
+        const next = new Set(prev);
+        // We don't know old carriageId here, so leave the set as-is
+        // Highlights persist until explicitly toggled off
+        return next;
+      });
+    }
+  }, []);
 
   const updateFilters = useCallback((partial: Partial<DashboardFilters>) => {
     setFilters((prev) => ({
@@ -146,6 +207,15 @@ export function RailDashboardAIProvider({
       clearWidgets,
       maintenancePlan,
       setMaintenancePlan: updateMaintenancePlan,
+      highlightByStatus,
+      setHighlightByStatus,
+      highlightedCarriageIds,
+      toggleCarriageHighlight,
+      activeCarriageId,
+      activeTrainId,
+      setActiveCarriage,
+      pendingIssuePlan,
+      setPendingIssuePlan,
     }),
     [
       filters,
@@ -156,6 +226,15 @@ export function RailDashboardAIProvider({
       clearWidgets,
       maintenancePlan,
       updateMaintenancePlan,
+      highlightByStatus,
+      setHighlightByStatus,
+      highlightedCarriageIds,
+      toggleCarriageHighlight,
+      activeCarriageId,
+      activeTrainId,
+      setActiveCarriage,
+      pendingIssuePlan,
+      setPendingIssuePlan,
     ],
   );
 

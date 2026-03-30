@@ -4,6 +4,7 @@ import { z } from "zod";
 import { useFrontendTool, useInterrupt } from "@copilotkit/react-core/v2";
 
 import { useRailDashboardAI } from "@/features/rail-dashboard/context/rail-dashboard-ai-context";
+import { useFleetData } from "@/features/rail-dashboard/context/fleet-data-context";
 
 const filterSchema = z.object({
   trainId: z.string().optional(),
@@ -20,7 +21,14 @@ export const useRailDashboardAIControls = (): void => {
     clearFilters,
     addWidget,
     clearWidgets,
+    highlightByStatus,
+    setHighlightByStatus,
+    highlightedCarriageIds,
+    toggleCarriageHighlight,
+    activeCarriageId,
+    activeTrainId,
   } = useRailDashboardAI();
+  const { issues } = useFleetData();
 
   useFrontendTool(
     {
@@ -127,6 +135,108 @@ export const useRailDashboardAIControls = (): void => {
       },
     },
     [widgets.length, clearWidgets],
+  );
+
+  useFrontendTool(
+    {
+      name: "highlightFleetByStatus",
+      description:
+        "Toggle color highlighting of train carriages by health status on the main dashboard. When enabled, healthy=green, warning=yellow, critical=red. When disabled, all carriages show as neutral gray. Use this when users ask to highlight, colorize, or show the status of the fleet.",
+      parameters: z.object({
+        enabled: z.boolean().describe("true to highlight carriages by status, false to reset to default gray"),
+      }),
+      handler: async ({ enabled }) => {
+        if (highlightByStatus === enabled) {
+          return enabled ? "Fleet is already highlighted by status." : "Fleet is already showing default colors.";
+        }
+        setHighlightByStatus(enabled);
+        return enabled
+          ? "Fleet carriages are now highlighted by health status: green=healthy, yellow=warning, red=critical."
+          : "Fleet carriages reset to default gray color.";
+      },
+    },
+    [highlightByStatus, setHighlightByStatus],
+  );
+
+  useFrontendTool(
+    {
+      name: "getActiveCarriageContext",
+      description:
+        "Get info about the carriage currently open in the detail modal. Use this when the user says 'this carriage', 'current carriage', or refers to the carriage they are viewing, before performing any carriage-specific action.",
+      parameters: z.object({}),
+      handler: async () => {
+        if (!activeCarriageId) {
+          return "No carriage is currently open. The user has not clicked on any carriage card.";
+        }
+        const highlighted = highlightedCarriageIds.has(activeCarriageId);
+        return JSON.stringify({
+          carriageId: activeCarriageId,
+          trainId: activeTrainId,
+          systemHighlightEnabled: highlighted,
+        });
+      },
+    },
+    [activeCarriageId, activeTrainId, highlightedCarriageIds],
+  );
+
+  useFrontendTool(
+    {
+      name: "highlightDangerousCarriageSystems",
+      description:
+        "Toggle animated highlight effects on dangerous/issue systems in the currently open carriage blueprint. Only affects the carriage currently being viewed — does not affect other carriages. Call getActiveCarriageContext first if you need to know which carriage is open.",
+      parameters: z.object({
+        enabled: z.boolean().describe("true to show pulsing effects on dangerous systems, false to disable"),
+      }),
+      handler: async ({ enabled }) => {
+        if (!activeCarriageId) {
+          return "No carriage is currently open. Ask the user to click on a carriage first.";
+        }
+        const alreadySet = highlightedCarriageIds.has(activeCarriageId) === enabled;
+        if (alreadySet) {
+          return enabled
+            ? `Carriage ${activeCarriageId} system highlights are already enabled.`
+            : `Carriage ${activeCarriageId} system highlights are already disabled.`;
+        }
+        toggleCarriageHighlight(activeCarriageId, enabled);
+        return enabled
+          ? `Carriage ${activeCarriageId}: dangerous systems will now show animated highlight effects.`
+          : `Carriage ${activeCarriageId}: system highlight effects disabled.`;
+      },
+    },
+    [activeCarriageId, highlightedCarriageIds, toggleCarriageHighlight],
+  );
+
+  useFrontendTool(
+    {
+      name: "proposeIssuePlan",
+      description:
+        "Propose an AI-generated action plan for a specific issue. The plan will appear as a card in the chat with Approve/Reject buttons. " +
+        "Use mode='create' when the issue has no existing plan steps (existingCount=0). " +
+        "Use mode='append' when the issue already has plan steps and you are adding new ones. " +
+        "Always call getActiveCarriageContext first if the user refers to 'this carriage' or 'current issue'.",
+      parameters: z.object({
+        issueId: z.string().describe("The issue ID to create the plan for (e.g. ISS-001)"),
+        mode: z.enum(["create", "append"]).describe("'create' for a fresh plan, 'append' to add steps to an existing plan"),
+        existingCount: z.number().int().min(0).default(0).describe("Number of existing plan steps already on this issue"),
+        rationale: z.string().optional().describe("Brief explanation of why this plan was designed this way"),
+        steps: z.array(z.object({
+          seqOrder: z.number().int().min(1),
+          title: z.string().describe("Short action title for this step"),
+          estimatedHours: z.number().min(0).default(2),
+          technicianId: z.string().nullable().optional(),
+          technicianName: z.string().nullable().optional(),
+        })).min(1).describe("The proposed plan steps"),
+      }),
+      handler: async (args) => {
+        // Look up issue title from live fleet data
+        const issue = issues.find(i => i.id === args.issueId);
+        if (!issue) {
+          return `Issue ${args.issueId} not found. Please check the issue ID.`;
+        }
+        return `Plan proposed for ${args.issueId} (${args.steps.length} steps). Waiting for user approval in the chat.`;
+      },
+    },
+    [issues],
   );
 
   useInterrupt({

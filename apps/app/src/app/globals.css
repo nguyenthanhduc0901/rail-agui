@@ -178,6 +178,11 @@ body, html {
 /* ─── Rail Dashboard Component Styles ─── */
 
 /* Train car body - gradient by status */
+.train-car-default {
+  background: linear-gradient(180deg, #E2E8F0 0%, #CBD5E1 100%);
+  border-color: #94A3B8;
+}
+
 .train-car-healthy {
   background: linear-gradient(180deg, #A6E3E9 0%, #71C9CE 100%);
   border-color: #5BBEC4;

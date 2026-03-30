@@ -47,7 +47,7 @@ SCHEMA DATABASE (QUAN TRỌNG):
          priority [low|medium|high|critical],
          status   [open|in-progress|resolved|closed],
          reported_at, scheduled_date, total_estimated_hours)
-  plan_steps(id, issue_id, technician_id, seq_order, title, details,
+  plan_steps(id, issue_id, technician_id, seq_order, title,
              estimated_hours, status [pending|doing|done])
 
 ⚠️  issues KHÔNG có cột train_id — phải JOIN qua bảng carriages:
