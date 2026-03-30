@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { Fragment, useState, useMemo, ReactNode } from 'react';
+import { Fragment, useState, useMemo, useEffect, useRef, ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Plus, Trash2, Clock } from 'lucide-react';
 import { getCarriageSystems, getActiveIssuesByCarriage, getCarriagesByTrain, type SystemHealth, type Carriage, type Train, type Technician } from '../data/railDataSource';
@@ -322,6 +322,25 @@ export function CarriageDetailsModal({ isOpen, onClose, train, carriage }: Carri
     () => rawIssues.find(i => i.id === selectedIssueId),
     [rawIssues, selectedIssueId],
   );
+
+  // Sync local planSteps when the selected issue's DB data changes (e.g. after chatbot approve + refreshFleet)
+  const lastSyncedPlanKey = useRef<string>("");
+  useEffect(() => {
+    if (!selectedIssue) return;
+    const dbKey = (selectedIssue.planSteps ?? []).map(ps => ps.id).sort().join('|');
+    if (dbKey === lastSyncedPlanKey.current) return; // Nothing changed in DB
+    lastSyncedPlanKey.current = dbKey;
+    if (selectedIssue.planSteps && selectedIssue.planSteps.length > 0) {
+      setPlanSteps(selectedIssue.planSteps.map(ps => ({
+        id: ps.id,
+        title: ps.title,
+        details: '',
+        technicianId: ps.technicianId || '',
+        estimatedHours: ps.estimatedHours || 2.0,
+        seqOrder: ps.seqOrder,
+      })));
+    }
+  }, [selectedIssue]);
 
   // Handler to select an issue and load its plan steps
   const handleSelectIssue = (issueId: string) => {
