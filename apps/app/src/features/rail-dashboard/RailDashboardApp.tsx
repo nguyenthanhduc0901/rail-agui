@@ -24,10 +24,9 @@ function RailDashboardWorkspace(): ReactNode {
   useRailChatSuggestions();
 
   const { refresh, planSteps, isLoading } = useFleetData();
-  const { maintenancePlan, setMaintenancePlan } = useRailDashboardAI();
+  const { setMaintenancePlan } = useRailDashboardAI();
   const { agent } = useAgent();
   const wasRunning = useRef(false);
-  const seedDoneRef = useRef(false);
 
   // Auto-refresh fleet data when agent finishes a run
   useEffect(() => {
@@ -37,26 +36,25 @@ function RailDashboardWorkspace(): ReactNode {
     wasRunning.current = agent.isRunning;
   }, [agent.isRunning, refresh]);
 
-  // Seed plan board from DB on first load (restores plan after page refresh)
+  // Sync plan board from DB whenever planSteps updates.
+  // Handles both initial page load and post-update_plan_step refreshes.
+  // Skips while agent is actively streaming so the live board isn't overwritten.
   useEffect(() => {
-    if (seedDoneRef.current || isLoading) return;
-    seedDoneRef.current = true;
-    if (planSteps.length > 0 && maintenancePlan.length === 0) {
-      setMaintenancePlan(
-        planSteps.map((s) => ({
-          id:             s.id,
-          order:          s.order,
-          title:          s.title,
-          details:        s.details ?? undefined,
-          priority:       s.priority,
-          status:         s.status,
-          estimatedHours: s.estimatedHours,
-          assigneeId:     s.assigneeId,
-          assigneeName:   s.assigneeName,
-        }))
-      );
-    }
-  }, [isLoading, planSteps, maintenancePlan.length, setMaintenancePlan]);
+    if (isLoading || planSteps.length === 0 || agent.isRunning) return;
+    setMaintenancePlan(
+      planSteps.map((s) => ({
+        id:             s.id,
+        order:          s.order,
+        title:          s.title,
+        details:        s.details ?? undefined,
+        priority:       s.priority,
+        status:         s.status,
+        estimatedHours: s.estimatedHours,
+        assigneeId:     s.assigneeId,
+        assigneeName:   s.assigneeName,
+      }))
+    );
+  }, [planSteps, isLoading, agent.isRunning, setMaintenancePlan]);
 
   return (
     <DashboardShell

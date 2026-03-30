@@ -11,6 +11,7 @@ TOOL SELECT:
 import asyncio
 import json
 import os
+import re
 import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
@@ -243,75 +244,6 @@ def _get_technician_by_id(tid: str) -> dict[str, Any] | None:
     return next((t for t in _get_technicians() if t.get("id") == tid), None) if tid else None
 
 
-def _filter_issues(
-    train_id: str | None = None,
-    carriage_id: str | None = None,
-    system: str | None = None,
-    priority: str | None = None,
-    status: str | None = None,
-) -> list[dict[str, Any]]:
-    def ok(i: dict) -> bool:
-        if train_id    and i.get("trainId")        != train_id:    return False
-        if carriage_id and i.get("carriageId")     != carriage_id: return False
-        if system      and i.get("systemCategory") != system:      return False
-        if priority    and i.get("priority")       != priority:    return False
-        if status      and i.get("status")         != status:      return False
-        return True
-    result = [i for i in _get_issues() if ok(i)]
-    result.sort(key=lambda i: (i.get("planning") or {}).get("reportedAt", ""), reverse=True)
-    return result
-
-
-def _compute_technician_workload() -> list[dict[str, Any]]:
-    wl: dict[str, dict] = {
-        t["id"]: {"technicianId": t["id"], "name": t["name"], "specialty": t["specialty"],
-                  "open": 0, "inProgress": 0, "estimatedHours": 0.0, "trains": set()}
-        for t in _get_technicians()
-    }
-    for issue in _get_issues():
-        aid = issue.get("assigneeId") or ""
-        if aid not in wl or issue.get("status") == "closed":
-            continue
-        if issue.get("status") == "open":          wl[aid]["open"] += 1
-        elif issue.get("status") == "in-progress": wl[aid]["inProgress"] += 1
-        wl[aid]["estimatedHours"] += (issue.get("planning") or {}).get("estimatedHours", 0)
-        wl[aid]["trains"].add(issue.get("trainId", ""))
-    rows = [{
-        "technicianId": e["technicianId"], "name": e["name"], "specialty": e["specialty"],
-        "openIssues": e["open"], "inProgressIssues": e["inProgress"],
-        "totalActiveIssues": e["open"] + e["inProgress"],
-        "estimatedHours": round(e["estimatedHours"], 1),
-        "affectedTrains": sorted(e["trains"]),
-    } for e in wl.values()]
-    rows.sort(key=lambda x: -x["totalActiveIssues"])
-    return rows
-
-
-def _best_tech_for_system(
-    system: str,
-    exclude_ids: set[str] | None = None,
-    workload_snapshot: dict[str, int] | None = None,
-) -> dict[str, Any] | None:
-    techs = {t["id"]: t for t in _get_technicians()}
-    excl  = exclude_ids or set()
-    pref  = _SYSTEM_SPECIALIST.get(system, ["Diagnostics"])
-    if workload_snapshot is None:
-        wl: dict[str, int] = {tid: 0 for tid in techs}
-        for issue in _get_issues():
-            if issue.get("status") in ("open", "in-progress"):
-                aid = issue.get("assigneeId")
-                if aid and aid in wl:
-                    wl[aid] += 1
-    else:
-        wl = workload_snapshot
-    candidates = [
-        (pref.index(t["specialty"]) if t["specialty"] in pref else 99, wl.get(tid, 0), tid, t)
-        for tid, t in techs.items() if tid not in excl
-    ]
-    candidates.sort(key=lambda x: (x[0], x[1]))
-    return candidates[0][3] if candidates else None
-
-
 # ========================= QUERY TOOL =========================================
 
 @tool
@@ -372,7 +304,7 @@ def query_database(sql: str) -> str:
     if not (upper.startswith("SELECT") or upper.startswith("WITH")):
         return json.dumps({"error": "Only SELECT queries are allowed."})
     for kw in ("DROP", "DELETE", "INSERT", "UPDATE", "ALTER", "CREATE", "ATTACH", "PRAGMA"):
-        if kw in upper:
+        if re.search(r'\b' + kw + r'\b', upper):
             return json.dumps({"error": f"Keyword '{kw}' is not permitted."})
     try:
         cur = _get_db().cursor()
@@ -442,7 +374,7 @@ def update_issue(
     )
     db.commit()
 
-    # Also sync JSON in-memory cache so same-session _filter_issues() calls stay consistent
+    # Sync JSON in-memory cache for same-session consistency
     for issue in _get_rail_data().get("issues", []):
         if issue.get("id") == iid:
             issue["status"]     = final_stat
@@ -590,8 +522,8 @@ async def schedule_inspection(
 ) -> dict[str, Any]:
     """
     Schedule a targeted inspection for specific systems on one train.
-    Creates a streaming plan with one step per system — each step has order,
-    status (pending -> done), assigned technician, and estimated hours from data.
+    Creates a streaming plan with one step per system — each step starts as
+    "pending" and is displayed progressively in the chat panel as the plan streams.
     systems: list from HVAC | Brakes | Doors | Power | Network
     Streams live step completions in the chat panel.
     """
@@ -704,6 +636,8 @@ def request_bulk_issue_status_update(
     tid      = _norm_train_id(train_id)
     pri_     = _norm_priority(priority)
     tgt_sta_ = _norm_status(target_status) or "in-progress"
+    if tgt_sta_ not in ("in-progress", "closed"):
+        return {"approved": False, "count": 0, "message": f"Invalid target_status '{tgt_sta_}'. Use: in-progress | closed"}
 
     # Query targets from SQLite (authoritative, reflects prior updates)
     db = _get_db()

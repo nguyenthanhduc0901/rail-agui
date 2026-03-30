@@ -31,7 +31,7 @@ export async function GET() {
       .prepare("SELECT * FROM carriages ORDER BY sequence")
       .all() as Record<string, unknown>[];
     const techRows = db
-      .prepare("SELECT id, name, specialty FROM technicians")
+      .prepare("SELECT id, name, specialty FROM technicians ORDER BY id")
       .all() as Record<string, unknown>[];
     const issueRows = db
       .prepare(
