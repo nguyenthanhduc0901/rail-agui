@@ -16,10 +16,10 @@ import {
 import { ReactNode } from "react";
 
 function RailDashboardWorkspace(): ReactNode {
-  useChatHistoryGuard();
+  // useChatHistoryGuard();
   useRailToolRendering();
   useRailDashboardAIControls();
-  useRailChatSuggestions();
+  // useRailChatSuggestions();
 
   return (
     <DashboardShell

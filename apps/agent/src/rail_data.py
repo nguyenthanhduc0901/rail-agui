@@ -393,6 +393,20 @@ def request_bulk_issue_status_update(
     return result
 
 
+@tool
+def write_document(document: str) -> str:
+    """
+    Write a document. Use markdown formatting to format the document.
+    It's good to format the document extensively so it's easy to read.
+    You can use all kinds of markdown.
+    However, do not use italic or strike-through formatting, it's reserved for another purpose.
+    You MUST write the full document, even when changing only a few words.
+    When making edits to the document, try to make them minimal - do not change every word.
+    Keep stories SHORT!
+    """
+    return document
+
+
 rail_tools = [
     get_fleet_overview,
     count_issues,
@@ -400,4 +414,5 @@ rail_tools = [
     list_issues,
     generate_maintenance_plan_stream,
     request_bulk_issue_status_update,
+    write_document,
 ]

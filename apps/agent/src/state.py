@@ -1,7 +1,7 @@
-from typing import Literal, Optional, TypedDict
+from typing import Literal, Optional, TypedDict, Any, List
 
 from langchain.agents import AgentState as BaseAgentState
-
+from langgraph.graph import MessagesState
 
 class RailTrain(TypedDict):
     id: str
@@ -39,8 +39,14 @@ class DashboardWidget(TypedDict):
     trainId: str
 
 
-class AgentState(BaseAgentState):
-    trains: Optional[list[RailTrain]]
-    issues: Optional[list[RailIssue]]
-    maintenancePlan: Optional[list[MaintenanceStep]]
-    dashboardWidgets: Optional[list[DashboardWidget]]
+# class AgentState(BaseAgentState):
+#     trains: Optional[list[RailTrain]]
+#     issues: Optional[list[RailIssue]]
+#     maintenancePlan: Optional[list[MaintenanceStep]]
+#     dashboardWidgets: Optional[list[DashboardWidget]]
+    
+
+class AgentState(MessagesState):
+    document: Optional[str] = None
+    tools: List[Any] = []
+    copilotkit: dict = {}
