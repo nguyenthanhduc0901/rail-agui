@@ -43,6 +43,9 @@ export interface MaintenanceStep {
   details?: string;
   priority: "high" | "medium" | "low";
   done: boolean;
+  estimatedHours?: number;
+  assigneeId?: string;
+  assigneeName?: string;
 }
 
 export interface RailDashboardAIContextType {

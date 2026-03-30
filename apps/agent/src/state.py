@@ -28,6 +28,7 @@ class RailIssue(TypedDict):
     title: str
     priority: Literal["high", "medium", "low"]
     status: Literal["open", "in-progress", "closed"]
+    assigneeId: str
 
 
 class MaintenanceStep(TypedDict):
@@ -36,6 +37,9 @@ class MaintenanceStep(TypedDict):
     details: str
     priority: Literal["high", "medium", "low"]
     done: bool
+    estimatedHours: float
+    assigneeId: str
+    assigneeName: str
 
 
 class DashboardWidget(TypedDict):
