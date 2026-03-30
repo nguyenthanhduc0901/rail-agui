@@ -34,6 +34,10 @@ _ALLOWED_STATUSES   = {"open", "in-progress", "closed"}
 _MAX_PLAN_STEPS     = 12
 _MAX_QUERY_ROWS     = 50
 
+# Path to the on-disk SQLite fleet database produced by build_db.py.
+# If it does not exist yet the agent builds an in-memory copy as fallback.
+_DB_FILE_PATH = Path(__file__).resolve().parents[1] / "fleet.db"
+
 _SYSTEM_SPECIALIST: dict[str, list[str]] = {
     "HVAC":    ["HVAC", "Diagnostics", "Mechanics"],
     "Brakes":  ["Brake Systems", "Mechanics", "Safety Systems", "Diagnostics"],
@@ -57,11 +61,28 @@ def _get_rail_data() -> dict[str, Any]:
 
 
 def _get_db() -> sqlite3.Connection:
-    """Return (or lazily build) the in-memory SQLite fleet database."""
+    """
+    Return the fleet SQLite connection.
+
+    Priority order:
+      1. Already-open connection (_db_conn) → return immediately.
+      2. fleet.db file exists on disk (built by build_db.py) → open it.
+      3. Fallback: build an in-memory DB from rail-data.json at runtime
+         (same behaviour as before; useful during development without a pre-built DB).
+    """
     global _db_conn
     if _db_conn is not None:
         return _db_conn
 
+    if _DB_FILE_PATH.exists():
+        conn = sqlite3.connect(str(_DB_FILE_PATH), check_same_thread=False)
+        conn.row_factory = sqlite3.Row
+        _db_conn = conn
+        print(f"[rail_data] Opened fleet DB from {_DB_FILE_PATH}")
+        return conn
+
+    # ── Fallback: build in-memory from JSON ───────────────────────────────────
+    print("[rail_data] fleet.db not found — building in-memory DB from JSON (run build_db.py to persist)")
     data = _get_rail_data()
     conn = sqlite3.connect(":memory:", check_same_thread=False)
     conn.row_factory = sqlite3.Row
