@@ -168,8 +168,6 @@ function MaintenancePlanCard({ status }: { status: string }) {
       id?: string;
       order?: number;
       status?: string;
-      /** legacy compat */
-      done?: boolean;
       title?: string;
       label?: string;
       details?: string;
@@ -183,11 +181,11 @@ function MaintenancePlanCard({ status }: { status: string }) {
     (idx: number) => {
       const updated = maintenancePlan.map((s, i) => {
         if (i !== idx) return s;
-        const cur = s.status ?? (s.done ? "done" : "pending");
+        const cur = s.status ?? "pending";
         const next =
           cur === "pending"     ? "in-progress" :
           cur === "in-progress" ? "done"        : "pending";
-        return { ...s, status: next, done: next === "done" };
+        return { ...s, status: next };
       });
       setMaintenancePlan(updated);
     },
@@ -195,9 +193,7 @@ function MaintenancePlanCard({ status }: { status: string }) {
   );
 
   const totalHours = maintenancePlan.reduce((s, step) => s + (step.estimatedHours ?? 0), 0);
-  const doneCount  = maintenancePlan.filter(
-    (s) => s.status === "done" || s.done,
-  ).length;
+  const doneCount  = maintenancePlan.filter((s) => s.status === "done").length;
 
   return (
     <div className="my-2 rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900">
@@ -225,7 +221,7 @@ function MaintenancePlanCard({ status }: { status: string }) {
       ) : (
         <div className="space-y-1">
           {maintenancePlan.map((step, i) => {
-            const stepStatus = step.status ?? (step.done ? "done" : "pending");
+            const stepStatus = step.status ?? "pending";
             const isDone       = stepStatus === "done";
             const isInProgress = stepStatus === "in-progress";
 

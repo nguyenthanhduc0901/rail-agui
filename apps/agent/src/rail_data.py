@@ -78,11 +78,11 @@ def _get_db() -> sqlite3.Connection:
         conn = sqlite3.connect(str(_DB_FILE_PATH), check_same_thread=False)
         conn.row_factory = sqlite3.Row
         _db_conn = conn
-        print(f"[rail_data] Opened fleet DB from {_DB_FILE_PATH}")
+        _log("_get_db", source="file", path=str(_DB_FILE_PATH))
         return conn
 
     # ── Fallback: build in-memory from JSON ───────────────────────────────────
-    print("[rail_data] fleet.db not found — building in-memory DB from JSON (run build_db.py to persist)")
+    _log("_get_db", source="memory", reason="fleet.db not found — run build_db.py to persist")
     data = _get_rail_data()
     conn = sqlite3.connect(":memory:", check_same_thread=False)
     conn.row_factory = sqlite3.Row

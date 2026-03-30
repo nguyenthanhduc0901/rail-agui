@@ -43,7 +43,6 @@ export interface MaintenanceStep {
   title: string;
   details?: string;
   priority: "high" | "medium" | "low";
-  /** Replaces the old `done` boolean — three-state lifecycle */
   status: "pending" | "in-progress" | "done";
   estimatedHours?: number;
   assigneeId?: string;
