@@ -1,22 +1,21 @@
-"use client";
-
 import "./globals.css";
 import "@copilotkit/react-core/v2/styles.css";
 
-import { CopilotKit } from "@copilotkit/react-core/v2";
-import { ThemeProvider } from "@/hooks/use-theme";
+import { Providers } from "./providers";
+
+export const metadata = {
+  title: "Rail Dashboard",
+  description: "Real-time fleet monitoring and maintenance planning",
+};
 
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head />
       <body className={`antialiased`}>
-        <ThemeProvider>
-          <CopilotKit runtimeUrl="/api/copilotkit">
-            {children}
-          </CopilotKit>
-        </ThemeProvider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

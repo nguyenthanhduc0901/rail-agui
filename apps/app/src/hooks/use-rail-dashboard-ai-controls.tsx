@@ -8,8 +8,8 @@ import { useRailDashboardAI } from "@/features/rail-dashboard/context/rail-dashb
 const filterSchema = z.object({
   trainId: z.string().optional(),
   system: z.string().optional(),
-  priority: z.enum(["high", "medium", "low", "all"]).optional(),
-  status: z.enum(["open", "in-progress", "closed", "all"]).optional(),
+  priority: z.enum(["critical", "high", "medium", "low", "all"]).optional(),
+  status: z.enum(["open", "in-progress", "resolved", "closed", "all"]).optional(),
 });
 
 export const useRailDashboardAIControls = (): void => {

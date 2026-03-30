@@ -28,7 +28,7 @@ export function FleetDashboard() {
   const [modalOpen, setModalOpen] = useState(false)
   const [selectedTrain, setSelectedTrain] = useState<Train | null>(null)
   const [selectedCarriage, setSelectedCarriage] = useState<Carriage | null>(null)
-  const { trains, issues, carriages } = useFleetData()
+  const { trains, issues, carriages, isLoading } = useFleetData()
   const {
     filters,
     updateFilters,
@@ -87,6 +87,21 @@ export function FleetDashboard() {
     setModalOpen(false)
     setSelectedTrain(null)
     setSelectedCarriage(null)
+  }
+
+  if (isLoading) {
+    return (
+      <section className="space-y-12 pb-12">
+        <div className="space-y-5">
+          <div className="h-8 w-48 animate-pulse rounded-lg bg-slate-200 dark:bg-slate-700" />
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="h-48 animate-pulse rounded-2xl bg-slate-200 dark:bg-slate-800" />
+            ))}
+          </div>
+        </div>
+      </section>
+    )
   }
 
   return (

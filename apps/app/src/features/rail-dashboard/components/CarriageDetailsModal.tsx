@@ -544,7 +544,7 @@ export function CarriageDetailsModal({ isOpen, onClose, train, carriage }: Carri
                         </label>
                         <input
                           type="date"
-                          defaultValue={selectedIssue.scheduledDate ?? ''}
+                          defaultValue={selectedIssue.scheduledDate?.slice(0, 10) ?? ''}
                           className="w-full p-2.5 text-sm bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg shadow-sm text-slate-700 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none cursor-pointer"
                         />
                       </div>

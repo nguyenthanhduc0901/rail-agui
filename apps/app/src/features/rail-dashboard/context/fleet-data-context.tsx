@@ -64,14 +64,26 @@ export function FleetDataProvider({ children }: { children: React.ReactNode }) {
       const res = await fetch("/api/fleet", { cache: "no-store" });
       if (res.ok) {
         const data = await res.json();
-        if (data.trains)      setTrains(data.trains);
-        if (data.carriages)   setCarriages(data.carriages);
-        if (data.technicians) setTechnicians(data.technicians);
-        if (data.issues)      setIssues(data.issues);
-        if (data.planSteps)   setPlanSteps(data.planSteps);
+        if (data.error) {
+          console.warn("[FleetData] API returned error:", data.error);
+        } else {
+          if (data.trains)      setTrains(data.trains);
+          if (data.carriages)   setCarriages(data.carriages);
+          if (data.technicians) setTechnicians(data.technicians);
+          if (data.issues)      setIssues(data.issues);
+          if (data.planSteps)   setPlanSteps(data.planSteps);
+          console.log("[FleetData] Loaded:", {
+            trains: data.trains?.length,
+            issues: data.issues?.length,
+            technicians: data.technicians?.length,
+          });
+        }
+      } else {
+        const errText = await res.text();
+        console.error("[FleetData] API error:", res.status, errText);
       }
-    } catch {
-      // Keep current data on error
+    } catch (err) {
+      console.error("[FleetData] Fetch failed:", err);
     } finally {
       setIsLoading(false);
       isFetching.current = false;

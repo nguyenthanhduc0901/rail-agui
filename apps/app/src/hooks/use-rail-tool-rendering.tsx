@@ -345,25 +345,47 @@ export const useRailToolRendering = () => {
       if (name === "generate_maintenance_plan_stream" || name === "schedule_inspection")
         return <MaintenancePlanCard status={status} />;
 
+      // ── Plan step update
+      if (name === "update_plan_step") {
+        const stepId = p.step_id ? String(p.step_id) : "";
+        const stepStatus = p.status ? String(p.status) : "";
+        return (
+          <div className="my-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm dark:border-slate-700 dark:bg-slate-900">
+            <div className="flex items-center gap-2">
+              <span className="font-semibold text-slate-700 dark:text-slate-200">
+                📋 {stepId || "Bước bảo trì"}
+              </span>
+              {stepStatus && (
+                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+                  {stepStatus}
+                </span>
+              )}
+              <span className="ml-auto"><Done done={status === "complete"} /></span>
+            </div>
+          </div>
+        );
+      }
+
+      // ── Bulk update (human approval handled via useInterrupt in ai-controls)
+      if (name === "request_bulk_issue_status_update")
+        return <FilterActionCard params={p as Record<string, string>} status={status} label="Cập nhật hàng loạt" />;
+
       // ── Fallback
-      return <ToolReasoning name={name} status={status} args={parameters} />;
+      return <ToolReasoning name={name} status={status} args={p} />;
     },
   });
 
   useFrontendTool(
     {
-      name: "setTheme",
-      description:
-        "Đặt chế độ giao diện chính xác theo yêu cầu người dùng: light, dark hoặc system.",
+      name: "change_theme",
+      description: "Switch the application UI theme between light and dark mode.",
       parameters: z.object({
-        mode: z.enum(["light", "dark", "system"]),
+        theme: z.enum(["light", "dark"]).describe("The theme to apply."),
       }),
-      handler: async ({ mode }) => {
-        if (mode === theme) {
-          return `Theme already set to ${mode}.`;
-        }
-        setTheme(mode);
-        return `Theme updated to ${mode}.`;
+      handler: async ({ theme: newTheme }) => {
+        if (theme === newTheme) return `Theme is already ${newTheme}.`;
+        setTheme(newTheme);
+        return `Theme changed to ${newTheme}.`;
       },
     },
     [theme, setTheme],
