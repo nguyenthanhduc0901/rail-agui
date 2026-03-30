@@ -17,12 +17,12 @@ if not gemini_api_key:
     raise ValueError("Missing GEMINI_API_KEY in environment variables.")
 
 model = ChatGoogleGenerativeAI(
-    model="gemini-2.5-flash",
+    model="gemini-3.1-flash-lite-preview",
     google_api_key=gemini_api_key,
-    temperature=0,
+    temperature=1.0,
     max_tokens=None,
     timeout=None,
-    max_retries=2,
+    max_retries=2
 )
 
 agent = create_agent(
@@ -45,6 +45,8 @@ agent = create_agent(
           + Dùng setTheme khi người dùng chỉ định rõ light/dark/system.
           + Dùng toggleTheme khi người dùng chỉ yêu cầu "đổi theme" chung chung.
         - Khi người dùng yêu cầu chuyển bố cục màn hình, dùng enableAppMode hoặc enableChatMode.
+        - Khi người dùng muốn tạo hoặc hiển thị thẻ "New Issue" trong khung chat, hãy gọi tool displayNewIssueCard.
+        - Trước khi gọi displayNewIssueCard, phải chỉnh sửa mô tả sự cố của người dùng cho rõ ràng, đúng thuật ngữ kỹ thuật, và ngắn gọn.
         - Nếu dữ liệu thiếu hoặc không tồn tại, nêu rõ phần thiếu và đề nghị thông tin bổ sung.
         - Không bịa thông tin ngoài dữ liệu có trong context hoặc tool output.
         - Khi đề xuất xử lý, đưa ra thứ tự ưu tiên dựa trên priority và status hiện tại.
