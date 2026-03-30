@@ -39,10 +39,12 @@ export interface Widget {
 
 export interface MaintenanceStep {
   id: string;
+  order: number;
   title: string;
   details?: string;
   priority: "high" | "medium" | "low";
-  done: boolean;
+  /** Replaces the old `done` boolean — three-state lifecycle */
+  status: "pending" | "in-progress" | "done";
   estimatedHours?: number;
   assigneeId?: string;
   assigneeName?: string;
@@ -126,7 +128,7 @@ export function RailDashboardAIProvider({
           const incoming = next[idx];
           return (
             step?.id === incoming?.id &&
-            step?.done === incoming?.done &&
+            step?.status === incoming?.status &&
             step?.title === incoming?.title
           );
         });

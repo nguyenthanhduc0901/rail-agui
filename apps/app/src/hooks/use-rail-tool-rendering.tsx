@@ -1,7 +1,7 @@
 "use client";
 
 import { z } from "zod";
-import { useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useTheme } from "@/hooks/use-theme";
 import {
   useAgent,
@@ -31,7 +31,7 @@ function Done({ done }: { done: boolean }) {
     : <Spinner />;
 }
 
-// ── Individual card components ────────────────────────────────────────────────
+// ── Card components ───────────────────────────────────────────────────────────
 
 function WidgetToolCard({ params, status }: { params: Record<string, string> | undefined; status: string }) {
   const sev = (params?.severity && severityStyles[params.severity]) ? params.severity : "info";
@@ -82,92 +82,47 @@ function FilterActionCard({
   );
 }
 
-function MaintenancePlanCard({ status }: { status: string }) {
-  const { maintenancePlan } = useRailDashboardAI() as {
-    maintenancePlan: Array<{
-      id?: string; done?: boolean; title?: string; label?: string;
-      details?: string; estimatedHours?: number; assigneeName?: string;
-    }>;
-    setMaintenancePlan: (plan: unknown[]) => void;
-  };
-  const totalHours = maintenancePlan.reduce((s, step) => s + (step.estimatedHours ?? 0), 0);
-  return (
-    <div className="my-2 rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900">
-      <div className="mb-2 flex items-center gap-2">
-        <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">
-          Kế hoạch bảo trì
-        </span>
-        {totalHours > 0 && (
-          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] text-slate-500 dark:bg-slate-800">
-            {totalHours.toFixed(1)}h
-          </span>
-        )}
-        {status !== "complete" && <Spinner />}
-      </div>
-      {maintenancePlan.length === 0 ? (
-        <p className="text-xs text-slate-400">Đang tải các bước...</p>
-      ) : (
-        <div className="space-y-1.5">
-          {maintenancePlan.map((step, i: number) => (
-            <div key={step.id ?? i} className="flex items-start gap-2 text-xs">
-              <span className="mt-0.5 shrink-0">{step.done ? "✅" : "⏳"}</span>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-slate-700 dark:text-slate-200">
-                  {step.title ?? step.label ?? `Bước ${i + 1}`}
-                </p>
-                {step.details && (
-                  <p className="text-slate-400 dark:text-slate-500">{step.details}</p>
-                )}
-                {step.assigneeName && step.assigneeName !== "Unassigned" && (
-                  <p className="text-blue-500 dark:text-sky-400">
-                    👤 {step.assigneeName}{step.estimatedHours ? ` · ${step.estimatedHours}h` : ""}
-                  </p>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-/** Generic card for all read-query tools */
-function AnalysisQueryCard({
-  toolName,
+/** Single card for ALL query_database calls — shows the SQL being executed */
+function SQLQueryCard({
   params,
   status,
 }: {
-  toolName: string;
   params: Record<string, unknown> | undefined;
   status: string;
 }) {
-  const LABELS: Record<string, string> = {
-    get_fleet_overview:       "📊 Tổng quan đội tàu",
-    get_train_summary:        "🚂 Tóm tắt tàu",
-    count_issues:             "🔢 Đếm sự cố",
-    list_issues:              "📋 Danh sách sự cố",
-    get_carriage_detail:      "🚃 Chi tiết toa",
-    get_issue_detail:         "🔍 Chi tiết sự cố",
-  };
-  const label = LABELS[toolName] ?? toolName;
-  const keyParam = Object.entries(params ?? {}).find(
-    ([, v]) => v && v !== "all" && v !== "" && v !== 10,
-  );
+  const sql = params?.sql ? String(params.sql) : null;
+  const preview = sql
+    ? sql.replace(/\s+/g, " ").trim().slice(0, 90) + (sql.length > 90 ? "…" : "")
+    : null;
   return (
-    <div className="my-2 flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm dark:border-slate-700 dark:bg-slate-900">
-      <span className="font-semibold text-slate-700 dark:text-slate-200">{label}</span>
-      {keyParam && (
-        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-500 dark:bg-slate-800 dark:text-slate-400">
-          {String(keyParam[1])}
+    <div className="my-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm dark:border-slate-700 dark:bg-slate-900">
+      <div className="flex items-center gap-2">
+        <svg
+          className="h-3.5 w-3.5 shrink-0 text-slate-400 dark:text-slate-500"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+            d="M4 7h16M4 12h10M4 17h7" />
+        </svg>
+        <span className="text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+          SQL
         </span>
-      )}
-      <span className="ml-auto"><Done done={status === "complete"} /></span>
+        {preview && (
+          <span className="min-w-0 flex-1 truncate font-mono text-[11px] text-slate-500 dark:text-slate-400">
+            {preview}
+          </span>
+        )}
+        <span className="ml-auto shrink-0">
+          <Done done={status === "complete"} />
+        </span>
+      </div>
     </div>
   );
 }
 
-/** update_issue — shows what is being changed */
+/** update_issue — shows what fields are changing */
 function IssueUpdateCard({
   params,
   status,
@@ -203,101 +158,142 @@ function IssueUpdateCard({
   );
 }
 
-/** rank_trains_by_risk */
-function RiskRankCard({
-  params,
-  status,
-}: {
-  params: Record<string, unknown> | undefined;
-  status: string;
-}) {
-  return (
-    <div className="my-2 rounded-xl border border-red-200 bg-red-50 p-3 text-sm dark:border-red-800/40 dark:bg-red-950/30">
-      <div className="flex items-center justify-between gap-2">
-        <span className="font-semibold text-red-800 dark:text-red-200">
-          🏆 Xếp hạng rủi ro đội tàu
-        </span>
-        <Done done={status === "complete"} />
-      </div>
-      <p className="mt-0.5 text-xs text-red-600 dark:text-red-400">
-        Top {String(params?.top_n ?? 5)} tàu · điểm rủi ro = toa hỏng × 3 + lỗi cao × 2 + quá hạn × 1.5
-      </p>
-    </div>
-  );
-}
+/** generate_maintenance_plan_stream / schedule_inspection
+ *  Shows an ordered, clickable plan where each step cycles:
+ *    pending → in-progress → done → pending
+ */
+function MaintenancePlanCard({ status }: { status: string }) {
+  const { maintenancePlan, setMaintenancePlan } = useRailDashboardAI() as {
+    maintenancePlan: Array<{
+      id?: string;
+      order?: number;
+      status?: string;
+      /** legacy compat */
+      done?: boolean;
+      title?: string;
+      label?: string;
+      details?: string;
+      estimatedHours?: number;
+      assigneeName?: string;
+    }>;
+    setMaintenancePlan: (plan: unknown[]) => void;
+  };
 
-/** get_system_analytics */
-function SystemAnalyticsCard({
-  params,
-  status,
-}: {
-  params: Record<string, unknown> | undefined;
-  status: string;
-}) {
-  const target = params?.system ? String(params.system) : null;
-  return (
-    <div className="my-2 rounded-xl border border-sky-200 bg-sky-50 p-3 text-sm dark:border-sky-800/40 dark:bg-sky-950/30">
-      <div className="flex items-center justify-between gap-2">
-        <span className="font-semibold text-sky-800 dark:text-sky-200">
-          ⚙️ Phân tích hệ thống{target ? ` — ${target}` : " (toàn bộ)"}
-        </span>
-        <Done done={status === "complete"} />
-      </div>
-      <p className="mt-0.5 text-xs text-sky-600 dark:text-sky-400">
-        HVAC · Brakes · Doors · Power · Network
-      </p>
-    </div>
+  const toggleStep = useCallback(
+    (idx: number) => {
+      const updated = maintenancePlan.map((s, i) => {
+        if (i !== idx) return s;
+        const cur = s.status ?? (s.done ? "done" : "pending");
+        const next =
+          cur === "pending"     ? "in-progress" :
+          cur === "in-progress" ? "done"        : "pending";
+        return { ...s, status: next, done: next === "done" };
+      });
+      setMaintenancePlan(updated);
+    },
+    [maintenancePlan, setMaintenancePlan],
   );
-}
 
-/** get_technician_workload / find_available_technician */
-function WorkloadCard({
-  toolName,
-  params,
-  status,
-}: {
-  toolName: string;
-  params: Record<string, unknown> | undefined;
-  status: string;
-}) {
-  const isFindMode = toolName === "find_available_technician";
-  return (
-    <div className="my-2 rounded-xl border border-teal-200 bg-teal-50 p-3 text-sm dark:border-teal-800/40 dark:bg-teal-950/30">
-      <div className="flex items-center justify-between gap-2">
-        <span className="font-semibold text-teal-800 dark:text-teal-200">
-          {isFindMode ? "🔎 Tìm kỹ thuật viên rảnh" : "👷 Khối lượng công việc"}
-        </span>
-        <Done done={status === "complete"} />
-      </div>
-      {isFindMode && !!params?.specialty && (
-        <p className="mt-0.5 text-xs text-teal-600 dark:text-teal-400">
-          Chuyên môn: {String(params.specialty)}
-        </p>
-      )}
-    </div>
-  );
-}
+  const totalHours = maintenancePlan.reduce((s, step) => s + (step.estimatedHours ?? 0), 0);
+  const doneCount  = maintenancePlan.filter(
+    (s) => s.status === "done" || s.done,
+  ).length;
 
-/** find_overdue_issues */
-function OverdueCard({
-  params,
-  status,
-}: {
-  params: Record<string, unknown> | undefined;
-  status: string;
-}) {
   return (
-    <div className="my-2 rounded-xl border border-orange-200 bg-orange-50 p-3 text-sm dark:border-orange-800/40 dark:bg-orange-950/30">
-      <div className="flex items-center justify-between gap-2">
-        <span className="font-semibold text-orange-800 dark:text-orange-200">
-          ⏰ Sự cố trễ hạn
+    <div className="my-2 rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900">
+      {/* Header */}
+      <div className="mb-2 flex items-center gap-2">
+        <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+          Kế hoạch bảo trì
         </span>
-        <Done done={status === "complete"} />
+        {totalHours > 0 && (
+          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] text-slate-500 dark:bg-slate-800">
+            {totalHours.toFixed(1)}h
+          </span>
+        )}
+        {maintenancePlan.length > 0 && (
+          <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
+            {doneCount}/{maintenancePlan.length}
+          </span>
+        )}
+        {status !== "complete" && <Spinner />}
       </div>
-      {!!(params?.train_id || params?.priority) && (
-        <p className="mt-0.5 text-xs text-orange-600 dark:text-orange-400">
-          {[params?.train_id, params?.priority].filter(Boolean).join(" · ")}
-        </p>
+
+      {/* Steps */}
+      {maintenancePlan.length === 0 ? (
+        <p className="text-xs text-slate-400">Đang tải các bước...</p>
+      ) : (
+        <div className="space-y-1">
+          {maintenancePlan.map((step, i) => {
+            const stepStatus = step.status ?? (step.done ? "done" : "pending");
+            const isDone       = stepStatus === "done";
+            const isInProgress = stepStatus === "in-progress";
+
+            return (
+              <div
+                key={step.id ?? i}
+                onClick={() => toggleStep(i)}
+                title={
+                  isDone       ? "Nhấn để đánh dấu chưa xong" :
+                  isInProgress ? "Nhấn để đánh dấu xong"      :
+                                 "Nhấn để bắt đầu"
+                }
+                className={[
+                  "flex cursor-pointer items-start gap-2 rounded-lg px-2 py-1.5 text-xs transition-all select-none",
+                  isDone
+                    ? "opacity-60"
+                    : isInProgress
+                    ? "bg-blue-50/70 dark:bg-sky-900/20"
+                    : "hover:bg-slate-50 dark:hover:bg-slate-800/40",
+                ].join(" ")}
+              >
+                {/* Order / status badge */}
+                <span
+                  className={[
+                    "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold",
+                    isDone
+                      ? "bg-emerald-200 text-emerald-700 dark:bg-emerald-800/40 dark:text-emerald-400"
+                      : isInProgress
+                      ? "bg-blue-200 text-blue-700 dark:bg-sky-700 dark:text-sky-200"
+                      : "bg-slate-200 text-slate-500 dark:bg-slate-700 dark:text-slate-400",
+                  ].join(" ")}
+                >
+                  {isDone ? "✓" : (step.order ?? i + 1)}
+                </span>
+
+                <div className="min-w-0 flex-1">
+                  <p
+                    className={[
+                      "truncate",
+                      isDone
+                        ? "text-slate-400 line-through dark:text-slate-500"
+                        : "text-slate-700 dark:text-slate-200",
+                    ].join(" ")}
+                  >
+                    {step.title ?? step.label ?? `Bước ${i + 1}`}
+                  </p>
+                  {step.details && !isDone && (
+                    <p className="text-slate-400 dark:text-slate-500">{step.details}</p>
+                  )}
+                  {step.assigneeName &&
+                    step.assigneeName !== "Unassigned" &&
+                    !isDone && (
+                      <p className="text-blue-500 dark:text-sky-400">
+                        👤 {step.assigneeName}
+                        {step.estimatedHours ? ` · ${step.estimatedHours}h` : ""}
+                      </p>
+                    )}
+                </div>
+
+                {isInProgress && (
+                  <span className="mt-0.5 shrink-0 text-[9px] font-bold uppercase text-blue-500 dark:text-sky-400">
+                    WIP
+                  </span>
+                )}
+              </div>
+            );
+          })}
+        </div>
       )}
     </div>
   );
@@ -331,7 +327,7 @@ export const useRailToolRendering = () => {
       if (ignoredTools.includes(name)) return <></>;
       const p = (parameters ?? {}) as Record<string, unknown>;
 
-      // ── Widget / filter frontend tools
+      // ── Frontend action tools
       if (name === "createDashboardWidget")
         return <WidgetToolCard params={p as Record<string, string>} status={status} />;
       if (name === "applyDashboardFilters")
@@ -341,33 +337,19 @@ export const useRailToolRendering = () => {
       if (name === "clearDashboardWidgets")
         return <FilterActionCard params={{}} status={status} label="Đã xoá widgets" />;
 
-      // ── Streaming plan tools (both share the same card)
-      if (name === "generate_maintenance_plan_stream" || name === "schedule_inspection")
-        return <MaintenancePlanCard status={status} />;
+      // ── Single SQL query tool
+      if (name === "query_database")
+        return <SQLQueryCard params={p} status={status} />;
 
       // ── Write tool
       if (name === "update_issue")
         return <IssueUpdateCard params={p} status={status} />;
 
-      // ── Analytics tools
-      if (name === "rank_trains_by_risk")
-        return <RiskRankCard params={p} status={status} />;
-      if (name === "get_system_analytics")
-        return <SystemAnalyticsCard params={p} status={status} />;
-      if (name === "get_technician_workload" || name === "find_available_technician")
-        return <WorkloadCard toolName={name} params={p} status={status} />;
-      if (name === "find_overdue_issues")
-        return <OverdueCard params={p} status={status} />;
+      // ── Streaming plan tools
+      if (name === "generate_maintenance_plan_stream" || name === "schedule_inspection")
+        return <MaintenancePlanCard status={status} />;
 
-      // ── Generic read-query tools
-      const queryTools = new Set([
-        "get_fleet_overview", "get_train_summary", "count_issues",
-        "list_issues", "get_carriage_detail", "get_issue_detail",
-      ]);
-      if (queryTools.has(name))
-        return <AnalysisQueryCard toolName={name} params={p} status={status} />;
-
-      // ── Fallback for anything else
+      // ── Fallback
       return <ToolReasoning name={name} status={status} args={parameters} />;
     },
   });
@@ -391,4 +373,3 @@ export const useRailToolRendering = () => {
     [theme, setTheme],
   );
 };
-

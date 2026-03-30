@@ -33,10 +33,11 @@ class RailIssue(TypedDict):
 
 class MaintenanceStep(TypedDict):
     id: str
+    order: int
     title: str
     details: str
     priority: Literal["high", "medium", "low"]
-    done: bool
+    status: Literal["pending", "in-progress", "done"]
     estimatedHours: float
     assigneeId: str
     assigneeName: str
