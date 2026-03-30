@@ -80,16 +80,16 @@ const subsystemTemplates = [
   { key: 'network', label: 'Network'  },
 ];
 
-export const getTechnicianById = (id: string | null): Technician | undefined =>
-  id ? technicians.find((t) => t.id === id) : undefined;
+export const getTechnicianById = (id: string | null, _technicians = technicians): Technician | undefined =>
+  id ? _technicians.find((t) => t.id === id) : undefined;
 
-export const getAllTechnicians = (): Technician[] => technicians;
+export const getAllTechnicians = (_technicians = technicians): Technician[] => _technicians;
 
-export const getCarriagesByTrain = (trainId: string): Carriage[] =>
-  carriages[trainId] || [];
+export const getCarriagesByTrain = (trainId: string, _carriages = carriages): Carriage[] =>
+  _carriages[trainId] || [];
 
-export const getActiveIssuesByCarriage = (trainId: string, carriageId: string): Issue[] =>
-  issues.filter(
+export const getActiveIssuesByCarriage = (trainId: string, carriageId: string, _issues = issues): Issue[] =>
+  _issues.filter(
     (issue) =>
       issue.trainId === trainId &&
       issue.carriageId === carriageId &&

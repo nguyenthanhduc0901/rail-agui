@@ -1,5 +1,6 @@
 import { Fragment, useMemo, useState } from 'react'
-import { trains, issues, getCarriagesByTrain, type Train, type Carriage } from '../data/railDataSource'
+import { getCarriagesByTrain, type Train, type Carriage } from '../data/railDataSource'
+import { useFleetData } from '../context/fleet-data-context'
 import { CarriageDetailsModal } from '../components/CarriageDetailsModal'
 import { MaintenancePlanBoard } from '../components/MaintenancePlanBoard'
 import { useRailDashboardAI } from '../context/rail-dashboard-ai-context'
@@ -27,6 +28,7 @@ export function FleetDashboard() {
   const [modalOpen, setModalOpen] = useState(false)
   const [selectedTrain, setSelectedTrain] = useState<Train | null>(null)
   const [selectedCarriage, setSelectedCarriage] = useState<Carriage | null>(null)
+  const { trains, issues, carriages } = useFleetData()
   const {
     filters,
     updateFilters,
@@ -35,7 +37,7 @@ export function FleetDashboard() {
 
   const systemOptions = useMemo(() => {
     return ['all', ...new Set(issues.map((issue) => issue.systemCategory))]
-  }, [])
+  }, [issues])
 
   const filteredTrains = useMemo(() => {
     return trains.filter((train) => {
@@ -59,7 +61,7 @@ export function FleetDashboard() {
 
       return true
     })
-  }, [filters.priority, filters.status, filters.system, filters.trainId])
+  }, [trains, issues, filters.priority, filters.status, filters.system, filters.trainId])
 
   const openIssuesInFilteredScope = useMemo(() => {
     return issues.filter((issue) => {
@@ -73,7 +75,7 @@ export function FleetDashboard() {
 
       return issue.status === 'open'
     }).length
-  }, [filteredTrains, filters.priority, filters.status, filters.system])
+  }, [issues, filteredTrains, filters.priority, filters.status, filters.system])
 
   const openModal = (train: Train, carriage: Carriage) => {
     setSelectedTrain(train)
@@ -168,7 +170,7 @@ export function FleetDashboard() {
       <div className="space-y-16">
         {filteredTrains.map((train) => {
           const config = statusConfig[train.healthStatus]
-          const carriageList = getCarriagesByTrain(train.id)
+          const carriageList = getCarriagesByTrain(train.id, carriages)
           const headCarriage = carriageList[0]
           const remainingCarriages = carriageList.slice(1)
           const headCarriageConfig = headCarriage ? statusConfig[headCarriage.healthStatus] : config

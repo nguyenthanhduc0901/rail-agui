@@ -4,6 +4,7 @@ import { Fragment, useState, useMemo, useEffect, ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { getCarriageSystems, getActiveIssuesByCarriage, getTechnicianById, getCarriagesByTrain, getAllTechnicians, type SystemHealth, type Carriage, type Train, type Technician } from '../data/railDataSource';
+import { useFleetData } from '../context/fleet-data-context';
 
 interface HealthStatus {
   color: string;
@@ -248,6 +249,7 @@ interface CarriageDetailsModalProps {
 }
 
 export function CarriageDetailsModal({ isOpen, onClose, train, carriage }: CarriageDetailsModalProps): ReactNode {
+  const { issues: liveIssues, carriages: liveCarriages, technicians: liveTechnicians } = useFleetData();
   const [filterSystem,   setFilterSystem]   = useState('All');
   const [filterPriority, setFilterPriority] = useState('All');
   const [filterAssignee, setFilterAssignee] = useState('All');
@@ -272,16 +274,16 @@ export function CarriageDetailsModal({ isOpen, onClose, train, carriage }: Carri
   );
 
   const rawIssues = useMemo(
-    () => (train && carriage ? getActiveIssuesByCarriage(train.id, carriage.id) : []),
-    [train, carriage],
+    () => (train && carriage ? getActiveIssuesByCarriage(train.id, carriage.id, liveIssues) : []),
+    [train, carriage, liveIssues],
   );
 
   const assigneeOptions = useMemo(() => {
     const names = rawIssues
-      .map(i => getTechnicianById(i.assigneeId)?.name)
+      .map(i => getTechnicianById(i.assigneeId, liveTechnicians)?.name)
       .filter((n): n is string => Boolean(n));
     return ['All', 'Unassigned', ...new Set(names)].map(a => ({ value: a, label: a }));
-  }, [rawIssues]);
+  }, [rawIssues, liveTechnicians]);
 
   const filteredIssues = useMemo(() => {
     let result = [...rawIssues];
@@ -290,7 +292,7 @@ export function CarriageDetailsModal({ isOpen, onClose, train, carriage }: Carri
     if (filterAssignee !== 'All') {
       result = filterAssignee === 'Unassigned'
         ? result.filter(i => !i.assigneeId)
-        : result.filter(i => getTechnicianById(i.assigneeId)?.name === filterAssignee);
+        : result.filter(i => getTechnicianById(i.assigneeId, liveTechnicians)?.name === filterAssignee);
     }
     return result.sort((a, b) => {
       if (sortBy === 'date-desc') return new Date(b.planning.reportedAt).getTime() - new Date(a.planning.reportedAt).getTime();
@@ -314,7 +316,7 @@ export function CarriageDetailsModal({ isOpen, onClose, train, carriage }: Carri
 
   if (!isOpen || !carriage) return null;
 
-  const allTechnicians = getAllTechnicians();
+  const allTechnicians = getAllTechnicians(liveTechnicians);
   const portalRoot = typeof document !== 'undefined' ? document.getElementById('app-modal-portal') : null;
 
   const modalContent = (
@@ -364,7 +366,7 @@ export function CarriageDetailsModal({ isOpen, onClose, train, carriage }: Carri
             </div>
 
             {(() => {
-              const allCarriages = train ? getCarriagesByTrain(train.id) : [];
+              const allCarriages = train ? getCarriagesByTrain(train.id, liveCarriages) : [];
               const isHead = allCarriages.length > 0 && allCarriages[0].id === carriage.id;
               const isLast = allCarriages.length > 1 && allCarriages[allCarriages.length - 1].id === carriage.id;
               const shapeClasses = isHead
@@ -497,7 +499,7 @@ export function CarriageDetailsModal({ isOpen, onClose, train, carriage }: Carri
                             {issue.status.replace('-', ' ')}
                           </span>
                           <div className="flex-1" />
-                          <AssigneeAvatar technician={getTechnicianById(issue.assigneeId)} />
+                          <AssigneeAvatar technician={getTechnicianById(issue.assigneeId, liveTechnicians)} />
                         </div>
                       </div>
                     );

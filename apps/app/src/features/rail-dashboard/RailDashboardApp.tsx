@@ -1,11 +1,14 @@
 "use client";
 
+import { useEffect, useRef, ReactNode } from "react";
 import { CopilotChat } from "@copilotkit/react-core/v2";
+import { useAgent } from "@copilotkit/react-core/v2";
 
 import { DashboardShell } from "@/components/dashboard-shell";
 import { AppLayout } from "./layout/AppLayout";
 import { FleetDashboard } from "./screens/FleetDashboard";
 import { RailDashboardAIProvider } from "./context/rail-dashboard-ai-context";
+import { FleetDataProvider, useFleetData } from "./context/fleet-data-context";
 import {
   useChatHistoryGuard,
   useRailDashboardAIControls,
@@ -13,13 +16,22 @@ import {
   useRailToolRendering,
 } from "@/hooks";
 
-import { ReactNode } from "react";
-
 function RailDashboardWorkspace(): ReactNode {
   useChatHistoryGuard();
   useRailToolRendering();
   useRailDashboardAIControls();
   useRailChatSuggestions();
+
+  const { refresh } = useFleetData();
+  const { agent } = useAgent();
+  const wasRunning = useRef(false);
+
+  useEffect(() => {
+    if (wasRunning.current && !agent.isRunning) {
+      refresh();
+    }
+    wasRunning.current = agent.isRunning;
+  }, [agent.isRunning, refresh]);
 
   return (
     <DashboardShell
@@ -37,9 +49,11 @@ function RailDashboardWorkspace(): ReactNode {
 
 export function RailDashboardApp() {
   return (
-    <RailDashboardAIProvider>
-      <RailDashboardWorkspace />
-    </RailDashboardAIProvider>
+    <FleetDataProvider>
+      <RailDashboardAIProvider>
+        <RailDashboardWorkspace />
+      </RailDashboardAIProvider>
+    </FleetDataProvider>
   );
 }
 
