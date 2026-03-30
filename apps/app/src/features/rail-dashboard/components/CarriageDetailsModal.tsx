@@ -3,7 +3,7 @@
 import { Fragment, useState, useMemo, ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
-import { getCarriageSystems, getActiveIssuesByCarriage, getTechnicianById, type SystemHealth, type Carriage, type Train, type Technician } from '../data/railDataSource';
+import { getCarriageSystems, getActiveIssuesByCarriage, getTechnicianById, getCarriagesByTrain, type SystemHealth, type Carriage, type Train, type Technician } from '../data/railDataSource';
 
 interface HealthStatus {
   color: string;
@@ -337,44 +337,85 @@ export function CarriageDetailsModal({ isOpen, onClose, train, carriage }: Carri
               <span className="text-slate-700 dark:text-slate-200 font-bold text-xs uppercase tracking-wider">Live Schema</span>
             </div>
 
-            <div className="relative w-full max-w-2xl aspect-[2/1] bg-gradient-to-b from-slate-50 to-slate-200 rounded-2xl border-2 border-slate-300 shadow-xl flex flex-col justify-between z-10">
-              <div className="absolute top-[60%] left-0 right-0 h-2 bg-blue-600 opacity-80" />
+            {(() => {
+              const allCarriages = train ? getCarriagesByTrain(train.id) : [];
+              const isHead = allCarriages.length > 0 && allCarriages[0].id === carriage.id;
+              const isLast = allCarriages.length > 1 && allCarriages[allCarriages.length - 1].id === carriage.id;
 
-              {/* Windows */}
-              <div className="flex justify-between px-10 pt-15 gap-6 absolute inset-x-0">
-                {[1, 2, 3].map(i => (
-                  <div key={i} className="h-14 flex-1 bg-slate-800 rounded-lg border-2 border-slate-400 shadow-inner relative overflow-hidden">
-                    <div className="absolute top-0 right-2 w-16 h-full bg-white/10 skew-x-12" />
-                  </div>
-                ))}
-                <div className="w-[80px]" />
-                {[4, 5].map(i => (
-                  <div key={i} className="h-14 flex-1 bg-slate-800 rounded-lg border-2 border-slate-400 shadow-inner relative overflow-hidden">
-                    <div className="absolute top-0 right-2 w-16 h-full bg-white/10 skew-x-12" />
-                  </div>
-                ))}
-              </div>
+              const shapeClasses = isHead
+                ? 'rounded-tl-[100px] rounded-bl-3xl rounded-r-2xl'
+                : isLast
+                  ? 'rounded-r-[100px] rounded-l-2xl'
+                  : 'rounded-2xl';
 
-              {/* Right-side wheels */}
-              <div className="absolute bottom-[-20px] right-[15%] flex gap-4 z-0">
-                {[0, 1].map(i => (
-                  <div key={i} className="w-10 h-10 rounded-full border-[3px] border-slate-600 bg-slate-300 flex items-center justify-center">
-                    <div className="w-4 h-4 rounded-full border border-slate-400 bg-slate-200" />
-                  </div>
-                ))}
-              </div>
+              return (
+                <div className={`relative w-full max-w-2xl aspect-[2/1] bg-gradient-to-b from-slate-50 to-slate-200 border-2 border-slate-300 shadow-xl flex flex-col justify-between z-10 transition-all duration-300 ${shapeClasses}`}>
+                  <div className="absolute top-[60%] left-0 right-0 h-2 bg-blue-600 opacity-80" />
 
-              {/* System overlays */}
-              {systems.map(system => {
-                const status    = getHealthStatus(system.health);
-                const hasIssues = rawIssues.some(i => i.systemCategory === system.name);
-                return (
-                  <Fragment key={system.id}>
-                    {renderSystemUI(system, hasIssues, status)}
-                  </Fragment>
-                );
-              })}
-            </div>
+                  {/* Windows */}
+                  <div className={`flex justify-between pt-12 gap-5 absolute inset-x-0 ${isHead ? 'pl-6 pr-10' : isLast ? 'pl-10 pr-6' : 'px-10'}`}>
+
+                    {/* Cab glass — Head */}
+                    {isHead && (
+                      <div className="w-32 h-14 bg-slate-800 rounded-tl-[60px] rounded-tr-md rounded-bl-lg border-2 border-slate-400 shadow-inner relative overflow-hidden shrink-0">
+                        <div className="absolute top-0 right-4 w-12 h-full bg-white/10 skew-x-12" />
+                      </div>
+                    )}
+
+                    {[1, 2].map(i => (
+                      <div key={i} className="h-14 flex-1 bg-slate-800 rounded-lg border-2 border-slate-400 shadow-inner relative overflow-hidden">
+                        <div className="absolute top-0 right-2 w-16 h-full bg-white/10 skew-x-12" />
+                      </div>
+                    ))}
+
+                    {/* Door gap */}
+                    <div className="w-[60px] shrink-0" />
+
+                    {[3, 4].map(i => (
+                      <div key={i} className="h-14 flex-1 bg-slate-800 rounded-lg border-2 border-slate-400 shadow-inner relative overflow-hidden">
+                        <div className="absolute top-0 right-2 w-16 h-full bg-white/10 skew-x-12" />
+                      </div>
+                    ))}
+
+                    {/* Cab glass — Last */}
+                    {isLast && (
+                      <div className="w-32 h-14 bg-slate-800 rounded-tr-[60px] rounded-tl-md rounded-br-lg border-2 border-slate-400 shadow-inner relative overflow-hidden shrink-0">
+                        <div className="absolute top-0 right-4 w-12 h-full bg-white/10 skew-x-12" />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Bogies — left */}
+                  <div className="absolute bottom-[-20px] left-[15%] flex gap-4 z-0">
+                    {[0, 1].map(i => (
+                      <div key={`wheel-l-${i}`} className="w-10 h-10 rounded-full border-[3px] border-slate-600 bg-slate-300 flex items-center justify-center">
+                        <div className="w-4 h-4 rounded-full border border-slate-400 bg-slate-200" />
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Bogies — right */}
+                  <div className="absolute bottom-[-20px] right-[15%] flex gap-4 z-0">
+                    {[0, 1].map(i => (
+                      <div key={`wheel-r-${i}`} className="w-10 h-10 rounded-full border-[3px] border-slate-600 bg-slate-300 flex items-center justify-center">
+                        <div className="w-4 h-4 rounded-full border border-slate-400 bg-slate-200" />
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* System overlays */}
+                  {systems.map(system => {
+                    const status    = getHealthStatus(system.health);
+                    const hasIssues = rawIssues.some(i => i.systemCategory === system.name);
+                    return (
+                      <Fragment key={system.id}>
+                        {renderSystemUI(system, hasIssues, status)}
+                      </Fragment>
+                    );
+                  })}
+                </div>
+              );
+            })()}
           </div>
 
           {/* RIGHT: Issues List */}
