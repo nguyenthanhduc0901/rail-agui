@@ -1,6 +1,7 @@
 import { Fragment, useMemo, useState } from 'react'
 import { trains, issues, getCarriagesByTrain, type Train, type Carriage } from '../data/railDataSource'
 import { CarriageDetailsModal } from '../components/CarriageDetailsModal'
+import { MaintenancePlanBoard } from '../components/MaintenancePlanBoard'
 import { useRailDashboardAI } from '../context/rail-dashboard-ai-context'
 
 type StatusKey = 'healthy' | 'warning' | 'critical'
@@ -324,6 +325,9 @@ export function FleetDashboard() {
           </div>
         )}
       </div>
+
+      {/* ── Maintenance Plan Board (shown when AI generates a plan) ─────── */}
+      <MaintenancePlanBoard />
 
       <CarriageDetailsModal 
         isOpen={modalOpen}

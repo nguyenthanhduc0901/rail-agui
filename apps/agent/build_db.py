@@ -71,6 +71,22 @@ CREATE TABLE IF NOT EXISTS issues (
 CREATE INDEX IF NOT EXISTS idx_iss_train    ON issues(train_id);
 CREATE INDEX IF NOT EXISTS idx_iss_status   ON issues(status);
 CREATE INDEX IF NOT EXISTS idx_iss_priority ON issues(priority);
+CREATE TABLE IF NOT EXISTS plan_steps (
+    id              TEXT PRIMARY KEY,
+    plan_id         TEXT NOT NULL,
+    seq_order       INTEGER NOT NULL,
+    issue_id        TEXT REFERENCES issues(id),
+    title           TEXT NOT NULL,
+    details         TEXT,
+    priority        TEXT NOT NULL,
+    status          TEXT NOT NULL DEFAULT 'pending',
+    estimated_hours REAL,
+    assignee_id     TEXT REFERENCES technicians(id),
+    assignee_name   TEXT,
+    created_at      TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_ps_plan   ON plan_steps(plan_id);
+CREATE INDEX IF NOT EXISTS idx_ps_status ON plan_steps(status);
 CREATE TABLE IF NOT EXISTS _meta (
     key   TEXT PRIMARY KEY,
     value TEXT
