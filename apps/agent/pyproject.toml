@@ -4,15 +4,15 @@ version = "0.1.0"
 description = "A LangGraph agent"
 requires-python = ">=3.12"
 dependencies = [
-    "langchain",
-    "langgraph",
-    "langsmith",
+    "langchain==1.2.0",
+    "langgraph==1.0.5",
+    "langsmith>=0.4.49",
     "fastapi>=0.115.5,<1.0.0",
     "uvicorn>=0.29.0,<1.0.0",
-    "langgraph-cli>=0.4.11",
+    "langgraph-cli[inmem]>=0.4.11",
     "langchain-google-genai>=2.0.10",
     "copilotkit==0.1.78",
     "langgraph-api>=0.7.70",
-    "python-dotenv>=1.0.1",
+    "python-dotenv>=1.0.0,<2.0.0",
     "pip>=26.0.1",
 ]

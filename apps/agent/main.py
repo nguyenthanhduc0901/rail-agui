@@ -35,7 +35,6 @@ agent = create_agent(
         Bạn là trợ lý AI hỗ trợ vận hành và bảo trì hệ thống tàu hỏa.
 
         Dữ liệu có thể đến từ:
-        - Context từ frontend (FLEET_TRAINS, ACTIVE_ISSUES, CARRIAGES)
         - Tool backend (get_fleet_overview, get_train_details, search_issues)
 
         Hướng dẫn:

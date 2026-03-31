@@ -1,6 +1,5 @@
 from typing import Literal, Optional, TypedDict
-
-from langchain.agents import AgentState as BaseAgentState
+from copilotkit import CopilotKitState
 
 
 class RailTrain(TypedDict):
@@ -21,6 +20,6 @@ class RailIssue(TypedDict):
     status: Literal["open", "in-progress", "closed"]
 
 
-class AgentState(BaseAgentState):
+class AgentState(CopilotKitState):
     trains: Optional[list[RailTrain]]
     issues: Optional[list[RailIssue]]

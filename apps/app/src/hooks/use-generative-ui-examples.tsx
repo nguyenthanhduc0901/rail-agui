@@ -6,6 +6,8 @@ import {
   useComponent,
   useDefaultRenderTool,
   useFrontendTool,
+  useHumanInTheLoop,
+  useInterrupt,
 } from "@copilotkit/react-core/v2";
 import { ToolReasoning } from "@/components/tool-rendering";
 
@@ -75,6 +77,91 @@ function NewIssueCard({
 export const useGenerativeUIExamples = () => {
   const { theme, setTheme } = useTheme();
 
+  const normalizeInterruptValue = (value: unknown) => {
+    if (typeof value === "string") {
+      try {
+        return JSON.parse(value) as Record<string, unknown>;
+      } catch {
+        return null;
+      }
+    }
+    if (value && typeof value === "object") {
+      return value as Record<string, unknown>;
+    }
+    return null;
+  };
+
+  useInterrupt({
+    enabled: (event) => {
+      const payload = normalizeInterruptValue(event.value);
+      return payload?.type === "approval" && payload?.action === "insert_issue_to_db";
+    },
+    render: ({ event, resolve }) => {
+      const payload = normalizeInterruptValue(event.value);
+      const issue = payload?.issue as
+        | {
+            trainId?: string;
+            carriageId?: string;
+            system?: string;
+            priority?: string;
+            description?: string;
+          }
+        | undefined;
+      if (!issue) return <></>;
+
+      return (
+        <div className="my-2 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+          <h4 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+            Confirm Database Insert
+          </h4>
+
+          <p className="mt-2 text-sm text-zinc-700 dark:text-zinc-300">
+            {(payload?.content as string | undefined) ?? "Approve this issue insert?"}
+          </p>
+
+          <div className="mt-2 space-y-1 text-xs text-zinc-600 dark:text-zinc-300">
+            <p>
+              <span className="font-medium text-zinc-800 dark:text-zinc-100">Train:</span>{" "}
+              {issue.trainId}
+            </p>
+            <p>
+              <span className="font-medium text-zinc-800 dark:text-zinc-100">Carriage:</span>{" "}
+              {issue.carriageId}
+            </p>
+            <p>
+              <span className="font-medium text-zinc-800 dark:text-zinc-100">System:</span>{" "}
+              {issue.system}
+            </p>
+            <p>
+              <span className="font-medium text-zinc-800 dark:text-zinc-100">Priority:</span>{" "}
+              {issue.priority}
+            </p>
+            <p className="rounded-md bg-zinc-50 p-2 text-sm text-zinc-700 dark:bg-zinc-800/60 dark:text-zinc-200">
+              {issue.description}
+            </p>
+          </div>
+
+          <div className="mt-3 flex gap-2">
+            <button
+              type="button"
+              className="rounded-md bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-700"
+              onClick={() => resolve(true)}
+            >
+              Approve Insert
+            </button>
+            <button
+              type="button"
+              className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm font-medium text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-800"
+              onClick={() => resolve(false)}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      );
+    },
+  });
+
   const ignoredTools = ["generate_form", "log_a2ui_event"];
   useDefaultRenderTool({
     render: ({ name, status, parameters }) => {
@@ -86,7 +173,7 @@ export const useGenerativeUIExamples = () => {
   useComponent({
     name: "displayNewIssueCard",
     description:
-      "Hiển thị thẻ New Issue trong chatbot panel. Trước khi gọi tool này, agent PHẢI chỉnh sửa mô tả sự cố của người dùng cho rõ ràng, đúng thuật ngữ, và ngắn gọn.",
+      "Hiển thị thẻ New Issue trong chatbot panel. Trước khi gọi tool này, agent PHẢI chỉnh sửa mô tả sự cố của người dùng cho rõ ràng, đúng thuật ngữ, và ngắn gọn. Sau khi hiển thị thẻ, agent gợi ý về việc thêm issue này vào cơ sở dữ liệu ",
     parameters: newIssueCardSchema,
     render: NewIssueCard,
   });

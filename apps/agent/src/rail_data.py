@@ -1,8 +1,11 @@
 import json
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+from uuid import uuid4
 
 from langchain.tools import tool
+from langgraph.types import interrupt
 
 _DATA_PATH = (
     Path(__file__).resolve().parents[2]
@@ -99,4 +102,70 @@ def search_issues(
         limit=limit,
     )
 
-rail_tools = [get_fleet_overview, get_train_details, search_issues]
+
+@tool
+def insert_issue_to_db(
+    train_id: str,
+    carriage_id: str,
+    system: str,
+    priority: str,
+    description: str,
+) -> dict[str, Any]:
+    """Mock DB insert for a new issue. Always asks for human approval before writing."""
+    approval = interrupt(
+        {
+            "type": "approval",
+            "action": "insert_issue_to_db",
+            "content": "Bạn có chắc muốn insert issue này vào database?",
+            "issue": {
+                "trainId": train_id,
+                "carriageId": carriage_id,
+                "system": system,
+                "priority": priority,
+                "description": description,
+            },
+        }
+    )
+
+    approved = False
+    if isinstance(approval, bool):
+        approved = approval
+    elif isinstance(approval, str):
+        approved = approval.strip().lower() in {"approved", "approve", "yes", "y", "true"}
+    elif isinstance(approval, dict):
+        approved = bool(
+            approval.get("approved")
+            or approval.get("decision") in {"approved", "approve", True}
+            or approval.get("status") in {"approved", "approve"}
+        )
+
+    if not approved:
+        return {
+            "success": False,
+            "status": "cancelled",
+            "message": "User rejected approval. Issue was not inserted.",
+        }
+
+    issue = {
+        "id": f"ISS-{uuid4().hex[:8].upper()}",
+        "trainId": train_id,
+        "carriageId": carriage_id,
+        "system": system,
+        "title": description,
+        "priority": priority,
+        "status": "open",
+        "date": datetime.now(timezone.utc).isoformat(),
+        "source": "mock-db",
+    }
+
+    # Mock insert: persist only in-memory for this agent process.
+    _rail_data.setdefault("issues", []).append(issue)
+
+    return {
+        "success": True,
+        "status": "inserted",
+        "message": "Issue inserted to mock database after approval.",
+        "issue": issue,
+    }
+
+rail_tools = [get_fleet_overview, get_train_details, search_issues, insert_issue_to_db]
