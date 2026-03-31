@@ -19,8 +19,8 @@ gemini_api_key = os.getenv("GEMINI_API_KEY")
 if not gemini_api_key:
     raise ValueError("Missing GEMINI_API_KEY in environment variables.")
 
-MODEL_NAME = "gemini-2.5-flash-lite"
-# MODEL_NAME = "gemini-3-flash-preview"
+# MODEL_NAME = "gemini-2.5-flash-lite"
+MODEL_NAME = "gemini-3-flash-preview"
 
 
 async def start_node(state: AgentState, config: RunnableConfig) -> Command:
