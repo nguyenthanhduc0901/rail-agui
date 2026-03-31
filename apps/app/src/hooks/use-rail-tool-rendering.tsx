@@ -9,7 +9,7 @@ import {
   useFrontendTool,
 } from "@copilotkit/react-core/v2";
 import { ToolReasoning } from "@/components/tool-rendering";
-import { useRailDashboardAI, type MaintenanceStep, type PendingPlanStep } from "@/features/rail-dashboard/context/rail-dashboard-ai-context";
+import { useRailDashboardAI, type MaintenanceStep, type PendingPlanStep, type AgentProgressStep } from "@/features/rail-dashboard/context/rail-dashboard-ai-context";
 import { FilterActionCard } from "@/features/rail-dashboard/components/tool-cards/filter-action-card";
 import { IssueUpdateCard } from "@/features/rail-dashboard/components/tool-cards/issue-update-card";
 import { MaintenancePlanCard } from "@/features/rail-dashboard/components/tool-cards/maintenance-plan-card";
@@ -17,13 +17,14 @@ import { PlanStepUpdateCard } from "@/features/rail-dashboard/components/tool-ca
 import { SQLQueryCard } from "@/features/rail-dashboard/components/tool-cards/sql-query-card";
 import { WidgetToolCard } from "@/features/rail-dashboard/components/tool-cards/widget-tool-card";
 import { IssuePlanProposalCard } from "@/features/rail-dashboard/components/tool-cards/issue-plan-proposal-card";
+import { IssueReportCard } from "@/features/rail-dashboard/components/tool-cards/issue-report-card";
 
 // ── Hook ──────────────────────────────────────────────────────────────────────
 
 export const useRailToolRendering = () => {
   const { theme, setTheme } = useTheme();
   const { agent } = useAgent();
-  const { setMaintenancePlan } = useRailDashboardAI();
+  const { setMaintenancePlan, setAgentProgress } = useRailDashboardAI();
 
   const ignoredTools = useMemo(() => ["log_a2ui_event"], []);
 
@@ -34,10 +35,13 @@ export const useRailToolRendering = () => {
         if (Array.isArray(event.value?.maintenancePlan)) {
           setMaintenancePlan(event.value.maintenancePlan as MaintenanceStep[]);
         }
+        if (Array.isArray(event.value?.agentProgress)) {
+          setAgentProgress(event.value.agentProgress as AgentProgressStep[]);
+        }
       },
     });
     return unsubscribe;
-  }, [agent, setMaintenancePlan]);
+  }, [agent, setMaintenancePlan, setAgentProgress]);
 
   useDefaultRenderTool({
     render: ({ name, status, parameters }) => {
@@ -64,6 +68,13 @@ export const useRailToolRendering = () => {
         return <IssuePlanProposalCard plan={plan} status={status} />;
       }
 
+      // ── Issue report tool (streaming via predict_state)
+      if (name === "generate_issue_report") {
+        const reportText = p.report ? String(p.report) : undefined;
+        const wordCount = reportText ? reportText.split(/\s+/).filter(Boolean).length : 0;
+        return <IssueReportCard status={status} wordCount={wordCount} />;
+      }
+
       // ── Frontend action tools
       if (name === "createDashboardWidget")
         return <WidgetToolCard params={p as Record<string, string>} status={status} />;
@@ -73,6 +84,8 @@ export const useRailToolRendering = () => {
         return <FilterActionCard params={{}} status={status} label="Đã xoá bộ lọc" />;
       if (name === "clearDashboardWidgets")
         return <FilterActionCard params={{}} status={status} label="Đã xoá widgets" />;
+      if (name === "openCarriageDetails")
+        return <FilterActionCard params={p as Record<string, string>} status={status} label="Mở chi tiết toa" />;
 
       // ── Single SQL query tool
       if (name === "query_database")
@@ -94,6 +107,10 @@ export const useRailToolRendering = () => {
       // ── Bulk update (human approval handled via useInterrupt in ai-controls)
       if (name === "request_bulk_issue_status_update")
         return <FilterActionCard params={p as Record<string, string>} status={status} label="Cập nhật hàng loạt" />;
+
+      // ── Plan execution approval (human-in-the-loop, handled via useInterrupt)
+      if (name === "confirm_plan_execution")
+        return <FilterActionCard params={{}} status={status} label="Xác nhận kế hoạch" />;
 
       // ── Fallback
       return <ToolReasoning name={name} status={status} args={p} />;

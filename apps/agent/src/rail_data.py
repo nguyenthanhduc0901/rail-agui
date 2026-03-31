@@ -20,8 +20,9 @@ from pathlib import Path
 from typing import Any
 
 from langchain.tools import tool
+from langchain_core.messages import ToolMessage
 from langchain_core.runnables import RunnableConfig
-from langgraph.types import interrupt
+from langgraph.types import Command, interrupt
 from copilotkit.langgraph import copilotkit_emit_state
 
 _DB_FILE_PATH = Path(__file__).resolve().parents[1] / "fleet.db"
@@ -431,7 +432,7 @@ async def generate_maintenance_plan_stream(
     candidates = [dict(r) for r in cur.fetchall()]
 
     if not candidates:
-        await copilotkit_emit_state(config, {"maintenancePlan": []})
+        await copilotkit_emit_state(config, {"maintenancePlan": [], "agentProgress": []})
         return {"summary": "No matching open issues found.", "stepCount": 0, "totalHours": 0}
 
     cur.execute(
@@ -447,7 +448,22 @@ async def generate_maintenance_plan_stream(
     steps: list[dict] = []
     batch_id = _now_utc().strftime("%Y%m%d%H%M%S")
 
+    # Initialise progress steps (one per candidate issue)
+    progress_steps: list[dict] = [
+        {
+            "id": f"prog-{i+1}",
+            "description": f"Phân tích {c['carriage_id']} — {c.get('system_category', '')}: {c.get('title', '')}",
+            "status": "pending",
+        }
+        for i, c in enumerate(candidates)
+    ]
+    await copilotkit_emit_state(config, {"maintenancePlan": steps, "agentProgress": progress_steps})
+
     for order, issue in enumerate(candidates, start=1):
+        # Mark current step as "doing"
+        progress_steps[order - 1]["status"] = "doing"
+        await copilotkit_emit_state(config, {"maintenancePlan": steps, "agentProgress": progress_steps})
+
         sys_name = issue.get("system_category", "")
         pref     = _SYSTEM_SPECIALIST.get(sys_name, ["Diagnostics"])
         tech_candidates = sorted(
@@ -469,10 +485,15 @@ async def generate_maintenance_plan_stream(
             "technicianId":   tech["id"]   if tech else "",
             "technicianName": tech["name"] if tech else "Unassigned",
         })
+        progress_steps[order - 1]["status"] = "done"
         await asyncio.sleep(0.12)
-        await copilotkit_emit_state(config, {"maintenancePlan": steps})
+        await copilotkit_emit_state(config, {"maintenancePlan": steps, "agentProgress": progress_steps})
 
     total_hours = round(sum(s["estimatedHours"] for s in steps), 1)
+
+    # Clear progress after completion
+    await asyncio.sleep(0.5)
+    await copilotkit_emit_state(config, {"maintenancePlan": steps, "agentProgress": []})
 
 
     db.execute("DELETE FROM plan_steps")
@@ -529,7 +550,21 @@ async def schedule_inspection(
     steps: list[dict] = []
     batch_id = f"INSP-{tid}-{_now_utc().strftime('%Y%m%d%H%M%S')}"
 
+    # Initialise progress steps (one per system)
+    progress_steps: list[dict] = [
+        {
+            "id": f"insp-prog-{i+1}",
+            "description": f"Lập lịch kiểm tra hệ thống {sys_name} — {tid}",
+            "status": "pending",
+        }
+        for i, sys_name in enumerate(valid_sys)
+    ]
+    await copilotkit_emit_state(config, {"maintenancePlan": steps, "agentProgress": progress_steps})
+
     for order, sys_name in enumerate(valid_sys, start=1):
+        progress_steps[order - 1]["status"] = "doing"
+        await copilotkit_emit_state(config, {"maintenancePlan": steps, "agentProgress": progress_steps})
+
         cur.execute(
             "SELECT i.total_estimated_hours FROM issues i "
             "JOIN carriages c ON c.id = i.carriage_id "
@@ -561,11 +596,16 @@ async def schedule_inspection(
             "technicianId":   tech["id"]   if tech else "",
             "technicianName": tech["name"] if tech else "Unassigned",
         })
+        progress_steps[order - 1]["status"] = "done"
         await asyncio.sleep(0.18)
-        await copilotkit_emit_state(config, {"maintenancePlan": steps})
+        await copilotkit_emit_state(config, {"maintenancePlan": steps, "agentProgress": progress_steps})
 
     total_hours = round(sum(s["estimatedHours"] for s in steps), 1)
     train_name  = dict(train_row)["name"]
+
+    # Clear progress after completion
+    await asyncio.sleep(0.5)
+    await copilotkit_emit_state(config, {"maintenancePlan": steps, "agentProgress": []})
 
     db.execute("DELETE FROM plan_steps")
     db.executemany(
@@ -668,6 +708,80 @@ def request_bulk_issue_status_update(
             "targetStatus": tgt_sta_, "message": message}
 
 
+@tool
+def generate_issue_report(report: str, config: RunnableConfig) -> Command:  # pylint: disable=unused-argument
+    """
+    Write or update the issue report document. Use markdown formatting extensively.
+
+    REPORT STRUCTURE (always include ALL sections):
+    # Báo cáo Sự cố — [Tên tàu / Toa / Hệ thống]
+    **Ngày lập:** [date]  **Người lập:** Trợ lý AI
+
+    ## 1. Tóm tắt
+    Brief executive summary of the situation.
+
+    ## 2. Danh sách Sự cố
+    | ID | Hệ thống | Tiêu đề | Mức độ | Trạng thái | Giờ ước tính |
+    |---|---|---|---|---|---|
+    ...rows...
+
+    ## 3. Phân công Kỹ thuật viên
+    List each technician and their assigned issues/steps.
+
+    ## 4. Ước tính Chi phí & Thời gian
+    Total hours, estimated labor cost (150k VND/hour), parts notes.
+
+    ## 5. Khuyến nghị
+    Prioritized action items.
+
+    RULES:
+    - You MUST write the FULL report even when only changing a few words.
+    - Do NOT repeat the report content in your text message — just summarize changes in 1-2 sentences.
+    - Use markdown tables for issue lists.
+    - Call query_database first to get accurate data before writing the report.
+    """
+    tool_call_id = config.get("configurable", {}).get("tool_call_id", "generate_issue_report")
+    return Command(
+        update={
+            "issueReport": report,
+            "messages": [ToolMessage(content="Report saved.", tool_call_id=tool_call_id)],
+        }
+    )
+
+
+@tool
+def confirm_plan_execution(
+    plan_summary: str,
+    estimated_total_hours: float = 0.0,
+    affected_issues: int = 0,
+) -> dict[str, Any]:
+    """
+    Request human approval before executing or committing a maintenance plan.
+    Use this when a proposed plan affects multiple issues or has significant time/cost impact
+    (e.g. estimated_total_hours > 8 or affected_issues > 3).
+    After user confirms, proceed with the actual plan creation steps.
+
+    plan_summary:         short markdown description of what the plan will do
+    estimated_total_hours: total hours across all proposed steps
+    affected_issues:      number of issues included in the plan
+    """
+    approval = interrupt({
+        "type":                "plan_execution_approval",
+        "planSummary":         plan_summary,
+        "estimatedTotalHours": estimated_total_hours,
+        "affectedIssues":      affected_issues,
+    })
+    approved = bool(isinstance(approval, dict) and approval.get("approved"))
+    return {
+        "approved": approved,
+        "message":  (
+            "Kế hoạch được phê duyệt. Tiến hành thực thi."
+            if approved else
+            "Kế hoạch bị từ chối. Không thực hiện thay đổi."
+        ),
+    }
+
+
 rail_tools = [
     query_database,
     update_issue,
@@ -675,4 +789,6 @@ rail_tools = [
     generate_maintenance_plan_stream,
     schedule_inspection,
     request_bulk_issue_status_update,
+    confirm_plan_execution,
+    generate_issue_report,
 ]

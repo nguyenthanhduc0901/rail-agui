@@ -1,4 +1,4 @@
-import { Fragment, useMemo, useState } from 'react'
+import { Fragment, useEffect, useMemo, useState } from 'react'
 import { getCarriagesByTrain, type Train, type Carriage } from '../data/railDataSource'
 import { useFleetData } from '../context/fleet-data-context'
 import { CarriageDetailsModal } from '../components/CarriageDetailsModal'
@@ -24,9 +24,14 @@ const CarriageWindow = () => (
 )
 
 export function FleetDashboard() {
-  const [modalOpen, setModalOpen] = useState(false)
-  const [selectedTrain, setSelectedTrain] = useState<Train | null>(null)
-  const [selectedCarriage, setSelectedCarriage] = useState<Carriage | null>(null)
+  // Combine modal open/train/carriage into one state object — avoids calling
+  // multiple local useState setters inside the pendingOpenCarriage effect.
+  const [modal, setModal] = useState<{ open: boolean; train: Train | null; carriage: Carriage | null }>(
+    { open: false, train: null, carriage: null },
+  )
+  const modalOpen     = modal.open
+  const selectedTrain    = modal.train
+  const selectedCarriage = modal.carriage
   const { trains, issues, carriages, isLoading } = useFleetData()
   const {
     filters,
@@ -34,7 +39,27 @@ export function FleetDashboard() {
     clearFilters,
     highlightByStatus,
     setActiveCarriage,
+    registerOpenCarriageModal,
   } = useRailDashboardAI()
+
+  // Feature 1: agent-driven carriage modal opener.
+  // The frontend tool openCarriageDetails() calls triggerOpenCarriageModal() in context,
+  // which invokes the callback registered here. Using a ref+callback avoids calling
+  // setState inside an effect body, satisfying the react-hooks/set-state-in-effect rule.
+  useEffect(() => {
+    registerOpenCarriageModal((carriageId, trainId) => {
+      const train = trains.find((t) => t.id === trainId);
+      // carriages is Record<trainId, Carriage[]>; check own array first, then flatten
+      const carriage = (carriages[trainId] ?? Object.values(carriages).flat()).find(
+        (c) => c.id === carriageId,
+      );
+      if (train && carriage) {
+        openModal(train, carriage);
+        updateFilters({ trainId: train.id });
+      }
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [trains, carriages, registerOpenCarriageModal, updateFilters]);
 
   const systemOptions = useMemo(() => {
     return ['all', ...new Set(issues.map((issue) => issue.systemCategory))]
@@ -91,16 +116,12 @@ export function FleetDashboard() {
   }, [issues, filteredTrainIds, filters.priority, filters.status, filters.system])
 
   const openModal = (train: Train, carriage: Carriage) => {
-    setSelectedTrain(train)
-    setSelectedCarriage(carriage)
-    setModalOpen(true)
+    setModal({ open: true, train, carriage })
     setActiveCarriage(carriage.id, train.id)
   }
 
   const closeModal = () => {
-    setModalOpen(false)
-    setSelectedTrain(null)
-    setSelectedCarriage(null)
+    setModal({ open: false, train: null, carriage: null })
     setActiveCarriage(null, null)
   }
 

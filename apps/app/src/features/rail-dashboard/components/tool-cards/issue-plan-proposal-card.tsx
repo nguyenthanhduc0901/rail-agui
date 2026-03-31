@@ -10,7 +10,7 @@ interface IssuePlanProposalCardProps {
   status?: string;
 }
 
-export function IssuePlanProposalCard({ plan, status }: IssuePlanProposalCardProps) {
+export function IssuePlanProposalCard({ plan }: IssuePlanProposalCardProps) {
   const { refresh: refreshFleet, technicians } = useFleetData();
   const [approving, setApproving] = useState(false);
   const [done, setDone] = useState<"approved" | "rejected" | null>(null);

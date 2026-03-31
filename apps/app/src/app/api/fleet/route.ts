@@ -67,7 +67,7 @@ export async function GET() {
       totalEstimatedHours: i.total_estimated_hours,
     }));
 
-    const planStepsByIssue: Record<string, Array<any>> = {};
+    const planStepsByIssue: Record<string, Array<Record<string, unknown>>> = {};
     for (const s of planStepRows) {
       const issueId = s.issue_id as string;
       if (!planStepsByIssue[issueId]) planStepsByIssue[issueId] = [];
@@ -84,7 +84,7 @@ export async function GET() {
     }
 
     // Issues WITH action plans
-    const issuesWithPlans = issues.map((i: any) => ({
+    const issuesWithPlans = issues.map((i) => ({
       ...i,
       planSteps: planStepsByIssue[i.id as string] ?? [],
     }));

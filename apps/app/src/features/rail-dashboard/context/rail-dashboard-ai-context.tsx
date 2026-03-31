@@ -5,6 +5,7 @@ import {
   useCallback,
   useContext,
   useMemo,
+  useRef,
   useState,
   ReactNode,
 } from "react";
@@ -65,6 +66,12 @@ export interface PendingIssuePlan {
   steps: PendingPlanStep[];
 }
 
+export interface AgentProgressStep {
+  id: string;
+  description: string;
+  status: "pending" | "doing" | "done";
+}
+
 export interface RailDashboardAIContextType {
   filters: DashboardFilters;
   updateFilters: (partial: Partial<DashboardFilters>) => void;
@@ -86,6 +93,20 @@ export interface RailDashboardAIContextType {
   // Pending AI-proposed issue plan awaiting approval
   pendingIssuePlan: PendingIssuePlan | null;
   setPendingIssuePlan: (plan: PendingIssuePlan | null) => void;
+  // Issue report (collaborative document)
+  issueReport: string | null;
+  setIssueReport: (report: string | null) => void;
+  issueReportPanelOpen: boolean;
+  openIssueReport: (report: string | null) => void;
+  closeIssueReportPanel: () => void;
+  // Agent in-progress task steps
+  agentProgress: AgentProgressStep[];
+  setAgentProgress: (steps: AgentProgressStep[]) => void;
+  // Programmatic carriage modal opener (used by openCarriageDetails frontend tool).
+  // Uses a ref-based callback so setState is never called inside an effect body.
+  // FleetDashboard registers its openModal handler; the frontend tool fires triggerOpenCarriageModal.
+  triggerOpenCarriageModal: (carriageId: string, trainId: string) => void;
+  registerOpenCarriageModal: (fn: (carriageId: string, trainId: string) => void) => void;
 }
 
 const RailDashboardAIContext = createContext<RailDashboardAIContextType | null>(
@@ -109,6 +130,21 @@ export function RailDashboardAIProvider({
   const [activeCarriageId, setActiveCarriageIdState] = useState<string | null>(null);
   const [activeTrainId, setActiveTrainIdState] = useState<string | null>(null);
   const [pendingIssuePlan, setPendingIssuePlan] = useState<PendingIssuePlan | null>(null);
+  const [issueReport, setIssueReport] = useState<string | null>(null);
+  const [issueReportPanelOpen, setIssueReportPanelOpen] = useState(false);
+  const [agentProgress, setAgentProgressState] = useState<AgentProgressStep[]>([]);
+  // Internal ref for the openCarriageDetails frontend tool callback.
+  // Ref (not state) so FleetDashboard can register its openModal handler without triggers.
+  const _openCarriageRef = useRef<((carriageId: string, trainId: string) => void) | null>(null);
+
+  const openIssueReport = useCallback((report: string | null) => {
+    setIssueReport(report);
+    setIssueReportPanelOpen(!!report);
+  }, []);
+
+  const closeIssueReportPanel = useCallback(() => {
+    setIssueReportPanelOpen(false);
+  }, []);
 
   const toggleCarriageHighlight = useCallback((carriageId: string, enabled: boolean) => {
     setHighlightedCarriageIds((prev) => {
@@ -197,6 +233,18 @@ export function RailDashboardAIProvider({
     });
   }, []);
 
+  const setAgentProgress = useCallback((steps: AgentProgressStep[]) => {
+    setAgentProgressState(Array.isArray(steps) ? steps : []);
+  }, []);
+
+  const triggerOpenCarriageModal = useCallback((carriageId: string, trainId: string) => {
+    _openCarriageRef.current?.(carriageId, trainId);
+  }, []);
+
+  const registerOpenCarriageModal = useCallback((fn: (carriageId: string, trainId: string) => void) => {
+    _openCarriageRef.current = fn;
+  }, []);
+
   const value = useMemo<RailDashboardAIContextType>(
     () => ({
       filters,
@@ -216,6 +264,15 @@ export function RailDashboardAIProvider({
       setActiveCarriage,
       pendingIssuePlan,
       setPendingIssuePlan,
+      issueReport,
+      setIssueReport,
+      issueReportPanelOpen,
+      openIssueReport,
+      closeIssueReportPanel,
+      agentProgress,
+      setAgentProgress,
+      triggerOpenCarriageModal,
+      registerOpenCarriageModal,
     }),
     [
       filters,
@@ -235,6 +292,15 @@ export function RailDashboardAIProvider({
       setActiveCarriage,
       pendingIssuePlan,
       setPendingIssuePlan,
+      issueReport,
+      setIssueReport,
+      issueReportPanelOpen,
+      openIssueReport,
+      closeIssueReportPanel,
+      agentProgress,
+      setAgentProgress,
+      triggerOpenCarriageModal,
+      registerOpenCarriageModal,
     ],
   );
 
