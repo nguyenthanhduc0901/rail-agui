@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface IssueReportPanelProps {
   report: string | null;
@@ -141,7 +142,7 @@ export function IssueReportPanel({
 
           {report && (
             <div className="prose prose-sm prose-slate max-w-none dark:prose-invert prose-headings:font-semibold prose-table:text-xs prose-th:bg-slate-100 prose-th:px-3 prose-th:py-2 prose-td:px-3 prose-td:py-1.5 dark:prose-th:bg-slate-800">
-              <ReactMarkdown>{report}</ReactMarkdown>
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>{report}</ReactMarkdown>
             </div>
           )}
 

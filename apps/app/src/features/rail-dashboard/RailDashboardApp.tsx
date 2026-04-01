@@ -71,12 +71,14 @@ function RailDashboardWorkspace(): ReactNode {
   }, [agent, copilotkit]);
 
   // Sync issueReport from agent state whenever it changes
+  // NOTE: only OPEN panel when stateReport is truthy — never close it from here.
+  // Closing only happens via the user pressing the X button (closeIssueReportPanel).
   useEffect(() => {
     const stateReport = (agent.state as { issueReport?: string } | undefined)?.issueReport;
-    if (stateReport !== undefined && stateReport !== issueReport) {
-      openIssueReport(stateReport ?? null);
+    if (stateReport) {
+      openIssueReport(stateReport);
     }
-  }, [agent.state, issueReport, openIssueReport]);
+  }, [agent.state, openIssueReport]);
 
 
   // Sync plan board from DB whenever planSteps updates.

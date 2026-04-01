@@ -23,7 +23,7 @@ import { IssueReportCard } from "@/features/rail-dashboard/components/tool-cards
 export const useRailToolRendering = () => {
   const { theme, setTheme } = useTheme();
   const { agent } = useAgent();
-  const { setMaintenancePlan, setAgentProgress } = useRailDashboardAI();
+  const { setMaintenancePlan, setAgentProgress, openIssueReport } = useRailDashboardAI();
 
   const ignoredTools = useMemo(() => ["log_a2ui_event"], []);
 
@@ -37,10 +37,13 @@ export const useRailToolRendering = () => {
         if (Array.isArray(event.value?.agentProgress)) {
           setAgentProgress(event.value.agentProgress as AgentProgressStep[]);
         }
+        if (typeof event.value?.issueReport === "string") {
+          openIssueReport(event.value.issueReport);
+        }
       },
     });
     return unsubscribe;
-  }, [agent, setMaintenancePlan, setAgentProgress]);
+  }, [agent, setMaintenancePlan, setAgentProgress, openIssueReport]);
 
   useDefaultRenderTool({
     render: ({ name, status, parameters }) => {

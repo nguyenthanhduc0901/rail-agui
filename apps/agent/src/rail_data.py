@@ -17,11 +17,13 @@ import re
 import sqlite3
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
-from typing import Any
+from typing import Any, Annotated
 
 from langchain.tools import tool
+from langchain_core.messages import ToolMessage
 from langchain_core.runnables import RunnableConfig
 from langgraph.types import Command, interrupt
+from langgraph.prebuilt import InjectedState
 from copilotkit.langgraph import copilotkit_emit_state
 
 _DB_FILE_PATH = Path(__file__).resolve().parents[1] / "fleet.db"
@@ -714,7 +716,11 @@ def request_bulk_issue_status_update(
 
 
 @tool
-async def generate_issue_report(report: str, config: RunnableConfig) -> str:
+def generate_issue_report(
+    report: str,
+    config: RunnableConfig,
+    state: Annotated[dict, InjectedState],
+) -> Command:
     """
     Write or update the issue report document. Use markdown formatting extensively.
 
@@ -745,8 +751,24 @@ async def generate_issue_report(report: str, config: RunnableConfig) -> str:
     - Use markdown tables for issue lists.
     - Call query_database first to get accurate data before writing the report.
     """
-    await copilotkit_emit_state(config, {"issueReport": report})
-    return "Report saved."
+    # Extract the tool_call_id from the last AI message that called this tool
+    tool_call_id = "generate_issue_report"  # fallback
+    messages = state.get("messages", [])
+    for msg in reversed(messages):
+        tool_calls = getattr(msg, "tool_calls", None)
+        if tool_calls:
+            for tc in tool_calls:
+                if tc.get("name") == "generate_issue_report":
+                    tool_call_id = tc["id"]
+                    break
+            break
+
+    return Command(
+        update={
+            "issueReport": report,
+            "messages": [ToolMessage(content="Report saved.", tool_call_id=tool_call_id)],
+        }
+    )
 
 
 
