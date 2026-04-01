@@ -20,7 +20,6 @@ from pathlib import Path
 from typing import Any
 
 from langchain.tools import tool
-from langchain_core.messages import ToolMessage
 from langchain_core.runnables import RunnableConfig
 from langgraph.types import Command, interrupt
 from copilotkit.langgraph import copilotkit_emit_state
@@ -715,7 +714,7 @@ def request_bulk_issue_status_update(
 
 
 @tool
-def generate_issue_report(report: str, config: RunnableConfig) -> Command:  # pylint: disable=unused-argument
+async def generate_issue_report(report: str, config: RunnableConfig) -> str:
     """
     Write or update the issue report document. Use markdown formatting extensively.
 
@@ -746,13 +745,8 @@ def generate_issue_report(report: str, config: RunnableConfig) -> Command:  # py
     - Use markdown tables for issue lists.
     - Call query_database first to get accurate data before writing the report.
     """
-    tool_call_id = config.get("configurable", {}).get("tool_call_id", "generate_issue_report")
-    return Command(
-        update={
-            "issueReport": report,
-            "messages": [ToolMessage(content="Report saved.", tool_call_id=tool_call_id)],
-        }
-    )
+    await copilotkit_emit_state(config, {"issueReport": report})
+    return "Report saved."
 
 
 
