@@ -39,6 +39,7 @@ CÔNG CỤ HIỆN CÓ:
 - request_bulk_issue_status_update   ← cập nhật hàng loạt (cần xác nhận người dùng)
 - request_inspection_approval(...)   ← xin phê duyệt kế hoạch bảo dưỡng trước khi thực thi
 - generate_issue_report(report)      ← soạn/chỉnh sửa báo cáo sự cố (streaming, markdown)
+- write_document(document)           ← viết/chỉnh sửa mô tả sự cố đang mở trong editor (plain text)
 
 CÔNG CỤ GIAO DIỆN (frontend tools — tự động injected bởi CopilotKit):
 - applyDashboardFilters(...)         ← lọc bảng điều khiển theo tàu, hệ thống, ưu tiên, trạng thái
@@ -108,6 +109,13 @@ QUY TẮC BÁO CÁO (generate_issue_report):
 - Khi chỉnh sửa báo cáo: LUÔN viết LẠI TOÀN BỘ báo cáo (kể cả phần không thay đổi)
 - Không lặp lại nội dung báo cáo trong tin nhắn text — chỉ tóm tắt thay đổi 1-2 câu
 
+QUY TẮC CHỈNH SỬA MÔ TẢ (write_document):
+- Khi "MÔ TẢ SỰ CỐ ĐANG CHỈNH SỬA" có trong context VÀ người dùng yêu cầu:
+  "sửa lỗi ngữ pháp", "mở rộng mô tả", "viết lại", "dịch", "cải thiện"...
+  → GỌI NGAY write_document với toàn bộ nội dung mới (plain text, không markdown)
+- KHÔNG hỏi lại, KHÔNG giải thích trước — gọi tool ngay, trả lời tóm tắt sau
+- Nội dung phải là text thuần (không dùng #, **, _markdown_)
+
 QUY TẮC CHUNG:
 - Dùng bullet hoặc bảng khi liệt kê nhiều mục
 - Luôn kèm tên tàu + ID khi liệt kê
@@ -138,12 +146,20 @@ async def chat_node(state: AgentState, config: RunnableConfig):
             "tool": "generate_issue_report",
             "tool_argument": "report",
         },
+        {
+            "state_key": "document",
+            "tool": "write_document",
+            "tool_argument": "document",
+        },
     ]
 
     issue_report = state.get("issueReport") or ""
+    current_document = state.get("document") or ""
     system_content = _SYSTEM_PROMPT
     if issue_report:
         system_content += f"\n\nBÁO CÁO HIỆN TẠI:\n---\n{issue_report}\n---"
+    if current_document:
+        system_content += f"\n\nMÔ TẢ SỰ CỐ ĐANG CHỈNH SỬA:\n---\n{current_document}\n---\nKhi user yêu cầu chỉnh sửa mô tả, hãy gọi write_document với toàn bộ nội dung mới."
 
     # Inject dashboard context if available (injected by frontend via useAgentContext)
     # CopilotKit stores context as a list of {description, value} objects.

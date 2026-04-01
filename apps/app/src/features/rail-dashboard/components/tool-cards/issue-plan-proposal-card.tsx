@@ -22,7 +22,7 @@ export function IssuePlanProposalCard({ plan }: IssuePlanProposalCardProps) {
     return (
       <div className="my-2 rounded-xl border border-blue-200 bg-blue-50 dark:border-blue-700/40 dark:bg-blue-950/30 p-4 text-sm flex items-center gap-2">
         <Sparkles className="w-4 h-4 text-blue-500 animate-pulse shrink-0" />
-        <span className="text-blue-700 dark:text-blue-300">AI đang phân tích và đề xuất kế hoạch...</span>
+        <span className="text-blue-700 dark:text-blue-300">AI is analyzing and generating a plan...</span>
       </div>
     );
   }
@@ -165,7 +165,7 @@ export function IssuePlanProposalCard({ plan }: IssuePlanProposalCardProps) {
       {/* Actions */}
       <div className="px-4 py-3 border-t border-blue-200/60 dark:border-blue-700/30 flex items-center justify-between bg-blue-50/50 dark:bg-blue-900/10">
         <span className="text-[11px] text-slate-500 dark:text-slate-400">
-          {plan.steps.length} bước · {totalHours.toFixed(1)}h tổng
+          {plan.steps.length} steps · {totalHours.toFixed(1)}h total
         </span>
         <div className="flex items-center gap-2">
           <button
@@ -173,7 +173,7 @@ export function IssuePlanProposalCard({ plan }: IssuePlanProposalCardProps) {
             disabled={approving}
             className="px-3 py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-40"
           >
-            Từ chối
+            Reject
           </button>
           <button
             onClick={handleApprove}
@@ -183,12 +183,12 @@ export function IssuePlanProposalCard({ plan }: IssuePlanProposalCardProps) {
             {approving ? (
               <>
                 <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Đang lưu...
+                Saving...
               </>
             ) : (
               <>
                 <CheckCircle className="w-3.5 h-3.5" />
-                Duyệt & Lưu
+                Approve & Save
               </>
             )}
           </button>

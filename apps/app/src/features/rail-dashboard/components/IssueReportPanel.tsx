@@ -68,12 +68,12 @@ export function IssueReportPanel({
             </div>
             <div>
               <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                Báo cáo Sự cố
+                Issue Report
               </h2>
               {isStreaming && (
                 <span className="flex items-center gap-1.5 text-xs text-sky-500">
                   <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-sky-500" />
-                  Đang viết...
+                  Writing...
                 </span>
               )}
             </div>
@@ -83,7 +83,7 @@ export function IssueReportPanel({
             {report && (
               <button
                 onClick={handleCopy}
-                title="Sao chép vào clipboard"
+                title="Copy to clipboard"
                 className="rounded-md p-1.5 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
               >
                 <svg
@@ -157,7 +157,7 @@ export function IssueReportPanel({
         {report && !isStreaming && (
           <div className="flex-shrink-0 border-t border-slate-100 px-5 py-3 dark:border-slate-800">
             <p className="text-xs text-slate-400 dark:text-slate-500">
-              Bạn có thể yêu cầu AI chỉnh sửa báo cáo trực tiếp qua chat.
+              You can ask the AI to edit this report directly via chat.
             </p>
           </div>
         )}

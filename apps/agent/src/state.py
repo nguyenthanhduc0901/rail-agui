@@ -46,6 +46,7 @@ class OutputState(CopilotKitState):
     maintenancePlan: Optional[list[MaintenanceStep]]
     issueReport: Optional[str]
     agentProgress: Optional[list[AgentProgressStep]]
+    document: Optional[str]
 
 
 class AgentState(OutputState):

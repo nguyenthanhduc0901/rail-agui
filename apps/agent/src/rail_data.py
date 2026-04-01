@@ -771,6 +771,38 @@ def generate_issue_report(
     )
 
 
+@tool
+def write_document(
+    document: str,
+    state: Annotated[dict, InjectedState],
+) -> Command:
+    """Write (rewrite or edit) the issue description document currently open in the editor.
+
+    Call this tool when the user asks you to:
+    - Fix grammar or spelling in the description
+    - Expand or rewrite the issue description
+    - Translate the description
+    - Improve clarity or add technical details
+
+    The `document` argument must contain the FULL updated description text (plain text, not markdown).
+    """
+    tool_call_id = "write_document"  # fallback
+    messages = state.get("messages", [])
+    for msg in reversed(messages):
+        tool_calls = getattr(msg, "tool_calls", None)
+        if tool_calls:
+            for tc in tool_calls:
+                if tc.get("name") == "write_document":
+                    tool_call_id = tc["id"]
+                    break
+            break
+
+    return Command(
+        update={
+            "document": document,
+            "messages": [ToolMessage(content="Document updated.", tool_call_id=tool_call_id)],
+        }
+    )
 
 
 
@@ -782,4 +814,5 @@ rail_tools = [
     schedule_inspection,
     request_bulk_issue_status_update,
     generate_issue_report,
+    write_document,
 ]

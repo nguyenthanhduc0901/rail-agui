@@ -81,7 +81,7 @@ export const useRailToolRendering = () => {
       if (name === "createDashboardWidget")
         return <WidgetToolCard params={p as Record<string, string>} status={status} />;
       if (name === "applyDashboardFilters")
-        return <FilterActionCard params={p as Record<string, string>} status={status} label="Đã áp dụng bộ lọc" />;
+        return <FilterActionCard params={p as Record<string, string>} status={status} label="Filters applied" />;
       if (name === "clearDashboardFilters")
         return <FilterActionCard params={{}} status={status} label="Đã xoá bộ lọc" />;
       if (name === "clearDashboardWidgets")

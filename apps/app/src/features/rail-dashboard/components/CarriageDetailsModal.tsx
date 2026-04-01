@@ -2,10 +2,12 @@
 
 import { Fragment, useState, useMemo, useEffect, useRef, ReactNode } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Plus, Trash2, Clock } from 'lucide-react';
+import { X, Plus, Trash2, Clock, Pencil, ArrowLeft } from 'lucide-react';
+import { useAgent } from '@copilotkit/react-core/v2';
 import { getCarriageSystems, getActiveIssuesByCarriage, getCarriagesByTrain, type SystemHealth, type Carriage, type Train, type Technician } from '../data/railDataSource';
 import { useFleetData } from '../context/fleet-data-context';
 import { useRailDashboardAI } from '../context/rail-dashboard-ai-context';
+import { DocumentEditor } from '@/features/document-editor/components/DocumentEditor';
 
 interface HealthStatus {
   color: string;
@@ -277,12 +279,15 @@ interface CarriageDetailsModalProps {
 export function CarriageDetailsModal({ isOpen, onClose, train, carriage }: CarriageDetailsModalProps): ReactNode {
   const { issues: liveIssues, carriages: liveCarriages, technicians: liveTechnicians, refresh: refreshFleet } = useFleetData();
   const { highlightedCarriageIds } = useRailDashboardAI();
+  const { agent } = useAgent();
   const showEffects = carriage ? highlightedCarriageIds.has(carriage.id) : false;
   const [filterSystem,   setFilterSystem]   = useState('All');
   const [filterPriority, setFilterPriority] = useState('All');
   const [sortBy,         setSortBy]         = useState('date-desc');
 
   const [selectedIssueId, setSelectedIssueId] = useState<string | null>(null);
+  const [isEditingDescription, setIsEditingDescription] = useState(false);
+  const [editedDescriptions, setEditedDescriptions] = useState<Record<string, string>>({});
   
   // Plan steps state
   const [planSteps, setPlanSteps] = useState<PlanStepLocal[]>([]);
@@ -293,6 +298,8 @@ export function CarriageDetailsModal({ isOpen, onClose, train, carriage }: Carri
     setFilterSystem('All');
     setFilterPriority('All');
     setPlanSteps([]);
+    setIsEditingDescription(false);
+    agent.setState({ document: null } as Record<string, unknown>);
     onClose();
   };
 
@@ -415,6 +422,20 @@ export function CarriageDetailsModal({ isOpen, onClose, train, carriage }: Carri
   const handleClearIssueSelection = () => {
     setSelectedIssueId(null);
     setPlanSteps([]);
+    setIsEditingDescription(false);
+    agent.setState({ document: null } as Record<string, unknown>);
+  };
+
+  // Push current description into agent state so the system prompt can inject it
+  const handleToggleEditor = () => {
+    if (!isEditingDescription && selectedIssue) {
+      const currentText = editedDescriptions[selectedIssue.id] ?? selectedIssue.description;
+      agent.setState({ document: currentText } as Record<string, unknown>);
+    } else {
+      // Clear document from agent state when closing editor
+      agent.setState({ document: null } as Record<string, unknown>);
+    }
+    setIsEditingDescription(!isEditingDescription);
   };
 
   // Calculate total estimated hours from plan steps
@@ -683,16 +704,41 @@ export function CarriageDetailsModal({ isOpen, onClose, train, carriage }: Carri
                   <div className="flex-1 p-6 overflow-y-auto space-y-6 rail-scrollbar">
                     
                     {/* Issue Description */}
-                    <div>
-                      <label className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 block">Issue Description</label>
-                      <div className="p-4 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-100 dark:border-slate-700/50">
-                        <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-300">
-                          {selectedIssue.description}
-                        </p>
+                    <div className={isEditingDescription ? "flex-1 flex flex-col" : ""}>
+                      <div className="flex items-center justify-between mb-2">
+                        <label className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Issue Description</label>
+                        <button
+                          onClick={handleToggleEditor}
+                          title={isEditingDescription ? 'Close editor' : 'Edit description with AI'}
+                          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-blue-600 dark:text-sky-400 hover:text-blue-700 dark:hover:text-sky-300 bg-blue-50 dark:bg-sky-900/30 hover:bg-blue-100 dark:hover:bg-sky-900/50 rounded-lg transition-colors border border-blue-200 dark:border-sky-800"
+                        >
+                          {isEditingDescription ? (
+                            <><ArrowLeft className="w-3 h-3" /> Close Editor</>
+                          ) : (
+                            <><Pencil className="w-3 h-3" /> Edit</>
+                          )}
+                        </button>
                       </div>
+                      {isEditingDescription ? (
+                        <div className="flex-1 relative">
+                          <DocumentEditor
+                            initialValue={editedDescriptions[selectedIssue.id] ?? selectedIssue.description}
+                            onChange={(text) =>
+                              setEditedDescriptions((prev) => ({ ...prev, [selectedIssue.id]: text }))
+                            }
+                          />
+                        </div>
+                      ) : (
+                        <div className="p-4 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-100 dark:border-slate-700/50">
+                          <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-300">
+                            {editedDescriptions[selectedIssue.id] ?? selectedIssue.description}
+                          </p>
+                        </div>
+                      )}
                     </div>
 
                     {/* Action Plan / Plan Steps */}
+                    {!isEditingDescription && (
                     <div>
                       <div className="flex items-center justify-between mb-3">
                         <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-2">
@@ -781,7 +827,6 @@ export function CarriageDetailsModal({ isOpen, onClose, train, carriage }: Carri
                           );
                         })}
                       </div>
-                    </div>
 
                     {/* Scheduled Date */}
                     <div>
@@ -797,6 +842,8 @@ export function CarriageDetailsModal({ isOpen, onClose, train, carriage }: Carri
                         className="w-full p-2.5 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm text-slate-700 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none cursor-pointer"
                       />
                     </div>
+                    </div>
+                    )}
                   </div>
 
                   {/* Footer Actions */}
@@ -808,7 +855,7 @@ export function CarriageDetailsModal({ isOpen, onClose, train, carriage }: Carri
                       Clear Selection
                     </button>
                     <button onClick={handleSaveActionPlan} disabled={isSaving} className="px-6 py-2.5 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-xl shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 transition-all active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed">
-                      {isSaving ? 'Saving...' : saveStatus === 'success' ? '✅ Saved!' : saveStatus === 'error' ? '❌ Error' : 'Save Action Plan'}
+                      {isSaving ? 'Saving...' : saveStatus === 'success' ? 'Saved!' : saveStatus === 'error' ? '❌ Error' : 'Save Action Plan'}
                     </button>
                   </div>
                 </div>
