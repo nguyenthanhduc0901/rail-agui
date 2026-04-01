@@ -95,30 +95,30 @@ _SERIAL_PFX     = {"Head": "LOC", "Power": "PWR", "Cargo": "CGO",
 
 
 def _seed_db(db: sqlite3.Connection, rng: random.Random) -> None:
-    """Create schema and populate demo data into a fresh DB."""
+    """Create schema and populate demo data into a fresh or incomplete DB."""
     cur = db.cursor()
     cur.executescript("""
-        CREATE TABLE trains (
+        CREATE TABLE IF NOT EXISTS trains (
             id                TEXT PRIMARY KEY,
             name              TEXT NOT NULL,
             fleet_type        TEXT NOT NULL,
             operational_state TEXT NOT NULL,
             current_location  TEXT NOT NULL
         );
-        CREATE TABLE carriages (
+        CREATE TABLE IF NOT EXISTS carriages (
             id            TEXT PRIMARY KEY,
             train_id      TEXT NOT NULL REFERENCES trains(id),
             serial_number TEXT NOT NULL,
             sequence      INTEGER NOT NULL,
             type          TEXT NOT NULL
         );
-        CREATE INDEX idx_car_train ON carriages(train_id);
-        CREATE TABLE technicians (
+        CREATE INDEX IF NOT EXISTS idx_car_train ON carriages(train_id);
+        CREATE TABLE IF NOT EXISTS technicians (
             id        TEXT PRIMARY KEY,
             name      TEXT NOT NULL,
             specialty TEXT NOT NULL
         );
-        CREATE TABLE issues (
+        CREATE TABLE IF NOT EXISTS issues (
             id                    TEXT PRIMARY KEY,
             carriage_id           TEXT NOT NULL REFERENCES carriages(id),
             system_category       TEXT NOT NULL,
@@ -130,10 +130,10 @@ def _seed_db(db: sqlite3.Connection, rng: random.Random) -> None:
             scheduled_date        TEXT,
             total_estimated_hours REAL
         );
-        CREATE INDEX idx_iss_carriage ON issues(carriage_id);
-        CREATE INDEX idx_iss_status   ON issues(status);
-        CREATE INDEX idx_iss_priority ON issues(priority);
-        CREATE TABLE plan_steps (
+        CREATE INDEX IF NOT EXISTS idx_iss_carriage ON issues(carriage_id);
+        CREATE INDEX IF NOT EXISTS idx_iss_status   ON issues(status);
+        CREATE INDEX IF NOT EXISTS idx_iss_priority ON issues(priority);
+        CREATE TABLE IF NOT EXISTS plan_steps (
             id              TEXT PRIMARY KEY,
             issue_id        TEXT REFERENCES issues(id),
             technician_id   TEXT REFERENCES technicians(id),
@@ -142,96 +142,98 @@ def _seed_db(db: sqlite3.Connection, rng: random.Random) -> None:
             estimated_hours REAL,
             status          TEXT NOT NULL DEFAULT 'pending'
         );
-        CREATE INDEX idx_ps_issue ON plan_steps(issue_id);
+        CREATE INDEX IF NOT EXISTS idx_ps_issue ON plan_steps(issue_id);
     """)
 
-    cur.executemany("INSERT INTO technicians VALUES (?,?,?)", _TECHNICIANS)
+    if not db.execute("SELECT 1 FROM technicians LIMIT 1").fetchone():
+        cur.executemany("INSERT INTO technicians VALUES (?,?,?)", _TECHNICIANS)
 
-    issue_seq = 1001
-    plan_step_seq = 1
-    epoch     = datetime(2026, 2, 1, tzinfo=timezone.utc)
-    all_issues: list[tuple] = []
+    if not db.execute("SELECT 1 FROM trains LIMIT 1").fetchone():
+        issue_seq = 1001
+        plan_step_seq = 1
+        epoch     = datetime(2026, 2, 1, tzinfo=timezone.utc)
+        all_issues: list[tuple] = []
 
-    for train_id, name, fleet_type, op_state, location in _TRAINS:
-        cur.execute("INSERT INTO trains VALUES (?,?,?,?,?)",
-                    (train_id, name, fleet_type, op_state, location))
+        for train_id, name, fleet_type, op_state, location in _TRAINS:
+            cur.execute("INSERT OR IGNORE INTO trains VALUES (?,?,?,?,?)",
+                        (train_id, name, fleet_type, op_state, location))
 
-        car_count = 5
-        for i in range(1, car_count + 1):
-            ctype = "Head" if i == 1 else "Power" if i == car_count else rng.choice(_CARRIAGE_TYPES)
-            cid   = f"C{i:02d}-{train_id}"
-            sn    = (f"{_SERIAL_PFX.get(ctype, 'PAS')}-"
-                     f"{rng.randint(1000, 9999)}-{chr(65 + rng.randint(0, 3))}")
-            cur.execute("INSERT INTO carriages VALUES (?,?,?,?,?)",
-                        (cid, train_id, sn, i, ctype))
+            car_count = 5
+            for i in range(1, car_count + 1):
+                ctype = "Head" if i == 1 else "Power" if i == car_count else rng.choice(_CARRIAGE_TYPES)
+                cid   = f"C{i:02d}-{train_id}"
+                sn    = (f"{_SERIAL_PFX.get(ctype, 'PAS')}-"
+                         f"{rng.randint(1000, 9999)}-{chr(65 + rng.randint(0, 3))}")
+                cur.execute("INSERT OR IGNORE INTO carriages VALUES (?,?,?,?,?)",
+                            (cid, train_id, sn, i, ctype))
 
-            for _ in range(rng.randint(1, 4)):
-                sys_  = rng.choice(_ALL_SYSTEMS)
-                pri_  = rng.choices(_PRIORITIES, weights=[0.20, 0.40, 0.28, 0.12])[0]
-                stat_ = rng.choices(_ISSUE_STATUSES, weights=[0.50, 0.22, 0.14, 0.14])[0]
-                ttl_  = rng.choice(_ISSUE_TITLES[sys_])
-                iid   = f"ISS-{issue_seq}"
-                issue_seq += 1
+                for _ in range(rng.randint(1, 4)):
+                    sys_  = rng.choice(_ALL_SYSTEMS)
+                    pri_  = rng.choices(_PRIORITIES, weights=[0.20, 0.40, 0.28, 0.12])[0]
+                    stat_ = rng.choices(_ISSUE_STATUSES, weights=[0.50, 0.22, 0.14, 0.14])[0]
+                    ttl_  = rng.choice(_ISSUE_TITLES[sys_])
+                    iid   = f"ISS-{issue_seq}"
+                    issue_seq += 1
 
-                rep   = epoch + timedelta(days=rng.randint(0, 50), hours=rng.randint(6, 22))
-                sched: str | None = None
-                if stat_ in ("closed", "resolved"):
-                    sched = (rep + timedelta(days=rng.randint(2, 7))).isoformat()
-                elif rng.random() < 0.6:
-                    sched = (epoch + timedelta(days=60 + rng.randint(1, 14))).isoformat()
+                    rep   = epoch + timedelta(days=rng.randint(0, 50), hours=rng.randint(6, 22))
+                    sched: str | None = None
+                    if stat_ in ("closed", "resolved"):
+                        sched = (rep + timedelta(days=rng.randint(2, 7))).isoformat()
+                    elif rng.random() < 0.6:
+                        sched = (epoch + timedelta(days=60 + rng.randint(1, 14))).isoformat()
 
-                desc = (f"{ttl_} detected on {cid} ({sys_}). "
-                        f"Telemetry deviation observed across multiple sampling windows. "
-                        f"Priority: {pri_}.")
-                est_hours = rng.choice(_EST_HOURS)
-                cur.execute(
-                    "INSERT INTO issues VALUES (?,?,?,?,?,?,?,?,?,?)",
-                    (iid, cid, sys_, ttl_, desc, pri_, stat_,
-                     rep.isoformat(), sched, est_hours),
-                )
-                all_issues.append((iid, sys_, stat_, est_hours))
+                    desc = (f"{ttl_} detected on {cid} ({sys_}). "
+                            f"Telemetry deviation observed across multiple sampling windows. "
+                            f"Priority: {pri_}.")
+                    est_hours = rng.choice(_EST_HOURS)
+                    cur.execute(
+                        "INSERT OR IGNORE INTO issues VALUES (?,?,?,?,?,?,?,?,?,?)",
+                        (iid, cid, sys_, ttl_, desc, pri_, stat_,
+                         rep.isoformat(), sched, est_hours),
+                    )
+                    all_issues.append((iid, sys_, stat_, est_hours))
 
-    for issue_id, system_category, status, total_hours in all_issues:
-        if status in ("open", "in-progress"):
-            num_steps = rng.randint(2, 4)
-        elif status == "resolved":
-            num_steps = rng.randint(1, 3)
-        else:
-            num_steps = rng.randint(1, 2)
-        
-        specialties = _SYSTEM_SPECIALIST.get(system_category, ["Diagnostics"])
-        step_templates = _PLAN_STEP_TEMPLATES.get(system_category, ["Kiểm tra tổng quát", "Sửa chữa", "Kiểm tra lại"])
-        
-        for step_idx in range(num_steps):
-            step_id = f"STEP-{plan_step_seq:04d}"
-            plan_step_seq += 1
-            
-            matching_techs = [t for t in _TECHNICIANS if t[2] in specialties]
-            if matching_techs:
-                tech = rng.choice(matching_techs)
-                tech_id = tech[0]
-            else:
-                tech_id = rng.choice(_TECHNICIANS)[0]
-            
-            step_title = step_templates[step_idx % len(step_templates)]
-            
-            step_hours = round(total_hours / num_steps + rng.uniform(-0.5, 0.5), 1)
-            step_hours = max(0.5, step_hours)
-            
-            if status == "closed":
-                step_status = "done"
+        for issue_id, system_category, status, total_hours in all_issues:
+            if status in ("open", "in-progress"):
+                num_steps = rng.randint(2, 4)
             elif status == "resolved":
-                step_status = rng.choice(["done", "done", "doing"])
-            elif status == "in-progress":
-                step_status = rng.choice(["done", "doing", "pending"])
+                num_steps = rng.randint(1, 3)
             else:
-                step_status = "pending"
+                num_steps = rng.randint(1, 2)
             
-            cur.execute(
-                "INSERT INTO plan_steps (id, issue_id, technician_id, seq_order, title, estimated_hours, status) "
-                "VALUES (?,?,?,?,?,?,?)",
-                (step_id, issue_id, tech_id, step_idx + 1, step_title, step_hours, step_status)
-            )
+            specialties = _SYSTEM_SPECIALIST.get(system_category, ["Diagnostics"])
+            step_templates = _PLAN_STEP_TEMPLATES.get(system_category, ["Kiểm tra tổng quát", "Sửa chữa", "Kiểm tra lại"])
+            
+            for step_idx in range(num_steps):
+                step_id = f"STEP-{plan_step_seq:04d}"
+                plan_step_seq += 1
+                
+                matching_techs = [t for t in _TECHNICIANS if t[2] in specialties]
+                if matching_techs:
+                    tech = rng.choice(matching_techs)
+                    tech_id = tech[0]
+                else:
+                    tech_id = rng.choice(_TECHNICIANS)[0]
+                
+                step_title = step_templates[step_idx % len(step_templates)]
+                
+                step_hours = round(total_hours / num_steps + rng.uniform(-0.5, 0.5), 1)
+                step_hours = max(0.5, step_hours)
+                
+                if status == "closed":
+                    step_status = "done"
+                elif status == "resolved":
+                    step_status = rng.choice(["done", "done", "doing"])
+                elif status == "in-progress":
+                    step_status = rng.choice(["done", "doing", "pending"])
+                else:
+                    step_status = "pending"
+                
+                cur.execute(
+                    "INSERT OR IGNORE INTO plan_steps (id, issue_id, technician_id, seq_order, title, estimated_hours, status) "
+                    "VALUES (?,?,?,?,?,?,?)",
+                    (step_id, issue_id, tech_id, step_idx + 1, step_title, step_hours, step_status)
+                )
 
     db.commit()
 
@@ -250,7 +252,13 @@ def _get_db() -> sqlite3.Connection:
     conn.execute("PRAGMA journal_mode=WAL")
     conn.execute("PRAGMA foreign_keys=ON")
 
-    if is_new:
+    needs_seed = is_new
+    if not needs_seed:
+        cur = conn.cursor()
+        cur.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='trains'")
+        needs_seed = cur.fetchone() is None
+
+    if needs_seed:
         _seed_db(conn, random.Random(20260330))
 
     _db_conn = conn

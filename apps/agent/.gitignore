@@ -8,5 +8,5 @@ __pycache__/
 .venv/
 .langgraph_api/
 
-# generated SQLite database (rebuild with: python build_db.py)
-fleet.db
+# # generated SQLite database (rebuild with: python build_db.py)
+# fleet.db
