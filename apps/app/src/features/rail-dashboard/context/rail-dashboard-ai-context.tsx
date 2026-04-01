@@ -47,6 +47,9 @@ export interface MaintenanceStep {
   estimatedHours?: number;
   technicianId?: string;
   technicianName?: string;
+  issueId?: string;
+  carriageId?: string;
+  trainId?: string;
 }
 
 export interface PendingPlanStep {

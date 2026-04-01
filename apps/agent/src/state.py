@@ -11,6 +11,9 @@ class MaintenanceStep(TypedDict):
     estimatedHours: float
     technicianId: str
     technicianName: str
+    issueId: str
+    carriageId: str
+    trainId: str
 
 
 class AgentProgressStep(TypedDict):

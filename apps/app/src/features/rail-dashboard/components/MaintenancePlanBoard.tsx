@@ -1,60 +1,46 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import {
   useRailDashboardAI,
   type MaintenanceStep,
 } from "../context/rail-dashboard-ai-context";
 
-// ── Style maps ─────────────────────────────────────────────────────────────────
-
-const STATUS_CFG: Record<
-  string,
-  { label: string; cardCls: string; badgeCls: string }
-> = {
-  pending: {
-    label:    "Chờ xử lý",
-    cardCls:  "border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900",
-    badgeCls: "bg-slate-100 text-slate-500 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700",
-  },
-  doing: {
-    label:    "Đang thực hiện",
-    cardCls:  "border-sky-200 bg-sky-50/60 dark:border-sky-700/50 dark:bg-sky-900/10",
-    badgeCls: "bg-sky-100 text-sky-700 hover:bg-sky-200 dark:bg-sky-800/60 dark:text-sky-300 dark:hover:bg-sky-700/60",
-  },
-  done: {
-    label:    "Hoàn thành",
-    cardCls:  "border-emerald-200 bg-white dark:border-emerald-800/40 dark:bg-slate-900",
-    badgeCls: "bg-emerald-100 text-emerald-700 hover:bg-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:hover:bg-emerald-800/40",
-  },
-};
-
-const NEXT: Record<string, MaintenanceStep["status"]> = {
-  pending: "doing",
-  doing:   "done",
-  done:    "pending",
-};
-
 // ── Component ──────────────────────────────────────────────────────────────────
 
 export function MaintenancePlanBoard() {
   const { maintenancePlan, setMaintenancePlan } = useRailDashboardAI();
+  const [selectedIndices, setSelectedIndices] = useState<Set<number>>(new Set());
 
-  const cycleStatus = useCallback(
-    (idx: number) => {
-      setMaintenancePlan(
-        maintenancePlan.map((s, i) =>
-          i !== idx ? s : { ...s, status: NEXT[s.status] ?? "pending" }
-        )
-      );
-    },
-    [maintenancePlan, setMaintenancePlan]
-  );
+  const toggleSelection = useCallback((index: number) => {
+    setSelectedIndices((prev) => {
+      const next = new Set(prev);
+      if (next.has(index)) {
+        next.delete(index);
+      } else {
+        next.add(index);
+      }
+      return next;
+    });
+  }, []);
+
+  const handleAccept = useCallback(() => {
+    // Update selected steps to "done"
+    const updated = maintenancePlan.map((step, idx) =>
+      selectedIndices.has(idx) ? { ...step, status: "done" as const } : step,
+    );
+    setMaintenancePlan(updated);
+    setSelectedIndices(new Set());
+  }, [maintenancePlan, selectedIndices, setMaintenancePlan]);
 
   if (maintenancePlan.length === 0) return null;
 
   const doneCount  = maintenancePlan.filter((s) => s.status === "done").length;
   const totalHours = maintenancePlan.reduce((acc, s) => acc + (s.estimatedHours ?? 0), 0);
+  const selectedHours = Array.from(selectedIndices).reduce(
+    (acc, idx) => acc + (maintenancePlan[idx]?.estimatedHours ?? 0),
+    0,
+  );
   const allDone    = doneCount === maintenancePlan.length;
 
   return (
@@ -82,6 +68,12 @@ export function MaintenancePlanBoard() {
               {totalHours.toFixed(1)} h
             </span>
           )}
+
+          {selectedIndices.size > 0 && (
+            <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-sm font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+              {selectedIndices.size} chọn • {selectedHours.toFixed(1)}h
+            </span>
+          )}
         </div>
 
         <button
@@ -103,58 +95,59 @@ export function MaintenancePlanBoard() {
       {/* ── Cards grid ────────────────────────────────────────────────────── */}
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {maintenancePlan.map((step, i) => {
-          const cfg  = STATUS_CFG[step.status] ?? STATUS_CFG.pending;
-          const isDone = step.status === "done";
+          const isSelected = selectedIndices.has(i);
+          // Format: T01>C01>ISS-1002 nếu có issueId, nếu không dùng title
+          const displayFormat = step.issueId 
+            ? `${step.trainId}>${step.carriageId}>${step.issueId}`
+            : step.title;
 
           return (
-            <div
+            <label
               key={step.id ?? i}
               className={[
                 "flex flex-col gap-3 rounded-xl border p-4 shadow-sm",
-                "transition-all duration-150",
-                cfg.cardCls,
+                "transition-all duration-150 cursor-pointer",
+                isSelected
+                  ? "border-blue-300 bg-blue-50 dark:border-blue-700/50 dark:bg-blue-900/20"
+                  : "border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/50",
               ].join(" ")}
             >
-              {/* Row 1 — order badge · title · status button */}
+              {/* Row 1 — checkbox · order badge · title */}
               <div className="flex items-start gap-2">
-                {/* Order / done indicator */}
+                <input
+                  type="checkbox"
+                  checked={isSelected}
+                  onChange={() => toggleSelection(i)}
+                  className="mt-1 h-4 w-4 rounded cursor-pointer"
+                />
+
                 <span
                   className={[
                     "mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center",
                     "rounded-full text-[11px] font-bold",
-                    isDone
+                    step.status === "done"
                       ? "bg-emerald-200 text-emerald-700 dark:bg-emerald-800/50 dark:text-emerald-300"
                       : "bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300",
                   ].join(" ")}
                 >
-                  {isDone ? "✓" : step.order}
+                  {step.status === "done" ? "✓" : step.order}
                 </span>
 
-                {/* Title */}
-                <p
-                  className={[
-                    "flex-1 text-sm font-semibold leading-snug",
-                    isDone
-                      ? "text-slate-400 line-through dark:text-slate-500"
-                      : "text-slate-800 dark:text-slate-100",
-                  ].join(" ")}
-                >
-                  {step.title}
-                </p>
-
-                {/* Clickable status badge */}
-                <button
-                  onClick={() => cycleStatus(i)}
-                  title="Nhấn để chuyển trạng thái"
-                  className={[
-                    "shrink-0 rounded-full px-2.5 py-0.5",
-                    "text-[10px] font-semibold uppercase tracking-wide",
-                    "transition-colors",
-                    cfg.badgeCls,
-                  ].join(" ")}
-                >
-                  {cfg.label}
-                </button>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-xs font-semibold font-mono text-slate-700 dark:text-slate-200">
+                    {displayFormat}
+                  </p>
+                  <p
+                    className={[
+                      "truncate text-xs",
+                      step.status === "done"
+                        ? "text-slate-400 line-through dark:text-slate-500"
+                        : "text-slate-600 dark:text-slate-300",
+                    ].join(" ")}
+                  >
+                    {step.title}
+                  </p>
+                </div>
               </div>
 
               {/* Row 2 — details / description */}
@@ -179,10 +172,20 @@ export function MaintenancePlanBoard() {
                   </span>
                 ) : null}
               </div>
-            </div>
+            </label>
           );
         })}
       </div>
+
+      {/* ── Accept Button ────────────────────────────────────────────────– */}
+      {selectedIndices.size > 0 && (
+        <button
+          onClick={handleAccept}
+          className="w-full rounded-lg bg-emerald-600 px-4 py-2.5 font-semibold text-white transition-all hover:bg-emerald-700 dark:bg-emerald-700 dark:hover:bg-emerald-800"
+        >
+          Xác nhận ({selectedIndices.size})
+        </button>
+      )}
     </section>
   );
 }

@@ -484,6 +484,9 @@ async def generate_maintenance_plan_stream(
             "estimatedHours": issue.get("total_estimated_hours") or 2.0,
             "technicianId":   tech["id"]   if tech else "",
             "technicianName": tech["name"] if tech else "Unassigned",
+            "issueId":        issue["id"],
+            "carriageId":     issue["carriage_id"],
+            "trainId":        issue["train_id"],
         })
         progress_steps[order - 1]["status"] = "done"
         await asyncio.sleep(0.12)
@@ -595,6 +598,9 @@ async def schedule_inspection(
             "estimatedHours": h,
             "technicianId":   tech["id"]   if tech else "",
             "technicianName": tech["name"] if tech else "Unassigned",
+            "issueId":        "",
+            "carriageId":     "",
+            "trainId":        tid,
         })
         progress_steps[order - 1]["status"] = "done"
         await asyncio.sleep(0.18)
@@ -749,37 +755,7 @@ def generate_issue_report(report: str, config: RunnableConfig) -> Command:  # py
     )
 
 
-@tool
-def confirm_plan_execution(
-    plan_summary: str,
-    estimated_total_hours: float = 0.0,
-    affected_issues: int = 0,
-) -> dict[str, Any]:
-    """
-    Request human approval before executing or committing a maintenance plan.
-    Use this when a proposed plan affects multiple issues or has significant time/cost impact
-    (e.g. estimated_total_hours > 8 or affected_issues > 3).
-    After user confirms, proceed with the actual plan creation steps.
 
-    plan_summary:         short markdown description of what the plan will do
-    estimated_total_hours: total hours across all proposed steps
-    affected_issues:      number of issues included in the plan
-    """
-    approval = interrupt({
-        "type":                "plan_execution_approval",
-        "planSummary":         plan_summary,
-        "estimatedTotalHours": estimated_total_hours,
-        "affectedIssues":      affected_issues,
-    })
-    approved = bool(isinstance(approval, dict) and approval.get("approved"))
-    return {
-        "approved": approved,
-        "message":  (
-            "Kế hoạch được phê duyệt. Tiến hành thực thi."
-            if approved else
-            "Kế hoạch bị từ chối. Không thực hiện thay đổi."
-        ),
-    }
 
 
 rail_tools = [
@@ -789,6 +765,5 @@ rail_tools = [
     generate_maintenance_plan_stream,
     schedule_inspection,
     request_bulk_issue_status_update,
-    confirm_plan_execution,
     generate_issue_report,
 ]

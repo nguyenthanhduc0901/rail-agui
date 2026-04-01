@@ -324,54 +324,5 @@ export const useRailDashboardAIControls = (): void => {
     },
   });
 
-  // ── Feature 5: Plan execution approval interrupt ──────────────────────────
-  // A second, distinctly-typed interrupt for approving maintenance plans.
-  // Separated from the bulk-update interrupt so each has its own UI + logic.
-  useInterrupt({
-    enabled: (event) => event?.value?.type === "plan_execution_approval",
-    render: ({ event, resolve }) => {
-      const payload = event.value || {};
-      const hours = (payload?.estimatedTotalHours as number) ?? 0;
-      const issueCount = (payload?.affectedIssues as number) ?? 0;
 
-      return (
-        <div className="my-3 rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm dark:border-blue-700/40 dark:bg-blue-950/30">
-          <p className="font-semibold text-blue-700 dark:text-blue-300">
-            Xác nhận thực thi kế hoạch bảo dưỡng
-          </p>
-          {payload?.planSummary && (
-            <p className="mt-1.5 text-slate-700 dark:text-slate-200">
-              {payload.planSummary as string}
-            </p>
-          )}
-          <div className="mt-2 flex flex-wrap gap-3 text-xs text-slate-500 dark:text-slate-400">
-            {issueCount > 0 && (
-              <span className="rounded-full bg-white/80 px-2 py-1 ring-1 ring-blue-200 dark:bg-slate-800 dark:ring-blue-800">
-                {issueCount} sự cố
-              </span>
-            )}
-            {hours > 0 && (
-              <span className="rounded-full bg-white/80 px-2 py-1 ring-1 ring-blue-200 dark:bg-slate-800 dark:ring-blue-800">
-                ~{hours}h ước tính
-              </span>
-            )}
-          </div>
-          <div className="mt-3 flex gap-2">
-            <button
-              onClick={() => resolve({ approved: true })}
-              className="rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600"
-            >
-              Phê duyệt
-            </button>
-            <button
-              onClick={() => resolve({ approved: false })}
-              className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
-            >
-              Từ chối
-            </button>
-          </div>
-        </div>
-      );
-    },
-  });
 };

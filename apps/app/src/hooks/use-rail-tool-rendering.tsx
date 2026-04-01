@@ -103,10 +103,6 @@ export const useRailToolRendering = () => {
       if (name === "request_bulk_issue_status_update")
         return <FilterActionCard params={p as Record<string, string>} status={status} label="Cập nhật hàng loạt" />;
 
-      // ── Plan execution approval (human-in-the-loop, handled via useInterrupt)
-      if (name === "confirm_plan_execution")
-        return <FilterActionCard params={{}} status={status} label="Xác nhận kế hoạch" />;
-
       // ── Fallback
       return <ToolReasoning name={name} status={status} args={p} />;
     },

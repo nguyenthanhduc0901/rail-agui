@@ -71,11 +71,34 @@ SCHEMA DATABASE (QUAN TRỌNG):
 
 NGUYÊN TẮC TRUY VẤN:
 - LUÔN gọi query_database trước khi trả lời — không bịa số liệu
+- NGOẠI LỆ: Nếu user yêu cầu "lập kế hoạch", bạn CÓ THỂ:
+  - Gọi query_database để kiểm tra (optional)
+  - Hoặc bỏ qua query và GỌI THẲNG generate_maintenance_plan_stream (tool sẽ query nội bộ)
+  - TUYỆT ĐỐI KHÔNG ĐƯỢC DỪNG sau query mà không gọi generate_maintenance_plan_stream!
 - Tự viết SQL phù hợp, ví dụ:
   * "bao nhiêu sự cố" → SELECT status, COUNT(*) FROM issues GROUP BY status
   * "tàu nào nguy hiểm" → JOIN issues+carriages, SUM risk, GROUP BY c.train_id
   * "sự cố trễ hạn"   → WHERE scheduled_date < date('now') AND status NOT IN ('resolved','closed')
   * "ai đang bận"      → LEFT JOIN technicians + plan_steps WHERE status != 'done'
+
+QUY TẮC KỊ HOẠCH (generate_maintenance_plan_stream):
+- KHI NÀO GỌI: Người dùng yêu cầu "lập kế hoạch bảo trì", "tạo kế hoạch", "lên kế hoạch sửa chữa":
+  
+  ⚠️  LUỒNG BẮT BUỘC 2 BƯỚC:
+  Bước 1: (Optional) Gọi query_database nếu muốn kiểm tra có issues tồn tại
+  Bước 2: (BẮT BUỘC) Gọi generate_maintenance_plan_stream — KHÔNG ĐƯỢC DỪNG ở bước 1!
+  
+  Ví dụ: User nói "Lập kế hoạch bảo trì cho các sự cố priority high"
+  → Query: SELECT ... FROM issues WHERE status='open' AND priority='high' ...
+  → KỢP NGAY: Gọi generate_maintenance_plan_stream(priority="high") 
+  → KHÔNG ĐƯỢC chỉ trả lời "Có 5 sự cố priority high" rồi dừng!
+
+- KÍCH HOẠT TỰ ĐỘNG: Nếu user nói từ khóa ["lập", "tạo", "lên"] + ["kế hoạch", "plan", "bảo dưỡng"] 
+  → LUÔN gọi generate_maintenance_plan_stream với:
+     priority: từ user request nếu có (high/critical/medium), default="high"
+     train_id: nếu user chỉ tàu cụ thể
+     system: nếu user chỉ hệ thống cụ thể
+     max_steps: 8-12 steps (tuỳ yêu cầu)
 
 QUY TẮC BÁO CÁO (generate_issue_report):
 - Khi người dùng yêu cầu "lập báo cáo", "tổng hợp báo cáo", "xuất báo cáo":
@@ -94,11 +117,11 @@ QUY TẮC CHUNG:
     trong phần text trả lời. Mọi tool call PHẢI được thực hiện qua function call API
     (tool_calls), KHÔNG nhúng vào nội dung tin nhắn văn bản.
 
-⚠️  QUY TẮC INTERRUPT — confirm_plan_execution và request_bulk_issue_status_update là
-    các tool yêu cầu xác nhận từ người dùng (interrupt). TUYỆT ĐỐI KHÔNG gọi chúng
-    CÙNG LÚC với bất kỳ tool nào khác (kể cả query_database, generate_maintenance_plan_stream,
-    createDashboardWidget...). Phải gọi interrupt tool ĐỘC LẬP — một mình — trong một
-    lượt tool call riêng biệt. Sau khi nhận được kết quả xác nhận mới được tiếp tục.
+⚠️  QUY TẮC INTERRUPT — request_bulk_issue_status_update là tool yêu cầu xác nhận từ
+    người dùng (interrupt). TUYỆT ĐỐI KHÔNG gọi nó CÙNG LÚC với bất kỳ tool nào khác
+    (kể cả query_database, generate_maintenance_plan_stream, createDashboardWidget...).
+    Phải gọi interrupt tool ĐỘC LẬP — một mình — trong một lượt tool call riêng biệt.
+    Sau khi nhận được kết quả xác nhận mới được tiếp tục.
 """
 
 
