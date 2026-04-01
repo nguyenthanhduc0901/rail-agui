@@ -50,7 +50,7 @@ function RailDashboardWorkspace(): ReactNode {
       id: crypto.randomUUID(),
       role: "user",
       content:
-        "Phân tích tổng quan đội tàu: tóm tắt tình trạng hiện tại, liệt kê TOP 3 sự cố nghiêm trọng nhất, và đề xuất hành động ưu tiên cần thực hiện ngay.",
+        "Analyse the fleet: summarise the current status, list the TOP 3 most critical issues, and suggest the priority actions to take immediately.",
     });
     try {
       await copilotkit.runAgent({ agent });

@@ -292,17 +292,17 @@ export const useRailDashboardAIControls = (): void => {
       return (
         <div className="my-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm dark:border-amber-700/40 dark:bg-amber-950/30">
           <p className="font-semibold text-amber-700 dark:text-amber-300">
-            Xác nhận cập nhật hàng loạt
+            Confirm bulk update
           </p>
           <p className="mt-1 text-slate-700 dark:text-slate-200">
-            <span className="font-semibold">{(payload?.count as number) || 0} sự cố</span>{" "}
-            có mức độ ưu tiên{" "}
+            <span className="font-semibold">{(payload?.count as number) || 0} issues</span>{" "}
+            with priority{" "}
             <span className="font-semibold">{(payload?.priority as string) || "high"}</span>{" "}
-            sẽ chuyển sang trạng thái{" "}
+            will be moved to{" "}
             <span className="font-semibold">{(payload?.targetStatus as string) || "in-progress"}</span>
             {payload?.trainId && payload?.trainId !== "all"
-              ? ` trên tàu ${payload?.trainId}`
-              : " trên toàn đội tàu"}
+              ? ` on train ${payload?.trainId}`
+              : " across the entire fleet"}
             .
           </p>
           <div className="mt-3 flex gap-2">
@@ -310,13 +310,13 @@ export const useRailDashboardAIControls = (): void => {
               onClick={() => resolve({ approved: true })}
               className="rounded-md bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-700 dark:bg-emerald-700 dark:hover:bg-emerald-600"
             >
-              Xác nhận
+              Confirm
             </button>
             <button
               onClick={() => resolve({ approved: false })}
               className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
             >
-              Huỷ
+              Cancel
             </button>
           </div>
         </div>

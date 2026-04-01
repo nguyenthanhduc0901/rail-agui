@@ -47,7 +47,7 @@ export function MaintenancePlanCard({ status }: MaintenancePlanCardProps) {
       agent.addMessage({
         id: crypto.randomUUID(),
         role: "user",
-        content: `Lưu kế hoạch bảo trì: ${selectedIds.join(", ")}`,
+        content: `Save maintenance plan: ${selectedIds.join(", ")}`,
       });
 
       // Clear selection
@@ -78,7 +78,7 @@ export function MaintenancePlanCard({ status }: MaintenancePlanCardProps) {
     <ToolCard className="shadow-none mt-3 border-t pt-3">
       <div className="mb-3 flex items-center gap-2">
         <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">
-          Kế hoạch bảo trì
+          Maintenance Plan
         </span>
         {summary.totalHours > 0 && (
           <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] text-slate-500 dark:bg-slate-800">
@@ -87,7 +87,7 @@ export function MaintenancePlanCard({ status }: MaintenancePlanCardProps) {
         )}
         {selectedIndices.size > 0 && (
           <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-semibold text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
-            {summary.selectedCount} chọn • {summary.selectedHours.toFixed(1)}h
+            {summary.selectedCount} selected • {summary.selectedHours.toFixed(1)}h
           </span>
         )}
         {!isSubmitting && (
@@ -98,7 +98,7 @@ export function MaintenancePlanCard({ status }: MaintenancePlanCardProps) {
       </div>
 
       {maintenancePlan.length === 0 ? (
-        <p className="text-xs text-slate-400">Đang tải các bước...</p>
+        <p className="text-xs text-slate-400">Loading steps...</p>
       ) : (
         <>
           <div className="space-y-2 mb-3">
@@ -148,7 +148,7 @@ export function MaintenancePlanCard({ status }: MaintenancePlanCardProps) {
             disabled={selectedIndices.size === 0 || isSubmitting}
             className="w-full rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-white transition-all hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-emerald-700 dark:hover:bg-emerald-800"
           >
-            {isSubmitting ? "Đang lưu..." : `Xác nhận (${selectedIndices.size})`}
+            {isSubmitting ? "Saving..." : `Confirm (${selectedIndices.size})`}
           </button>
         </>
       )}

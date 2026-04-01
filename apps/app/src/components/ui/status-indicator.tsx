@@ -14,7 +14,7 @@ export function StatusIndicator({ status, className, size = "md" }: StatusIndica
   if (status === "complete") {
     return (
       <span className={cn("text-xs font-medium text-emerald-600 dark:text-emerald-400", className)}>
-        ✓ Xong
+        ✓ Done
       </span>
     );
   }

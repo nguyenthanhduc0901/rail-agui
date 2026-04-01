@@ -49,7 +49,7 @@ export function MaintenancePlanBoard() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">
-            Kế hoạch bảo trì
+            Maintenance Plan
           </h2>
 
           <span
@@ -60,7 +60,7 @@ export function MaintenancePlanBoard() {
                 : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300",
             ].join(" ")}
           >
-            {doneCount}/{maintenancePlan.length} xong
+            {doneCount}/{maintenancePlan.length} done
           </span>
 
           {totalHours > 0 && (
@@ -71,7 +71,7 @@ export function MaintenancePlanBoard() {
 
           {selectedIndices.size > 0 && (
             <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-sm font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
-              {selectedIndices.size} chọn • {selectedHours.toFixed(1)}h
+              {selectedIndices.size} selected • {selectedHours.toFixed(1)}h
             </span>
           )}
         </div>
@@ -80,7 +80,7 @@ export function MaintenancePlanBoard() {
           onClick={() => setMaintenancePlan([])}
           className="text-xs text-slate-400 transition-colors hover:text-slate-600 dark:hover:text-slate-200"
         >
-          Xoá plan
+          Clear plan
         </button>
       </div>
 
@@ -183,7 +183,7 @@ export function MaintenancePlanBoard() {
           onClick={handleAccept}
           className="w-full rounded-lg bg-emerald-600 px-4 py-2.5 font-semibold text-white transition-all hover:bg-emerald-700 dark:bg-emerald-700 dark:hover:bg-emerald-800"
         >
-          Xác nhận ({selectedIndices.size})
+          Confirm ({selectedIndices.size})
         </button>
       )}
     </section>

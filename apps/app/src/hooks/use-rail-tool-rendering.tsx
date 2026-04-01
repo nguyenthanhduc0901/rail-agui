@@ -83,11 +83,11 @@ export const useRailToolRendering = () => {
       if (name === "applyDashboardFilters")
         return <FilterActionCard params={p as Record<string, string>} status={status} label="Filters applied" />;
       if (name === "clearDashboardFilters")
-        return <FilterActionCard params={{}} status={status} label="Đã xoá bộ lọc" />;
+        return <FilterActionCard params={{}} status={status} label="Filters cleared" />;
       if (name === "clearDashboardWidgets")
         return <FilterActionCard params={{}} status={status} label="Đã xoá widgets" />;
       if (name === "openCarriageDetails")
-        return <FilterActionCard params={p as Record<string, string>} status={status} label="Mở chi tiết toa" />;
+        return <FilterActionCard params={p as Record<string, string>} status={status} label="Carriage details opened" />;
 
       // ── Write tool
       if (name === "update_issue")

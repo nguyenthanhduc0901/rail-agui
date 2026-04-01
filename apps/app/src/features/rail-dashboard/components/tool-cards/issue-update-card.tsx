@@ -15,7 +15,7 @@ export function IssueUpdateCard({ params, status }: IssueUpdateCardProps) {
   return (
     <ToolCard className="border-violet-200 bg-violet-50 dark:border-violet-800/40 dark:bg-violet-950/30 shadow-none">
       <ToolCardHeader
-        title={`Cập nhật ${String(params?.issue_id ?? "sự cố")}`}
+        title={`Update ${String(params?.issue_id ?? "issue")}`}
         status={status}
         className="text-violet-800 dark:text-violet-200"
       />

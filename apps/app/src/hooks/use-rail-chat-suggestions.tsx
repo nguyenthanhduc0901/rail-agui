@@ -10,19 +10,19 @@ export const useRailChatSuggestions = () => {
   const suggestions = useMemo(() => {
     const trainScoped =
       filters.trainId && filters.trainId !== "all"
-        ? `Tổng hợp nhanh tình trạng tàu ${filters.trainId}`
-        : "Tàu nào đang có mức rủi ro cao nhất?";
+        ? `Quick summary for train ${filters.trainId}`
+        : "Which train has the highest risk level?";
 
     const systemScoped =
       filters.system && filters.system !== "all"
-        ? `Liệt kê sự cố open của hệ ${filters.system}`
-        : "Phân tích hệ thống nào đang phát sinh nhiều lỗi nhất";
+        ? `List open issues for the ${filters.system} system`
+        : "Which system is generating the most errors?";
 
     return [
       { title: trainScoped, message: trainScoped },
       { title: systemScoped, message: systemScoped },
-      { title: "Lập kế hoạch bảo trì cho các sự cố priority high", message: "Lập kế hoạch bảo trì cho các sự cố priority high" },
-      { title: "Tạo widget tổng hợp 3 tàu cần ưu tiên xử lý", message: "Tạo widget tổng hợp 3 tàu cần ưu tiên xử lý" },
+      { title: "Create a maintenance plan for high priority issues", message: "Create a maintenance plan for high priority issues" },
+      { title: "Create a widget summarising the top 3 trains needing attention", message: "Create a widget summarising the top 3 trains needing attention" },
     ];
   }, [filters.trainId, filters.system]);
 
