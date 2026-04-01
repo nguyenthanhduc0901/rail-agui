@@ -14,7 +14,6 @@ import { FilterActionCard } from "@/features/rail-dashboard/components/tool-card
 import { IssueUpdateCard } from "@/features/rail-dashboard/components/tool-cards/issue-update-card";
 import { MaintenancePlanCard } from "@/features/rail-dashboard/components/tool-cards/maintenance-plan-card";
 import { PlanStepUpdateCard } from "@/features/rail-dashboard/components/tool-cards/plan-step-update-card";
-import { SQLQueryCard } from "@/features/rail-dashboard/components/tool-cards/sql-query-card";
 import { WidgetToolCard } from "@/features/rail-dashboard/components/tool-cards/widget-tool-card";
 import { IssuePlanProposalCard } from "@/features/rail-dashboard/components/tool-cards/issue-plan-proposal-card";
 import { IssueReportCard } from "@/features/rail-dashboard/components/tool-cards/issue-report-card";
@@ -86,10 +85,6 @@ export const useRailToolRendering = () => {
         return <FilterActionCard params={{}} status={status} label="Đã xoá widgets" />;
       if (name === "openCarriageDetails")
         return <FilterActionCard params={p as Record<string, string>} status={status} label="Mở chi tiết toa" />;
-
-      // ── Single SQL query tool
-      if (name === "query_database")
-        return <SQLQueryCard params={p} status={status} />;
 
       // ── Write tool
       if (name === "update_issue")

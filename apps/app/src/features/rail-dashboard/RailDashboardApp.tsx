@@ -52,7 +52,17 @@ function RailDashboardWorkspace(): ReactNode {
       content:
         "Phân tích tổng quan đội tàu: tóm tắt tình trạng hiện tại, liệt kê TOP 3 sự cố nghiêm trọng nhất, và đề xuất hành động ưu tiên cần thực hiện ngay.",
     });
-    await copilotkit.runAgent({ agent });
+    try {
+      await copilotkit.runAgent({ agent });
+    } catch (error) {
+      // Handle AbortError gracefully when user stops the agent
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        console.log('Agent run was stopped by user');
+        return;
+      }
+      // Re-throw other errors
+      throw error;
+    }
   }, [agent, copilotkit]);
 
   // Feature 3: stop a running agent turn.
@@ -93,34 +103,6 @@ function RailDashboardWorkspace(): ReactNode {
       <DashboardShell
         chatContent={
           <>
-            {/* Feature 3: Agent control toolbar — sticky above the chat scroll area */}
-            <div className="sticky top-0 z-10 flex items-center gap-2 border-b border-zinc-200 bg-white/95 px-4 py-2.5 backdrop-blur dark:border-zinc-700 dark:bg-slate-900/95">
-              <button
-                onClick={handleAnalyzeFleet}
-                disabled={agent.isRunning}
-                title="Phân tích tổng quan đội tàu"
-                className="flex items-center gap-1.5 rounded-lg bg-sky-600 px-3 py-1.5 text-xs font-medium text-white shadow-sm transition-all hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-sky-700 dark:hover:bg-sky-600"
-              >
-                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-                Phân tích đội tàu
-              </button>
-
-              {agent.isRunning && (
-                <button
-                  onClick={handleStopAgent}
-                  title="Dừng agent"
-                  className="flex items-center gap-1.5 rounded-lg border border-red-300 bg-white px-3 py-1.5 text-xs font-medium text-red-600 shadow-sm transition-all hover:bg-red-50 dark:border-red-700 dark:bg-slate-900 dark:text-red-400 dark:hover:bg-red-950/30"
-                >
-                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                  Dừng
-                </button>
-              )}
-            </div>
-
             <CopilotChat
               input={{ disclaimer: () => null, className: "pb-6" }}
               messageView={{
